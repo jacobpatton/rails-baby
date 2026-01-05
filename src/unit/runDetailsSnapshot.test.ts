@@ -8,7 +8,9 @@ import {
   isFsPathInsideRoot,
   listFilesRecursive,
   listFilesSortedByMtimeDesc,
+  readRunDetailsSnapshot,
 } from '../core/runDetailsSnapshot';
+import { JournalTailer } from '../core/journal';
 
 function makeTempDir(prefix: string): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
@@ -69,6 +71,124 @@ suite('runDetailsSnapshot', () => {
       const items = listFilesSortedByMtimeDesc({ dir, rootForRel: dir, maxFiles: 10 });
       assert.strictEqual(items[0]?.relPath, 'b.md');
       assert.strictEqual(items[1]?.relPath, 'a.md');
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  test('readRunDetailsSnapshot includes runFiles + importantFiles + keyFilesMeta', () => {
+    const tempDir = makeTempDir('babysitter-runDetails-');
+    try {
+      const runRoot = path.join(tempDir, 'run-20260105-182700');
+      fs.mkdirSync(path.join(runRoot, 'artifacts'), { recursive: true });
+      fs.mkdirSync(path.join(runRoot, 'prompts'), { recursive: true });
+      fs.mkdirSync(path.join(runRoot, 'work_summaries'), { recursive: true });
+      fs.mkdirSync(path.join(runRoot, 'code'), { recursive: true });
+      fs.mkdirSync(path.join(runRoot, 'nested'), { recursive: true });
+
+      fs.writeFileSync(path.join(runRoot, 'state.json'), JSON.stringify({ status: 'running' }), 'utf8');
+      fs.writeFileSync(path.join(runRoot, 'journal.jsonl'), '', 'utf8');
+      fs.writeFileSync(path.join(runRoot, 'process.md'), '# process', 'utf8');
+      fs.writeFileSync(path.join(runRoot, 'code', 'main.js'), 'console.log(1)', 'utf8');
+      fs.writeFileSync(path.join(runRoot, 'artifacts', 'other.txt'), 'artifact', 'utf8');
+      fs.writeFileSync(path.join(runRoot, 'nested', 'x.txt'), 'nested', 'utf8');
+
+      const run: any = {
+        id: 'run-20260105-182700',
+        status: 'running',
+        timestamps: { createdAt: new Date(), updatedAt: new Date() },
+        paths: {
+          runRoot,
+          stateJson: path.join(runRoot, 'state.json'),
+          journalJsonl: path.join(runRoot, 'journal.jsonl'),
+          artifactsDir: path.join(runRoot, 'artifacts'),
+          promptsDir: path.join(runRoot, 'prompts'),
+          workSummariesDir: path.join(runRoot, 'work_summaries'),
+          codeDir: path.join(runRoot, 'code'),
+          mainJs: path.join(runRoot, 'code', 'main.js'),
+        },
+      };
+
+      const { snapshot } = readRunDetailsSnapshot({
+        run,
+        journalTailer: new JournalTailer(),
+        existingJournalEntries: [],
+        maxJournalEntries: 10,
+        maxArtifacts: 10,
+        maxWorkSummaries: 10,
+        maxPrompts: 10,
+      });
+
+      assert.ok(Array.isArray(snapshot.runFiles));
+      assert.ok(Array.isArray(snapshot.importantFiles));
+      assert.ok(snapshot.keyFilesMeta);
+      assert.equal(snapshot.keyFilesMeta.runRootExists, true);
+      assert.equal(snapshot.keyFilesMeta.runRootReadable, true);
+      assert.equal(snapshot.keyFilesMeta.truncated, false);
+      assert.equal(snapshot.keyFilesMeta.totalFiles, snapshot.runFiles.length);
+
+      assert.equal(snapshot.runFiles.every((f) => f.isDirectory === false), true);
+      const rels = snapshot.runFiles.map((f) => f.relPath.replace(/\\/g, '/'));
+      assert.ok(rels.includes('state.json'));
+      assert.ok(rels.includes('journal.jsonl'));
+      assert.ok(rels.includes('process.md'));
+      assert.ok(rels.includes('code/main.js'));
+      assert.ok(rels.includes('artifacts/other.txt'));
+      assert.ok(rels.includes('nested/x.txt'));
+
+      const importantRels = snapshot.importantFiles.map((f) => f.relPath.replace(/\\/g, '/'));
+      assert.ok(importantRels.includes('state.json'));
+      assert.ok(importantRels.includes('journal.jsonl'));
+      assert.ok(importantRels.includes('process.md'));
+      assert.ok(importantRels.includes('code/main.js'));
+      assert.equal(importantRels.includes('artifacts/process.mermaid.md'), false);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  test('readRunDetailsSnapshot discovers important run/ variants when present', () => {
+    const tempDir = makeTempDir('babysitter-runDetails-');
+    try {
+      const runRoot = path.join(tempDir, 'run-20260105-182701');
+      fs.mkdirSync(path.join(runRoot, 'artifacts'), { recursive: true });
+      fs.mkdirSync(path.join(runRoot, 'prompts'), { recursive: true });
+      fs.mkdirSync(path.join(runRoot, 'work_summaries'), { recursive: true });
+      fs.mkdirSync(path.join(runRoot, 'code'), { recursive: true });
+      fs.mkdirSync(path.join(runRoot, 'run'), { recursive: true });
+
+      fs.writeFileSync(path.join(runRoot, 'state.json'), JSON.stringify({ status: 'running' }), 'utf8');
+      fs.writeFileSync(path.join(runRoot, 'journal.jsonl'), '', 'utf8');
+      fs.writeFileSync(path.join(runRoot, 'run', 'process.md'), '# process (run variant)', 'utf8');
+
+      const run: any = {
+        id: 'run-20260105-182701',
+        status: 'running',
+        timestamps: { createdAt: new Date(), updatedAt: new Date() },
+        paths: {
+          runRoot,
+          stateJson: path.join(runRoot, 'state.json'),
+          journalJsonl: path.join(runRoot, 'journal.jsonl'),
+          artifactsDir: path.join(runRoot, 'artifacts'),
+          promptsDir: path.join(runRoot, 'prompts'),
+          workSummariesDir: path.join(runRoot, 'work_summaries'),
+          codeDir: path.join(runRoot, 'code'),
+          mainJs: path.join(runRoot, 'code', 'main.js'),
+        },
+      };
+
+      const { snapshot } = readRunDetailsSnapshot({
+        run,
+        journalTailer: new JournalTailer(),
+        existingJournalEntries: [],
+        maxJournalEntries: 10,
+        maxArtifacts: 10,
+        maxWorkSummaries: 10,
+        maxPrompts: 10,
+      });
+
+      const importantRels = snapshot.importantFiles.map((f) => f.relPath.replace(/\\/g, '/'));
+      assert.ok(importantRels.includes('run/process.md'));
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }

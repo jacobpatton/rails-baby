@@ -10,8 +10,20 @@ import {
   readTextFileWithLimit,
   type RunDetailsSnapshot,
 } from '../core/runDetailsSnapshot';
+import { DEFAULT_MAX_COPY_CONTENTS_BYTES, readFileContentsForClipboard } from '../core/copyFileContents';
 import { WorkSummaryTailSession } from '../core/workSummaryTailSession';
 import type { AwaitingInputStatus } from '../core/awaitingInput';
+import {
+  computeKeyFilesGroupForRelPath,
+  computeKeyFilesModel,
+  getPinnedIdsForRun,
+  groupKeyFiles,
+  groupOrderIndex,
+  matchesKeyFilesFilter,
+  normalizePinnedIdsByRunId,
+  togglePinnedId,
+  setPinnedIdsForRun,
+} from './keyFilesModel';
 
 type WebviewInboundMessage =
   | { type: 'ready' }
@@ -20,6 +32,7 @@ type WebviewInboundMessage =
   | { type: 'revealInExplorer'; fsPath: string }
   | { type: 'loadTextFile'; fsPath: string; tail?: boolean }
   | { type: 'copyText'; text: string }
+  | { type: 'copyFileContents'; fsPath: string }
   | { type: 'sendUserInput'; runId: string; text: string }
   | { type: 'sendEnter'; runId: string }
   | { type: 'sendEsc'; runId: string };
@@ -48,6 +61,19 @@ function nonce(len = 16): string {
 function renderWebviewHtml(webview: vscode.Webview): string {
   const cspSource = webview.cspSource;
   const scriptNonce = nonce();
+	  const keyFilesHelpersJs = [
+	    computeKeyFilesGroupForRelPath,
+	    groupOrderIndex,
+	    matchesKeyFilesFilter,
+	    normalizePinnedIdsByRunId,
+	    getPinnedIdsForRun,
+	    togglePinnedId,
+	    setPinnedIdsForRun,
+	    groupKeyFiles,
+	    computeKeyFilesModel,
+	  ]
+    .map((fn) => fn.toString())
+    .join('\n\n');
 
   return `<!doctype html>
 <html lang="en">
@@ -239,9 +265,20 @@ function renderWebviewHtml(webview: vscode.Webview): string {
       flex: 0 0 auto;
     }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    button:focus-visible, textarea:focus-visible {
+    button:focus-visible, textarea:focus-visible, input:focus-visible, .item[role="button"]:focus-visible {
       outline: 1px solid var(--vscode-focusBorder);
       outline-offset: 2px;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
     textarea {
       width: 100%;
@@ -259,6 +296,59 @@ function renderWebviewHtml(webview: vscode.Webview): string {
     }
     textarea:focus {
       border-color: var(--vscode-focusBorder);
+    }
+    input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      background: var(--vscode-input-background);
+      color: var(--vscode-input-foreground);
+      font-family: var(--vscode-font-family);
+      font-size: 12px;
+      line-height: 1.4;
+      outline: none;
+    }
+    input[type="text"]:focus {
+      border-color: var(--vscode-focusBorder);
+    }
+    .keyfiles-head {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .keyfiles-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .keyfiles-section-title {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      margin: 0 0 6px 0;
+    }
+    .keyfiles-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .keyfiles-group-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 6px 0 -2px 0;
+    }
+	    .keyfiles-scroll {
+	      max-height: min(420px, 45vh);
+	      min-height: 120px;
+	      overflow: auto;
+	      padding-right: 4px;
+	    }
+    .item[role="button"] {
+      cursor: pointer;
     }
   </style>
 </head>
@@ -340,6 +430,36 @@ function renderWebviewHtml(webview: vscode.Webview): string {
       </section>
     </div>
 
+    <section class="card" id="keyFilesCard">
+      <h2>
+        Key files
+        <span class="pill" id="keyFilesPill"></span>
+	      </h2>
+	      <div class="keyfiles-head">
+	        <label for="keyFilesFilter" class="sr-only">Filter key files</label>
+	        <input id="keyFilesFilter" type="text" placeholder="Filter files by substring..." aria-label="Filter key files by substring" />
+	      </div>
+      <div class="keyfiles-sections">
+        <div id="keyFilesPinnedWrap" style="display:none;">
+          <div class="keyfiles-section-title">Pinned</div>
+          <div class="keyfiles-groups" id="keyFilesPinned"></div>
+        </div>
+        <div id="keyFilesImportantWrap" style="display:none;">
+          <div class="keyfiles-section-title">Important</div>
+          <div class="keyfiles-groups" id="keyFilesImportant"></div>
+        </div>
+        <div id="keyFilesAllWrap" style="display:none;">
+          <div class="keyfiles-section-title">All files</div>
+          <div class="keyfiles-scroll" id="keyFilesAll"></div>
+        </div>
+      </div>
+      <div id="keyFilesEmpty" class="empty" style="display:none; margin-top: 10px;"></div>
+      <div class="actions" id="keyFilesEmptyActions" style="display:none; justify-content: flex-start; margin-top: 10px;">
+        <button id="keyFilesRevealRun">Reveal run folder</button>
+        <button id="keyFilesCopyRun">Copy run path</button>
+      </div>
+    </section>
+
     <div class="grid2">
       <section class="card">
         <h2>
@@ -374,6 +494,8 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 
   <script nonce="${scriptNonce}">
     const vscode = acquireVsCodeApi();
+
+    ${keyFilesHelpersJs}
 
     const el = (id) => document.getElementById(id);
     const runTitle = el('runTitle');
@@ -416,15 +538,36 @@ function renderWebviewHtml(webview: vscode.Webview): string {
     const bannerMsg = el('bannerMsg');
     const bannerSpinner = el('bannerSpinner');
     const bannerDismissBtn = el('bannerDismissBtn');
+    const keyFilesPill = el('keyFilesPill');
+    const keyFilesFilter = el('keyFilesFilter');
+    const keyFilesPinnedWrap = el('keyFilesPinnedWrap');
+    const keyFilesPinned = el('keyFilesPinned');
+    const keyFilesImportantWrap = el('keyFilesImportantWrap');
+    const keyFilesImportant = el('keyFilesImportant');
+    const keyFilesAllWrap = el('keyFilesAllWrap');
+    const keyFilesAll = el('keyFilesAll');
+    const keyFilesEmpty = el('keyFilesEmpty');
+    const keyFilesEmptyActions = el('keyFilesEmptyActions');
+    const keyFilesRevealRun = el('keyFilesRevealRun');
+    const keyFilesCopyRun = el('keyFilesCopyRun');
 
 	    let latestRunId = undefined;
 	    let latestRunStatus = 'unknown';
+      let latestSnapshot = undefined;
 	    let awaitingInputVisible = false;
 	    let activeWorkPreviewFsPath = '';
 	    let activeWorkPreviewContent = '';
 	    let activeWorkPreviewTruncated = false;
 	    let activeWorkPreviewError = '';
       let activeWorkPreviewAutoScroll = false;
+      let keyFilesFilterValue = '';
+	      let pinnedIdsByRunId = {};
+	      let keyFilesRenderHandle = 0;
+
+	      const initialState = vscode.getState() || {};
+	      if (initialState && typeof initialState === 'object') {
+	        pinnedIdsByRunId = normalizePinnedIdsByRunId(initialState.pinnedIdsByRunId);
+	      }
 
     refreshBtn.addEventListener('click', () => vscode.postMessage({ type: 'refresh' }));
     bannerDismissBtn.addEventListener('click', () => hideBanner());
@@ -440,6 +583,13 @@ function renderWebviewHtml(webview: vscode.Webview): string {
       activeWorkPreviewAutoScroll = false;
       renderActiveWorkPreview();
     });
+
+	    keyFilesFilter.addEventListener('input', () => {
+	      const next = (keyFilesFilter.value || '').toString();
+	      if (next === keyFilesFilterValue) return;
+	      keyFilesFilterValue = next;
+	      scheduleRenderKeyFiles();
+	    });
 
     function showBanner(text, opts) {
       banner.classList.add('show');
@@ -554,6 +704,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	    function renderSnapshot(snapshot) {
 	      latestRunId = snapshot.run.id;
 	      latestRunStatus = snapshot.run.status || 'unknown';
+        latestSnapshot = snapshot;
 	      runTitle.textContent = snapshot.run.id;
 	      runSubtitle.innerHTML = '';
       const status = document.createElement('span');
@@ -599,8 +750,292 @@ function renderWebviewHtml(webview: vscode.Webview): string {
         renderMainJs(snapshot.mainJs || null);
 	      renderArtifacts(snapshot.artifacts || []);
 	      renderInteraction(snapshot.awaitingInput);
+        renderKeyFiles(snapshot);
 	      renderActiveWorkPreview();
 	    }
+
+	      function scheduleRenderKeyFiles() {
+	        if (!latestSnapshot) return;
+	        if (keyFilesRenderHandle) cancelAnimationFrame(keyFilesRenderHandle);
+	        keyFilesRenderHandle = requestAnimationFrame(() => {
+	          keyFilesRenderHandle = 0;
+	          renderKeyFiles(latestSnapshot);
+	        });
+	      }
+
+	      function persistPinnedIdsByRunId() {
+	        const nextState = { ...(vscode.getState() || {}), pinnedIdsByRunId };
+	        vscode.setState(nextState);
+	      }
+
+	      function setPinnedIds(runId, ids) {
+	        pinnedIdsByRunId = setPinnedIdsForRun(pinnedIdsByRunId, runId, Array.isArray(ids) ? ids : []);
+	        persistPinnedIdsByRunId();
+	      }
+
+	      function togglePinned(runId, fileId) {
+	        const current = getPinnedIdsForRun(pinnedIdsByRunId, runId);
+	        const next = togglePinnedId(current, fileId);
+	        setPinnedIds(runId, next);
+	        scheduleRenderKeyFiles();
+	      }
+
+	      function formatMtime(mtimeMs) {
+	        if (mtimeMs == null) return '';
+	        try {
+	          return new Date(mtimeMs).toLocaleString();
+	        } catch {
+	          return '';
+	        }
+	      }
+
+	      function setButtonEnabled(button, enabled) {
+	        button.disabled = !enabled;
+	        button.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+	      }
+
+	      function renderKeyFiles(snapshot) {
+	        const model = computeKeyFilesModel({
+	          snapshot,
+	          filterValue: keyFilesFilterValue,
+	          pinnedIdsByRunId,
+	        });
+
+	        if (model.nextPinnedIds && model.runId) {
+	          setPinnedIds(model.runId, model.nextPinnedIds);
+	        }
+
+	        const runId = model.runId;
+	        const runRoot = model.runRoot;
+	        const pinnedIds = getPinnedIdsForRun(pinnedIdsByRunId, runId);
+	        const pinnedSet = new Set(pinnedIds);
+
+	        keyFilesPill.textContent = model.pillText || '';
+
+	        keyFilesPinned.innerHTML = '';
+	        keyFilesImportant.innerHTML = '';
+	        keyFilesAll.innerHTML = '';
+	        keyFilesEmpty.style.display = 'none';
+	        keyFilesEmpty.textContent = '';
+	        keyFilesEmptyActions.style.display = 'none';
+	        keyFilesRevealRun.onclick = null;
+	        keyFilesCopyRun.onclick = null;
+
+	        if (model.emptyMessage) {
+	          keyFilesPinnedWrap.style.display = 'none';
+	          keyFilesImportantWrap.style.display = 'none';
+	          keyFilesAllWrap.style.display = 'none';
+	          keyFilesEmpty.style.display = '';
+	          keyFilesEmpty.textContent = model.emptyMessage;
+
+	          if (model.showRunActions) {
+	            keyFilesEmptyActions.style.display = '';
+	            setButtonEnabled(keyFilesRevealRun, model.canRevealRunRoot);
+	            setButtonEnabled(keyFilesCopyRun, model.canCopyRunRoot);
+	            if (model.canRevealRunRoot) {
+	              keyFilesRevealRun.onclick = () => vscode.postMessage({ type: 'revealInExplorer', fsPath: runRoot });
+	            }
+	            if (model.canCopyRunRoot) {
+	              keyFilesCopyRun.onclick = () => vscode.postMessage({ type: 'copyText', text: runRoot });
+	            }
+	          }
+	          return;
+	        }
+
+	        const COPY_CONTENTS_MAX_BYTES = 1000000;
+	        const BINARY_EXTS = new Set([
+	          'png',
+	          'jpg',
+	          'jpeg',
+	          'gif',
+	          'webp',
+	          'bmp',
+	          'ico',
+	          'pdf',
+	          'zip',
+	          'gz',
+	          'tgz',
+	          'tar',
+	          '7z',
+	          'rar',
+	          'jar',
+	          'exe',
+	          'dll',
+	          'so',
+	          'dylib',
+	          'wasm',
+	          'class',
+	          'bin',
+	          'dat',
+	        ]);
+	        const extOf = (p) => {
+	          const s = (p || '').toString();
+	          const idx = s.lastIndexOf('.');
+	          if (idx === -1) return '';
+	          return s.slice(idx + 1).toLowerCase();
+	        };
+
+	        function appendRow(container, item) {
+	          const fsPath = item && typeof item.fsPath === 'string' ? item.fsPath : '';
+	          const canCopy = Boolean(fsPath);
+	          const canReveal = Boolean(fsPath);
+	          const canOpen = Boolean(fsPath);
+	          const ext = extOf(item.relPath || item.displayName || fsPath);
+	          const canCopyContents =
+	            Boolean(fsPath) &&
+	            item &&
+	            item.isDirectory !== true &&
+	            typeof item.size === 'number' &&
+	            item.size >= 0 &&
+	            item.size <= COPY_CONTENTS_MAX_BYTES &&
+	            !BINARY_EXTS.has(ext);
+
+	          const row = document.createElement('div');
+	          row.className = 'item';
+	          row.title = fsPath;
+
+	          const left = document.createElement('div');
+	          left.className = 'left';
+
+	          const name = document.createElement('div');
+	          name.className = 'name';
+	          const primary = item.relPath || item.displayName || fsPath;
+	          name.textContent = primary || '';
+	          left.appendChild(name);
+
+	          const hint = document.createElement('div');
+	          hint.className = 'hint';
+	          const hintParts = [];
+	          if (item.size != null) hintParts.push(formatBytes(item.size));
+	          const mt = formatMtime(item.mtimeMs);
+	          if (mt) hintParts.push(mt);
+	          hint.textContent = hintParts.join(' | ');
+	          left.appendChild(hint);
+
+	          const actions = document.createElement('div');
+	          actions.className = 'actions';
+
+	          const pinBtn = document.createElement('button');
+	          const isPinned = pinnedSet.has(item.id);
+	          pinBtn.textContent = isPinned ? 'Unpin' : 'Pin';
+	          pinBtn.setAttribute('aria-pressed', isPinned ? 'true' : 'false');
+	          pinBtn.setAttribute('aria-label', (isPinned ? 'Unpin ' : 'Pin ') + (primary || 'file'));
+	          pinBtn.addEventListener('click', (e) => {
+	            e.stopPropagation();
+	            togglePinned(runId, item.id);
+	          });
+	          actions.appendChild(pinBtn);
+
+	          const copyBtn = document.createElement('button');
+	          copyBtn.textContent = 'Copy path';
+	          copyBtn.setAttribute('aria-label', 'Copy path for ' + (primary || 'file'));
+	          setButtonEnabled(copyBtn, canCopy);
+	          copyBtn.addEventListener('click', (e) => {
+	            e.stopPropagation();
+	            if (!canCopy) return;
+	            vscode.postMessage({ type: 'copyText', text: fsPath });
+	          });
+	          actions.appendChild(copyBtn);
+
+	          const copyContentsBtn = document.createElement('button');
+	          copyContentsBtn.textContent = 'Copy contents';
+	          copyContentsBtn.setAttribute('aria-label', 'Copy contents for ' + (primary || 'file'));
+	          if (!canCopyContents) {
+	            const size = typeof item.size === 'number' ? item.size : null;
+	            if (size != null && size > COPY_CONTENTS_MAX_BYTES) {
+	              copyContentsBtn.title = 'Disabled: file is too large to copy contents';
+	            } else if (BINARY_EXTS.has(ext)) {
+	              copyContentsBtn.title = 'Disabled: file appears to be binary';
+	            } else if (item.isDirectory) {
+	              copyContentsBtn.title = 'Disabled: not a file';
+	            } else {
+	              copyContentsBtn.title = 'Disabled';
+	            }
+	          }
+	          setButtonEnabled(copyContentsBtn, canCopyContents);
+	          copyContentsBtn.addEventListener('click', (e) => {
+	            e.stopPropagation();
+	            if (!canCopyContents) return;
+	            vscode.postMessage({ type: 'copyFileContents', fsPath });
+	          });
+	          actions.appendChild(copyContentsBtn);
+
+	          const revealBtn = document.createElement('button');
+	          revealBtn.textContent = 'Reveal';
+	          revealBtn.setAttribute('aria-label', 'Reveal ' + (primary || 'file') + ' in Explorer');
+	          setButtonEnabled(revealBtn, canReveal);
+	          revealBtn.addEventListener('click', (e) => {
+	            e.stopPropagation();
+	            if (!canReveal) return;
+	            vscode.postMessage({ type: 'revealInExplorer', fsPath });
+	          });
+	          actions.appendChild(revealBtn);
+
+	          const openBtn = document.createElement('button');
+	          openBtn.textContent = 'Open';
+	          openBtn.setAttribute('aria-label', 'Open ' + (primary || 'file'));
+	          setButtonEnabled(openBtn, canOpen);
+	          openBtn.addEventListener('click', (e) => {
+	            e.stopPropagation();
+	            if (!canOpen) return;
+	            vscode.postMessage({ type: 'openInEditor', fsPath });
+	          });
+	          actions.appendChild(openBtn);
+
+	          if (canOpen) {
+	            row.setAttribute('role', 'button');
+	            row.tabIndex = 0;
+	            row.setAttribute('aria-label', 'Open ' + (primary || 'file'));
+	            const open = () => vscode.postMessage({ type: 'openInEditor', fsPath });
+	            row.addEventListener('click', (e) => {
+	              if (e && e.target && e.target.closest && e.target.closest('button')) return;
+	              open();
+	            });
+	            row.addEventListener('keydown', (e) => {
+	              if (e.key === 'Enter' || e.key === ' ') {
+	                e.preventDefault();
+	                open();
+	              }
+	            });
+	          }
+
+	          row.appendChild(left);
+	          row.appendChild(actions);
+	          container.appendChild(row);
+	        }
+
+	        function renderGrouped(container, grouped) {
+	          for (const group of grouped) {
+	            if (!group || !Array.isArray(group.items) || group.items.length === 0) continue;
+	            const label = document.createElement('div');
+	            label.className = 'keyfiles-group-label';
+	            label.textContent = group.group || 'Other';
+	            container.appendChild(label);
+	            for (const item of group.items) appendRow(container, item);
+	          }
+	        }
+
+	        if (model.groupedPinned.some((g) => g.items.length > 0)) {
+	          keyFilesPinnedWrap.style.display = '';
+	          renderGrouped(keyFilesPinned, model.groupedPinned);
+	        } else {
+	          keyFilesPinnedWrap.style.display = 'none';
+	        }
+
+	        if (model.groupedImportant.some((g) => g.items.length > 0)) {
+	          keyFilesImportantWrap.style.display = '';
+	          renderGrouped(keyFilesImportant, model.groupedImportant);
+	        } else {
+	          keyFilesImportantWrap.style.display = 'none';
+	        }
+
+	        if (model.groupedAll.some((g) => g.items.length > 0)) {
+	          keyFilesAllWrap.style.display = '';
+	          renderGrouped(keyFilesAll, model.groupedAll);
+	        } else {
+	          keyFilesAllWrap.style.display = 'none';
+	        }
+	      }
 
     function renderInteraction(awaitingInput) {
       if (!awaitingInput || awaitingInput.awaiting !== true) {
@@ -961,6 +1396,9 @@ class RunDetailsPanel {
       case 'copyText':
         await this.copyText(msg.text);
         return;
+      case 'copyFileContents':
+        await this.copyFileContents(msg.fsPath);
+        return;
       case 'sendUserInput':
         await this.sendUserInput(msg.runId, msg.text);
         return;
@@ -1068,7 +1506,9 @@ class RunDetailsPanel {
   }
 
   private async openInEditor(fsPath: string): Promise<void> {
-    if (!isFsPathInsideRoot(this.run.paths.runRoot, fsPath)) {
+    const value = typeof fsPath === 'string' ? fsPath : '';
+    if (!value) return;
+    if (!isFsPathInsideRoot(this.run.paths.runRoot, value)) {
       await this.post({
         type: 'error',
         message: 'Refusing to open a file outside the run directory.',
@@ -1076,15 +1516,17 @@ class RunDetailsPanel {
       return;
     }
     try {
-      await vscode.window.showTextDocument(vscode.Uri.file(fsPath), { preview: true });
+      await vscode.window.showTextDocument(vscode.Uri.file(value), { preview: true });
     } catch {
-      await this.post({ type: 'error', message: `Could not open: ${path.basename(fsPath)}` });
+      await this.post({ type: 'error', message: `Could not open: ${path.basename(value)}` });
     }
   }
 
   private async revealInExplorer(fsPath: string): Promise<void> {
-    if (!isFsPathInsideRoot(this.run.paths.runRoot, fsPath)) return;
-    await vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(fsPath));
+    const value = typeof fsPath === 'string' ? fsPath : '';
+    if (!value) return;
+    if (!isFsPathInsideRoot(this.run.paths.runRoot, value)) return;
+    await vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(value));
   }
 
   private async loadTextFile(fsPath: string, tail: boolean): Promise<void> {
@@ -1126,6 +1568,28 @@ class RunDetailsPanel {
       vscode.window.setStatusBarMessage('Babysitter: copied to clipboard', 2000);
     } catch {
       // ignore
+    }
+  }
+
+  private async copyFileContents(fsPath: string): Promise<void> {
+    const value = typeof fsPath === 'string' ? fsPath : '';
+    if (!value) return;
+
+    const res = await readFileContentsForClipboard({
+      runRoot: this.run.paths.runRoot,
+      fsPath: value,
+      maxBytes: DEFAULT_MAX_COPY_CONTENTS_BYTES,
+    });
+    if (!res.ok) {
+      await this.post({ type: 'error', message: res.message });
+      return;
+    }
+
+    try {
+      await vscode.env.clipboard.writeText(res.content);
+      vscode.window.setStatusBarMessage('Babysitter: copied file contents to clipboard', 2000);
+    } catch {
+      await this.post({ type: 'error', message: 'Could not copy to clipboard.' });
     }
   }
 }

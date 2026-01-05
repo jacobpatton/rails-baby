@@ -53,6 +53,9 @@ export type RunDetailsSnapshot = {
   prompts: RunFileItem[];
   artifacts: RunFileItem[];
   mainJs: RunFileItem | null;
+  runFiles: RunFileItem[];
+  importantFiles: RunFileItem[];
+  keyFilesMeta: KeyFilesMeta;
 };
 
 function normalizeForPlatform(p: string): string {
@@ -89,6 +92,28 @@ function safeStat(filePath: string): fs.Stats | undefined {
     return fs.statSync(filePath);
   } catch {
     return undefined;
+  }
+}
+
+function safeLstat(filePath: string): fs.Stats | undefined {
+  try {
+    return fs.lstatSync(filePath);
+  } catch {
+    return undefined;
+  }
+}
+
+function safeDirReadable(dirPath: string): { readable: boolean; error?: string } {
+  try {
+    fs.readdirSync(dirPath);
+    return { readable: true };
+  } catch (err) {
+    const errno = err as NodeJS.ErrnoException | undefined;
+    if (errno?.code === 'EACCES' || errno?.code === 'EPERM') {
+      return { readable: false, error: 'Run folder is not readable.' };
+    }
+    const message = err instanceof Error ? err.message : String(err);
+    return { readable: false, error: message };
   }
 }
 
@@ -135,6 +160,56 @@ export function listFilesRecursive(params: {
   return results;
 }
 
+function listFilesRecursiveFilesOnly(params: {
+  dir: string;
+  rootForRel: string;
+  maxFiles: number;
+}): RunFileItem[] {
+  const results: RunFileItem[] = [];
+  const stack: string[] = [params.dir];
+  const normalizedRoot = path.resolve(params.rootForRel);
+
+  while (stack.length > 0 && results.length < params.maxFiles) {
+    const current = stack.pop();
+    if (!current) break;
+
+    let dirents: fs.Dirent[];
+    try {
+      dirents = fs.readdirSync(current, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+
+    for (const dirent of dirents) {
+      if (results.length >= params.maxFiles) break;
+      if (dirent.isSymbolicLink()) continue;
+
+      const abs = path.join(current, dirent.name);
+      if (dirent.isDirectory()) {
+        stack.push(abs);
+        continue;
+      }
+
+      if (!dirent.isFile()) continue;
+
+      const stat = safeStat(abs);
+      if (!stat || !stat.isFile()) continue;
+
+      const relPath = path.relative(normalizedRoot, abs);
+      results.push({
+        relPath,
+        fsPath: abs,
+        isDirectory: false,
+        size: stat.size,
+        mtimeMs: stat.mtimeMs,
+      });
+    }
+  }
+
+  results.sort((a, b) => a.relPath.localeCompare(b.relPath));
+  return results;
+}
+
 export function listFilesSortedByMtimeDesc(params: {
   dir: string;
   rootForRel: string;
@@ -172,6 +247,116 @@ function toJournalView(result: JournalTailResult): JournalView {
     errors: result.errors.map((e) => ({ line: e.line, source: e.source, message: e.message })),
     truncated: result.truncated,
     position: result.position,
+  };
+}
+
+export type KeyFilesMeta = {
+  runRoot: string;
+  runRootExists: boolean;
+  runRootReadable: boolean;
+  runRootError?: string;
+  truncated: boolean;
+  totalFiles: number;
+};
+
+function buildRunFileItemIfRegularFile(params: {
+  runRoot: string;
+  fsPath: string;
+}): RunFileItem | undefined {
+  if (!isFsPathInsideRoot(params.runRoot, params.fsPath)) return undefined;
+
+  const lst = safeLstat(params.fsPath);
+  if (!lst || lst.isSymbolicLink()) return undefined;
+
+  const stat = safeStat(params.fsPath);
+  if (!stat || !stat.isFile()) return undefined;
+
+  const relPath = path.relative(path.resolve(params.runRoot), params.fsPath);
+  return {
+    relPath,
+    fsPath: params.fsPath,
+    isDirectory: false,
+    size: stat.size,
+    mtimeMs: stat.mtimeMs,
+  };
+}
+
+function discoverKeyFiles(params: { run: Run; maxRunFiles: number }): {
+  runFiles: RunFileItem[];
+  importantFiles: RunFileItem[];
+  keyFilesMeta: KeyFilesMeta;
+} {
+  const runRoot = params.run.paths.runRoot;
+
+  let runRootExists = false;
+  let runRootReadable = false;
+  let runRootError: string | undefined;
+
+  try {
+    const stat = fs.statSync(runRoot);
+    runRootExists = stat.isDirectory();
+    if (runRootExists) {
+      const readable = safeDirReadable(runRoot);
+      runRootReadable = readable.readable;
+      runRootError = readable.error;
+    }
+  } catch (err) {
+    const errno = err as NodeJS.ErrnoException | undefined;
+    if (errno?.code === 'ENOENT') {
+      runRootExists = false;
+      runRootReadable = false;
+    } else if (errno?.code === 'EACCES' || errno?.code === 'EPERM') {
+      runRootExists = true;
+      runRootReadable = false;
+      runRootError = 'Run folder is not readable.';
+    } else {
+      const message = err instanceof Error ? err.message : String(err);
+      runRootError = message;
+    }
+  }
+
+  let rawRunFiles: RunFileItem[] = [];
+  if (runRootReadable) {
+    rawRunFiles = listFilesRecursiveFilesOnly({
+      dir: runRoot,
+      rootForRel: runRoot,
+      maxFiles: params.maxRunFiles + 1,
+    });
+  }
+
+  const truncated = rawRunFiles.length > params.maxRunFiles;
+  const runFiles = truncated ? rawRunFiles.slice(0, params.maxRunFiles) : rawRunFiles;
+
+  const importantFsPaths = [
+    params.run.paths.stateJson,
+    params.run.paths.journalJsonl,
+    params.run.paths.mainJs,
+    path.join(runRoot, 'process.md'),
+    path.join(runRoot, 'artifacts', 'process.mermaid.md'),
+    path.join(runRoot, 'code', 'main.js'),
+    path.join(runRoot, 'run', 'process.md'),
+    path.join(runRoot, 'run', 'artifacts', 'process.mermaid.md'),
+    path.join(runRoot, 'run', 'code', 'main.js'),
+  ]
+    .map((p) => path.resolve(p))
+    .filter((p, idx, all) => all.indexOf(p) === idx);
+
+  const importantFiles = importantFsPaths
+    .map((fsPath) => buildRunFileItemIfRegularFile({ runRoot, fsPath }))
+    .filter((v): v is RunFileItem => Boolean(v))
+    .sort((a, b) => a.relPath.localeCompare(b.relPath));
+
+  return {
+    runFiles,
+    importantFiles,
+    keyFilesMeta: {
+      runRoot,
+      runRootExists,
+      runRootReadable,
+      ...(runRootError ? { runRootError } : {}),
+      truncated,
+      totalFiles: runFiles.length,
+    },
   };
 }
 
@@ -224,6 +409,8 @@ export function readRunDetailsSnapshot(params: {
         }
       : null;
 
+  const keyFiles = discoverKeyFiles({ run: params.run, maxRunFiles: 2000 });
+
   return {
     snapshot: {
       run: {
@@ -240,6 +427,9 @@ export function readRunDetailsSnapshot(params: {
       prompts,
       artifacts,
       mainJs,
+      runFiles: keyFiles.runFiles,
+      importantFiles: keyFiles.importantFiles,
+      keyFilesMeta: keyFiles.keyFilesMeta,
     },
     nextJournalEntries,
   };
