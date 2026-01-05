@@ -315,6 +315,30 @@ function renderWebviewHtml(webview: vscode.Webview): string {
     .md .md-li { margin: 2px 0; }
     .md .md-blank { height: 8px; }
     .md .md-p { margin: 2px 0; }
+    .evtable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .evtable th, .evtable td {
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      vertical-align: top;
+    }
+    .evtable th {
+      text-align: left;
+      font-weight: 600;
+      background: var(--card);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .evtable code {
+      font-family: var(--vscode-editor-font-family);
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
     textarea {
       width: 100%;
       box-sizing: border-box;
@@ -443,12 +467,26 @@ function renderWebviewHtml(webview: vscode.Webview): string {
           <span class="pill" id="journalPill"></span>
         </h2>
         <div id="journalErrors" class="empty" style="margin-bottom: 8px; display:none;"></div>
-        <pre id="journalJson">[]</pre>
+        <table class="evtable" id="journalTable">
+          <thead>
+            <tr>
+              <th style="width: 190px;">Time</th>
+              <th style="width: 170px;">Event</th>
+              <th style="width: 70px;">Id</th>
+              <th>Summary</th>
+            </tr>
+          </thead>
+          <tbody id="journalBody"></tbody>
+        </table>
       </section>
       <section class="card">
         <h2>
           Work Summaries
           <span class="pill" id="workPill"></span>
+          <label class="pill" style="display:inline-flex; gap:6px; align-items:center; margin-left: 8px; cursor:pointer;">
+            <input id="tailLatestWork" type="checkbox" style="margin:0;" />
+            Tail latest
+          </label>
         </h2>
         <div class="list" id="workList"></div>
         <div id="textPreviewCard" style="margin-top: 10px; display:none;">
@@ -557,9 +595,10 @@ function renderWebviewHtml(webview: vscode.Webview): string {
     const runMeta = el('runMeta');
     const stateJson = el('stateJson');
     const stateIssues = el('stateIssues');
-    const journalJson = el('journalJson');
     const journalErrors = el('journalErrors');
     const journalPill = el('journalPill');
+    const journalTable = el('journalTable');
+    const journalBody = el('journalBody');
     const workList = el('workList');
     const textPreviewCard = el('textPreviewCard');
     const textPreviewTitle = el('textPreviewTitle');
@@ -569,6 +608,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
     const workPreviewHtml = el('workPreviewHtml');
     const workEmpty = el('workEmpty');
     const workPill = el('workPill');
+    const tailLatestWork = el('tailLatestWork');
     const promptList = el('promptList');
     const promptEmpty = el('promptEmpty');
     const promptPill = el('promptPill');
@@ -619,14 +659,16 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	    let awaitingInputVisible = false;
 	    let activeWorkPreviewFsPath = '';
 	    let activeWorkPreviewContent = '';
-	    let activeWorkPreviewTruncated = false;
-	    let activeWorkPreviewError = '';
+      let activeWorkPreviewTruncated = false;
+      let activeWorkPreviewError = '';
       let activeWorkPreviewAutoScroll = false;
       let activeWorkPreviewMode = 'plain'; // 'plain' | 'markdown' | 'code'
+      let activeWorkPreviewKind = ''; // '' | 'workTail' | 'filePreview'
       const textFileCache = new Map(); // fsPath -> { content?: string, truncated?: boolean, size?: number, mtimeMs?: number, error?: string }
       let processMdTarget = null;
       let processMermaidTarget = null;
       let mainJsTarget = null;
+      let tailLatestWorkEnabled = false;
       let keyFilesFilterValue = '';
 	      let pinnedIdsByRunId = {};
 	      let keyFilesRenderHandle = 0;
@@ -634,7 +676,14 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	      const initialState = vscode.getState() || {};
 	      if (initialState && typeof initialState === 'object') {
 	        pinnedIdsByRunId = normalizePinnedIdsByRunId(initialState.pinnedIdsByRunId);
+          tailLatestWorkEnabled = Boolean(initialState.tailLatestWorkEnabled);
 	      }
+      tailLatestWork.checked = tailLatestWorkEnabled;
+      tailLatestWork.addEventListener('change', () => {
+        tailLatestWorkEnabled = Boolean(tailLatestWork.checked);
+        persistViewState();
+        if (latestSnapshot) renderWorkSummaries(latestSnapshot.workSummaries || []);
+      });
 
     refreshBtn.addEventListener('click', () => vscode.postMessage({ type: 'refresh' }));
     bannerDismissBtn.addEventListener('click', () => hideBanner());
@@ -648,6 +697,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
       activeWorkPreviewTruncated = false;
       activeWorkPreviewError = '';
       activeWorkPreviewAutoScroll = false;
+      activeWorkPreviewKind = '';
       renderActiveWorkPreview();
     });
 
@@ -802,7 +852,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 
       const journal = snapshot.journal;
       journalPill.textContent = (journal.entries?.length || 0) + ' entries';
-      journalJson.textContent = JSON.stringify(journal.entries || [], null, 2);
+      renderJournalTable(journal.entries || []);
       const jErrors = journal.errors || [];
       if (jErrors.length > 0) {
         journalErrors.style.display = '';
@@ -814,7 +864,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 
 	      renderWorkSummaries(snapshot.workSummaries || []);
         renderPrompts(snapshot.prompts || []);
-        renderMainJs(snapshot.mainJs || null);
+        renderPinnedPreviews(snapshot);
 	      renderArtifacts(snapshot.artifacts || []);
 	      renderInteraction(snapshot.awaitingInput);
         renderKeyFiles(snapshot);
@@ -830,9 +880,13 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	        });
 	      }
 
-	      function persistPinnedIdsByRunId() {
-	        const nextState = { ...(vscode.getState() || {}), pinnedIdsByRunId };
+	      function persistViewState() {
+	        const nextState = { ...(vscode.getState() || {}), pinnedIdsByRunId, tailLatestWorkEnabled };
 	        vscode.setState(nextState);
+	      }
+
+	      function persistPinnedIdsByRunId() {
+	        persistViewState();
 	      }
 
 	      function setPinnedIds(runId, ids) {
@@ -847,7 +901,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	        scheduleRenderKeyFiles();
 	      }
 
-	      function formatMtime(mtimeMs) {
+      function formatMtime(mtimeMs) {
 	        if (mtimeMs == null) return '';
 	        try {
 	          return new Date(mtimeMs).toLocaleString();
@@ -1160,6 +1214,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	        activeWorkPreviewTruncated = false;
 	        activeWorkPreviewError = '';
           activeWorkPreviewAutoScroll = false;
+          activeWorkPreviewKind = '';
 	      }
 
 	      if (items.length === 0) {
@@ -1169,9 +1224,105 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	        activeWorkPreviewTruncated = false;
 	        activeWorkPreviewError = '';
           activeWorkPreviewAutoScroll = false;
+          activeWorkPreviewKind = '';
 	        return;
 	      }
 	      workEmpty.style.display = 'none';
+
+      if (tailLatestWorkEnabled && (activeWorkPreviewKind === '' || activeWorkPreviewKind === 'workTail')) {
+        const newest = items[0];
+        if (newest && newest.fsPath && newest.fsPath !== activeWorkPreviewFsPath) {
+          activeWorkPreviewFsPath = newest.fsPath;
+          activeWorkPreviewContent = '';
+          activeWorkPreviewTruncated = false;
+          activeWorkPreviewError = '';
+          activeWorkPreviewAutoScroll = true;
+          activeWorkPreviewMode = 'plain';
+          activeWorkPreviewKind = 'workTail';
+          renderActiveWorkPreview();
+          vscode.postMessage({ type: 'loadTextFile', fsPath: newest.fsPath, tail: true });
+        }
+      }
+
+      function safeString(v) {
+        if (v == null) return '';
+        if (typeof v === 'string') return v;
+        try {
+          return JSON.stringify(v);
+        } catch {
+          return String(v);
+        }
+      }
+
+	      function summarizeEvent(entry) {
+	        if (!entry || typeof entry !== 'object') return safeString(entry);
+	        const ev = entry.event || entry.type || '';
+	        const data = entry.data;
+	        if (ev === 'function_call' && data && typeof data === 'object') {
+	          const fn = data.function || '';
+	          const args = data.args || {};
+	          if (fn) return 'function_call: ' + fn;
+	          return 'function_call';
+	        }
+	        if (ev === 'breakpoint_approved' && data && typeof data === 'object') {
+	          const bp = data.breakpoint || '';
+	          return bp ? 'breakpoint_approved: ' + bp : 'breakpoint_approved';
+	        }
+	        if (ev === 'run_created' && data && typeof data === 'object') {
+	          const runId = data.runId || '';
+	          return runId ? 'run_created: ' + runId : 'run_created';
+	        }
+	        return data ? safeString(data) : safeString(entry);
+	      }
+
+      function renderJournalTable(entries) {
+        journalBody.innerHTML = '';
+        const list = Array.isArray(entries) ? entries : [];
+        if (list.length === 0) {
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.colSpan = 4;
+          td.className = 'empty';
+          td.textContent = 'No events yet.';
+          tr.appendChild(td);
+          journalBody.appendChild(tr);
+          return;
+        }
+
+        for (const entry of list) {
+          const tr = document.createElement('tr');
+          const tsRaw =
+            entry && typeof entry === 'object'
+              ? entry.timestamp || entry.time || entry.createdAt || entry.updatedAt || ''
+              : '';
+          const ts = tsRaw ? new Date(String(tsRaw)).toLocaleString() : '';
+          const ev = entry && typeof entry === 'object' ? String(entry.event || entry.type || '') : '';
+          const id = entry && typeof entry === 'object' ? String(entry.id || '') : '';
+          const summary = summarizeEvent(entry);
+
+          const tdTime = document.createElement('td');
+          tdTime.textContent = ts;
+          tr.appendChild(tdTime);
+
+          const tdEv = document.createElement('td');
+          tdEv.textContent = ev;
+          tr.appendChild(tdEv);
+
+          const tdId = document.createElement('td');
+          tdId.textContent = id;
+          tr.appendChild(tdId);
+
+          const tdSummary = document.createElement('td');
+          const code = document.createElement('code');
+          const text = String(summary || '');
+          code.textContent = text.length > 240 ? text.slice(0, 240) + '...' : text;
+          code.title = text;
+          tdSummary.appendChild(code);
+          tr.appendChild(tdSummary);
+
+          journalBody.appendChild(tr);
+        }
+      }
 
       for (const item of items) {
         const row = document.createElement('div');
@@ -1203,6 +1354,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	          activeWorkPreviewError = '';
             activeWorkPreviewAutoScroll = true;
             activeWorkPreviewMode = 'plain';
+            activeWorkPreviewKind = 'workTail';
 	          renderActiveWorkPreview();
 	          vscode.postMessage({ type: 'loadTextFile', fsPath: item.fsPath, tail: true });
 	        });
@@ -1260,6 +1412,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
           activeWorkPreviewError = '';
           activeWorkPreviewAutoScroll = false;
           activeWorkPreviewMode = 'plain';
+          activeWorkPreviewKind = 'filePreview';
           renderActiveWorkPreview();
           vscode.postMessage({ type: 'loadTextFile', fsPath: item.fsPath, tail: false });
         });
@@ -1277,30 +1430,84 @@ function renderWebviewHtml(webview: vscode.Webview): string {
       }
     }
 
-    function renderMainJs(item) {
-      if (!item || !item.fsPath) {
+    function findImportantByRel(snapshot, predicate) {
+      const items = Array.isArray(snapshot.importantFiles) ? snapshot.importantFiles : [];
+      for (const item of items) {
+        if (!item || typeof item.relPath !== 'string' || typeof item.fsPath !== 'string') continue;
+        if (predicate(item.relPath)) return item;
+      }
+      return null;
+    }
+
+    function getCachedText(fsPath) {
+      const cached = textFileCache.get(fsPath);
+      return cached && typeof cached.content === 'string' ? cached.content : '';
+    }
+
+    function ensureCached(fsPath, mtimeMs) {
+      const cached = textFileCache.get(fsPath);
+      if (!cached || cached.mtimeMs !== mtimeMs) {
+        vscode.postMessage({ type: 'loadTextFile', fsPath, tail: false });
+        textFileCache.set(fsPath, { ...(cached || {}), mtimeMs });
+      }
+    }
+
+    function renderPinnedPreviews(snapshot) {
+      processMdTarget = findImportantByRel(snapshot, (rel) => {
+        const norm = String(rel).replace(/\\\\/g, '/').toLowerCase();
+        return norm === 'process.md' || norm === 'run/process.md';
+      });
+      processMermaidTarget = findImportantByRel(snapshot, (rel) => {
+        const norm = String(rel).replace(/\\\\/g, '/').toLowerCase();
+        return norm === 'artifacts/process.mermaid.md' || norm === 'run/artifacts/process.mermaid.md';
+      });
+      mainJsTarget = snapshot.mainJs && snapshot.mainJs.fsPath ? snapshot.mainJs : null;
+
+      // process.md
+      if (processMdTarget) {
+        processMdPill.textContent = processMdTarget.relPath;
+        processMdOpen.style.display = '';
+        processMdOpen.onclick = () => vscode.postMessage({ type: 'openInEditor', fsPath: processMdTarget.fsPath });
+        ensureCached(processMdTarget.fsPath, processMdTarget.mtimeMs || 0);
+        const content = getCachedText(processMdTarget.fsPath);
+        processMdPreview.innerHTML = content ? renderMarkdownToHtml(content) : 'Loading...';
+      } else {
+        processMdPill.textContent = 'process.md';
+        processMdOpen.style.display = 'none';
+        processMdPreview.textContent = 'No process.md found.';
+      }
+
+      // process.mermaid.md
+      if (processMermaidTarget) {
+        processMermaidPill.textContent = processMermaidTarget.relPath;
+        processMermaidOpen.style.display = '';
+        processMermaidOpen.onclick = () =>
+          vscode.postMessage({ type: 'openInEditor', fsPath: processMermaidTarget.fsPath });
+        ensureCached(processMermaidTarget.fsPath, processMermaidTarget.mtimeMs || 0);
+        const content = getCachedText(processMermaidTarget.fsPath);
+        processMermaidPreview.innerHTML = content ? renderMarkdownToHtml(content) : 'Loading...';
+      } else {
+        processMermaidPill.textContent = 'process.mermaid.md';
+        processMermaidOpen.style.display = 'none';
+        processMermaidPreview.textContent = 'No process.mermaid.md found.';
+      }
+
+      // main.js
+      if (mainJsTarget) {
+        mainJsPill.textContent = mainJsTarget.size != null ? formatBytes(mainJsTarget.size) : 'Present';
+        mainJsHint.textContent = mainJsTarget.mtimeMs ? 'Updated: ' + new Date(mainJsTarget.mtimeMs).toLocaleString() : '';
+        mainJsActions.style.display = '';
+        mainJsOpen.onclick = () => vscode.postMessage({ type: 'openInEditor', fsPath: mainJsTarget.fsPath });
+        mainJsSaveAs.onclick = () => vscode.postMessage({ type: 'saveFileAs', fsPath: mainJsTarget.fsPath });
+        ensureCached(mainJsTarget.fsPath, mainJsTarget.mtimeMs || 0);
+        const content = getCachedText(mainJsTarget.fsPath);
+        mainJsPreviewPre.textContent = content ? content : 'Loading...';
+      } else {
         mainJsPill.textContent = 'Missing';
         mainJsHint.textContent = 'No code/main.js found for this run.';
         mainJsActions.style.display = 'none';
-        return;
+        mainJsPreviewPre.textContent = '';
       }
-
-      mainJsPill.textContent = item.size != null ? formatBytes(item.size) : 'Present';
-      mainJsHint.textContent = item.mtimeMs ? 'Updated: ' + new Date(item.mtimeMs).toLocaleString() : '';
-      mainJsActions.style.display = '';
-
-      mainJsPreview.onclick = () => {
-        activeWorkPreviewFsPath = item.fsPath;
-        activeWorkPreviewContent = '';
-        activeWorkPreviewTruncated = false;
-        activeWorkPreviewError = '';
-        activeWorkPreviewAutoScroll = false;
-        activeWorkPreviewMode = 'code';
-        renderActiveWorkPreview();
-        vscode.postMessage({ type: 'loadTextFile', fsPath: item.fsPath, tail: false });
-      };
-
-      mainJsOpen.onclick = () => vscode.postMessage({ type: 'openInEditor', fsPath: item.fsPath });
     }
 
     function renderArtifacts(items) {
@@ -1347,6 +1554,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
             activeWorkPreviewError = '';
             activeWorkPreviewAutoScroll = false;
             activeWorkPreviewMode = 'markdown';
+            activeWorkPreviewKind = 'filePreview';
             renderActiveWorkPreview();
             vscode.postMessage({ type: 'loadTextFile', fsPath: item.fsPath, tail: false });
           });
@@ -1373,20 +1581,35 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 
 	    function renderTextFile(msg) {
 	      if (!msg || typeof msg.content !== 'string') return;
-	      activeWorkPreviewFsPath = msg.fsPath || activeWorkPreviewFsPath;
-	      activeWorkPreviewContent = msg.content;
-	      activeWorkPreviewTruncated = Boolean(msg.truncated);
-	      activeWorkPreviewError = '';
-	      renderActiveWorkPreview();
+        if (msg.fsPath) {
+          textFileCache.set(msg.fsPath, {
+            ...(textFileCache.get(msg.fsPath) || {}),
+            content: msg.content,
+            truncated: Boolean(msg.truncated),
+            size: msg.size,
+          });
+        }
+        if (msg.fsPath && msg.fsPath === activeWorkPreviewFsPath) {
+          activeWorkPreviewContent = msg.content;
+          activeWorkPreviewTruncated = Boolean(msg.truncated);
+          activeWorkPreviewError = '';
+          renderActiveWorkPreview();
+        }
+        if (latestSnapshot) renderPinnedPreviews(latestSnapshot);
 	    }
 
 	    function renderTextFileError(msg) {
 	      if (!msg || typeof msg.message !== 'string') return;
-	      activeWorkPreviewFsPath = msg.fsPath || activeWorkPreviewFsPath;
-	      activeWorkPreviewError = msg.message;
-	      activeWorkPreviewContent = '';
-	      activeWorkPreviewTruncated = false;
-	      renderActiveWorkPreview();
+        if (msg.fsPath) {
+          textFileCache.set(msg.fsPath, { ...(textFileCache.get(msg.fsPath) || {}), error: msg.message });
+        }
+        if (msg.fsPath && msg.fsPath === activeWorkPreviewFsPath) {
+          activeWorkPreviewError = msg.message;
+          activeWorkPreviewContent = '';
+          activeWorkPreviewTruncated = false;
+          renderActiveWorkPreview();
+        }
+        if (latestSnapshot) renderPinnedPreviews(latestSnapshot);
 	    }
 
       function escapeHtml(text) {
@@ -1398,50 +1621,51 @@ function renderWebviewHtml(webview: vscode.Webview): string {
           .replace(/'/g, '&#39;');
       }
 
-      function renderMarkdownToHtml(markdown) {
-        const lines = String(markdown || '').split(/\\r?\\n/);
-        let out = '';
-        let inCode = false;
-        let codeLang = '';
-        for (const rawLine of lines) {
-          const line = String(rawLine);
-          const fence = line.match(/^```\\s*([a-zA-Z0-9_-]+)?\\s*$/);
-          if (fence) {
-            if (!inCode) {
-              inCode = true;
-              codeLang = fence[1] || '';
-              out += `<pre><code class=\"lang-${escapeHtml(codeLang)}\">`;
-            } else {
-              inCode = false;
-              codeLang = '';
-              out += `</code></pre>`;
-            }
-            continue;
-          }
+	      function renderMarkdownToHtml(markdown) {
+	        const lines = String(markdown || '').split(/\\r?\\n/);
+	        let out = '';
+	        let inCode = false;
+	        let codeLang = '';
+	        for (const rawLine of lines) {
+	          const line = String(rawLine);
+	          const fence = line.match(/^\\x60\\x60\\x60\\s*([a-zA-Z0-9_-]+)?\\s*$/);
+	          if (fence) {
+	            if (!inCode) {
+	              inCode = true;
+	              codeLang = fence[1] || '';
+		              out += '<pre><code class="lang-' + escapeHtml(codeLang) + '">';
+		            } else {
+		              inCode = false;
+		              codeLang = '';
+		              out += '</code></pre>';
+		            }
+	            continue;
+	          }
           if (inCode) {
             out += escapeHtml(line) + '\\n';
             continue;
           }
-          const heading = line.match(/^(#{1,6})\\s+(.*)$/);
-          if (heading) {
-            const level = heading[1].length;
-            out += `<h${level}>${escapeHtml(heading[2])}</h${level}>`;
-            continue;
-          }
-          const list = line.match(/^\\s*[-*]\\s+(.*)$/);
-          if (list) {
-            out += `<div class=\"md-li\">• ${escapeHtml(list[1])}</div>`;
-            continue;
-          }
-          if (!line.trim()) {
-            out += `<div class=\"md-blank\"></div>`;
-            continue;
-          }
-          out += `<div class=\"md-p\">${escapeHtml(line)}</div>`;
-        }
-        if (inCode) out += `</code></pre>`;
-        return out;
-      }
+	          const heading = line.match(/^(#{1,6})\\s+(.*)$/);
+	          if (heading) {
+	            const level = heading[1].length;
+	            out +=
+	              '<h' + level + '>' + escapeHtml(heading[2]) + '</h' + level + '>';
+	            continue;
+	          }
+	          const list = line.match(/^\\s*[-*]\\s+(.*)$/);
+	          if (list) {
+	            out += '<div class="md-li">- ' + escapeHtml(list[1]) + '</div>';
+	            continue;
+	          }
+	          if (!line.trim()) {
+	            out += '<div class="md-blank"></div>';
+	            continue;
+	          }
+	          out += '<div class="md-p">' + escapeHtml(line) + '</div>';
+	        }
+	        if (inCode) out += '</code></pre>';
+	        return out;
+	      }
 
 	    function renderActiveWorkPreview() {
 	      if (!activeWorkPreviewFsPath) {

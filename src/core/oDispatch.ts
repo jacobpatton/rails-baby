@@ -175,7 +175,10 @@ function buildWindowsWslInvocation(params: {
     `cd ${shSingleQuote(params.workspaceRoot)}`,
     `${shSingleQuote(params.oBinaryPath)} ${params.args.map(shSingleQuote).join(' ')}`,
   ].join('; ');
-  return { filePath: 'wsl.exe', args: ['-e', 'bash', '-lc', bashScript] };
+  const systemRoot = process.env['SystemRoot'] ?? 'C:\\Windows';
+  const wslExe = path.join(systemRoot, 'System32', 'wsl.exe');
+  const wslExePath = fs.existsSync(wslExe) ? wslExe : 'wsl.exe';
+  return { filePath: wslExePath, args: ['-e', 'bash', '-lc', bashScript] };
 }
 
 function buildInvocationHelp(output: string): string | undefined {

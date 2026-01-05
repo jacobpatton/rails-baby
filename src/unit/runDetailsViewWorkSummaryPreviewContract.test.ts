@@ -17,7 +17,7 @@ suite('Run Details webview template', () => {
     assert.ok(source.includes('Prompts'), 'expected Prompts section label');
     assert.ok(source.includes('id="promptList"'), 'expected Prompts list container');
     assert.ok(source.includes('code/main.js'), 'expected main.js section label');
-    assert.ok(source.includes('id="mainJsPreview"'), 'expected main.js preview button');
+    assert.ok(source.includes('id="mainJsPreviewPre"'), 'expected main.js preview container');
 
     assert.ok(
       source.includes("{ type: 'loadTextFile'") || source.includes('{ type: "loadTextFile"'),
@@ -58,8 +58,8 @@ suite('Run Details webview template', () => {
       'expected webview to track active work-summary preview fsPath',
     );
     assert.ok(
-      /activeWorkPreviewFsPath\s*=\s*msg\.fsPath/.test(source),
-      'expected textFile handler to set activeWorkPreviewFsPath from msg.fsPath',
+      /msg\.fsPath\s*===\s*activeWorkPreviewFsPath/.test(source),
+      'expected textFile handler to apply updates only when fsPath matches active preview',
     );
   });
 
