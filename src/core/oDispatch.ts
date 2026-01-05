@@ -264,16 +264,35 @@ export async function resumeExistingRunViaO(
 
   let child: PtyProcess;
   try {
-    child = spawnPtyProcess(options.oBinaryPath, [options.runId, options.prompt], {
-      cwd: options.workspaceRoot,
-      ...(options.env ? { env: options.env } : {}),
-    });
+    if (
+      process.platform === 'win32' &&
+      options.windowsRuntime === 'wsl' &&
+      !isLikelyWindowsNativeBinary(options.oBinaryPath)
+    ) {
+      const wslWorkspaceRoot = await windowsPathToWslPath(options.workspaceRoot);
+      const wslOBinaryPath = await windowsPathToWslPath(options.oBinaryPath);
+      const invocation = buildWindowsWslInvocation({
+        workspaceRoot: wslWorkspaceRoot,
+        oBinaryPath: wslOBinaryPath,
+        args: [options.runId, options.prompt],
+      });
+      child = spawnPtyProcess(invocation.filePath, invocation.args, {
+        cwd: options.workspaceRoot,
+        ...(options.env ? { env: options.env } : {}),
+      });
+    } else {
+      child = spawnPtyProcess(options.oBinaryPath, [options.runId, options.prompt], {
+        cwd: options.workspaceRoot,
+        ...(options.env ? { env: options.env } : {}),
+        ...(options.windowsBashPath ? { windowsBashPath: options.windowsBashPath } : {}),
+      });
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     if (process.platform === 'win32' && /error code:\s*193\b/i.test(message)) {
       throw new Error(
         `Failed to start \`o\` (${message}). The configured path (${options.oBinaryPath}) is not a Windows executable. ` +
-          `If you're pointing at the bash script from the \`o\` repo, install Git Bash and ensure \`bash\` is on PATH, or point Babysitter at \`o.exe\`/an \`o.cmd\` wrapper.`,
+          `If you're pointing at the bash script from the \`o\` repo, prefer WSL2 (recommended) or install Git Bash and configure Babysitter to use it, or point Babysitter at \`o.exe\`/an \`o.cmd\` wrapper.`,
       );
     }
     throw err;
@@ -349,7 +368,10 @@ export async function resumeExistingRunViaO(
         `stdout=${stdout.trim() ? '(captured)' : '(empty)'}`,
         `stderr=${stderr.trim() ? '(captured)' : '(empty)'}`,
       ].join(', ');
-      const err = new Error(`\`o\` exited while resuming ${options.runId} (${details}).`);
+      const hint = buildInvocationHelp(`${stdout}\n${stderr}`) ?? '';
+      const err = new Error(
+        `\`o\` exited while resuming ${options.runId} (${details}).` + (hint ? ` ${hint}` : ''),
+      );
       (err as { stdout?: string; stderr?: string }).stdout = stdout;
       (err as { stdout?: string; stderr?: string }).stderr = stderr;
       settled = true;

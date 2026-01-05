@@ -160,6 +160,7 @@ If you recently changed `PATH`, fully restart VS Code so the extension host pick
 - Windows:
   - WSL2 is recommended (the command will use `wsl.exe` + `bash`).
   - If WSL is unavailable, install Git Bash and set `babysitter.o.install.bashPath` to your `bash.exe` (or let Babysitter auto-detect it).
+  - Dispatch/resume will also prefer WSL automatically when `o` is a bash script on Windows; otherwise it uses Git Bash if configured/detected.
 - Security: the command is gated by a modal consent prompt because it executes a downloaded script.
 
 ### Configuration validation

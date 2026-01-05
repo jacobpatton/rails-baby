@@ -115,6 +115,38 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
     });
   };
 
+  const isLikelyWindowsNativeBinary = (filePath: string): boolean => {
+    const ext = path.extname(filePath).toLowerCase();
+    return ext === '.exe' || ext === '.com' || ext === '.cmd' || ext === '.bat';
+  };
+
+  let cachedWslAvailable: boolean | undefined;
+  const getWslAvailable = async (): Promise<boolean> => {
+    if (cachedWslAvailable === undefined) cachedWslAvailable = await isWslAvailable();
+    return cachedWslAvailable;
+  };
+
+  const resolveWindowsInvocationOptions = async (
+    folder: vscode.WorkspaceFolder,
+    oBinaryPath: string,
+  ): Promise<{ windowsRuntime?: 'wsl'; windowsBashPath?: string }> => {
+    if (process.platform !== 'win32') return {};
+    if (isLikelyWindowsNativeBinary(oBinaryPath)) return {};
+
+    if (await getWslAvailable()) {
+      return { windowsRuntime: 'wsl' };
+    }
+
+    const cfg = vscode.workspace.getConfiguration('babysitter', folder.uri);
+    const configuredBashPath = (cfg.get<string>('o.install.bashPath') ?? '').trim();
+    const detectedGitBashPath =
+      (configuredBashPath && fs.existsSync(configuredBashPath) ? configuredBashPath : '') ||
+      firstExistingPath(findGitBashCandidates());
+
+    if (!detectedGitBashPath) return {};
+    return { windowsBashPath: detectedGitBashPath };
+  };
+
   context.subscriptions.push(
     new vscode.Disposable(() => {
       // Do not kill running `o` processes on deactivation; just detach listeners.
@@ -225,7 +257,8 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
   const dispatchRunDisposable = vscode.commands.registerCommand(
     'babysitter.dispatchRun',
     async (arg?: unknown): Promise<unknown> => {
-      const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+      const workspaceRoot = workspaceFolder?.uri.fsPath;
       if (!workspaceRoot) {
         await vscode.window.showErrorMessage(
           'Babysitter: open a workspace folder to dispatch runs.',
@@ -274,11 +307,33 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
       output.appendLine(`Dispatching via \`o\`: ${result.config.oBinary.path}`);
 
       try {
+        const windowsInvocation = workspaceFolder
+          ? await resolveWindowsInvocationOptions(workspaceFolder, result.config.oBinary.path)
+          : {};
+        if (
+          process.platform === 'win32' &&
+          !isLikelyWindowsNativeBinary(result.config.oBinary.path) &&
+          !windowsInvocation.windowsRuntime &&
+          !windowsInvocation.windowsBashPath
+        ) {
+          await vscode.window.showErrorMessage(
+            'Babysitter: `o` appears to be a bash script on Windows, but neither WSL nor Git Bash was found. ' +
+              'Install WSL2 (recommended) or set `babysitter.o.install.bashPath` to your Git Bash `bash.exe`.',
+          );
+          throw new Error('No usable Bash runtime found for Windows `o` bash script.');
+        }
+
         const dispatched = await dispatchNewRunViaO({
           oBinaryPath: result.config.oBinary.path,
           workspaceRoot,
           runsRootPath: result.config.runsRoot.path,
           prompt,
+          ...(windowsInvocation.windowsRuntime
+            ? { windowsRuntime: windowsInvocation.windowsRuntime }
+            : {}),
+          ...(windowsInvocation.windowsBashPath
+            ? { windowsBashPath: windowsInvocation.windowsBashPath }
+            : {}),
           onProcess: (process) => {
             registerOProcess(process, 'o (dispatch)');
             output.appendLine(`Started interactive o process (pid ${process.pid}).`);
@@ -319,7 +374,8 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
   const resumeRunDisposable = vscode.commands.registerCommand(
     'babysitter.resumeRun',
     async (arg?: unknown): Promise<unknown> => {
-      const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+      const workspaceRoot = workspaceFolder?.uri.fsPath;
       if (!workspaceRoot) {
         await vscode.window.showErrorMessage('Babysitter: open a workspace folder to resume runs.');
         throw new Error('No workspace folder open.');
@@ -399,12 +455,34 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
       output.appendLine(`Resuming ${runId} via \`o\`: ${result.config.oBinary.path}`);
 
       try {
+        const windowsInvocation = workspaceFolder
+          ? await resolveWindowsInvocationOptions(workspaceFolder, result.config.oBinary.path)
+          : {};
+        if (
+          process.platform === 'win32' &&
+          !isLikelyWindowsNativeBinary(result.config.oBinary.path) &&
+          !windowsInvocation.windowsRuntime &&
+          !windowsInvocation.windowsBashPath
+        ) {
+          await vscode.window.showErrorMessage(
+            'Babysitter: `o` appears to be a bash script on Windows, but neither WSL nor Git Bash was found. ' +
+              'Install WSL2 (recommended) or set `babysitter.o.install.bashPath` to your Git Bash `bash.exe`.',
+          );
+          throw new Error('No usable Bash runtime found for Windows `o` bash script.');
+        }
+
         const resumed = await resumeExistingRunViaO({
           oBinaryPath: result.config.oBinary.path,
           workspaceRoot,
           runsRootPath: result.config.runsRoot.path,
           runId,
           prompt,
+          ...(windowsInvocation.windowsRuntime
+            ? { windowsRuntime: windowsInvocation.windowsRuntime }
+            : {}),
+          ...(windowsInvocation.windowsBashPath
+            ? { windowsBashPath: windowsInvocation.windowsBashPath }
+            : {}),
           onProcess: (process) => {
             registerOProcess(process, `o (resume ${runId})`);
             interactions.setRunIdForPid(process.pid, runId);
