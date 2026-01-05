@@ -147,6 +147,52 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
     return { windowsBashPath: detectedGitBashPath };
   };
 
+  const bashSingleQuote = (value: string): string => `'${value.replace(/'/g, `'"'"'`)}'`;
+
+  const listRunIds = (runsRootPath: string): string[] => {
+    try {
+      const dirents = fs.readdirSync(runsRootPath, { withFileTypes: true });
+      return dirents
+        .filter((d) => d.isDirectory() && isRunId(d.name))
+        .map((d) => d.name)
+        .sort((a, b) => b.localeCompare(a));
+    } catch {
+      return [];
+    }
+  };
+
+  const waitForNewRunId = async (params: {
+    runsRootPath: string;
+    baselineIds: Set<string>;
+    timeoutMs: number;
+  }): Promise<string | undefined> => {
+    const start = Date.now();
+    while (Date.now() - start < params.timeoutMs) {
+      const current = listRunIds(params.runsRootPath);
+      const found = current.find((id) => !params.baselineIds.has(id));
+      if (found) return found;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+    return undefined;
+  };
+
+  const openGitBashTerminalAndSend = (params: {
+    name: string;
+    bashPath: string;
+    workspaceRoot: string;
+    command: string;
+  }): vscode.Terminal => {
+    const terminal = vscode.window.createTerminal({
+      name: params.name,
+      shellPath: params.bashPath,
+      shellArgs: ['-l'],
+      cwd: params.workspaceRoot,
+    });
+    terminal.show(true);
+    terminal.sendText(params.command, true);
+    return terminal;
+  };
+
   context.subscriptions.push(
     new vscode.Disposable(() => {
       // Do not kill running `o` processes on deactivation; just detach listeners.
@@ -331,6 +377,45 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
           throw new Error('No usable Bash runtime found for Windows `o` bash script.');
         }
 
+        if (
+          process.platform === 'win32' &&
+          !isLikelyWindowsNativeBinary(result.config.oBinary.path) &&
+          !windowsInvocation.windowsRuntime &&
+          windowsInvocation.windowsBashPath
+        ) {
+          const baselineIds = new Set(listRunIds(result.config.runsRoot.path));
+          const bashCmd = [
+            'set -euo pipefail',
+            `cd \"$(cygpath -u ${bashSingleQuote(workspaceRoot)})\"`,
+            `\"$(cygpath -u ${bashSingleQuote(result.config.oBinary.path)})\" ${bashSingleQuote(prompt)}`,
+          ].join('; ');
+
+          openGitBashTerminalAndSend({
+            name: 'o (dispatch)',
+            bashPath: windowsInvocation.windowsBashPath,
+            workspaceRoot,
+            command: bashCmd,
+          });
+
+          const runId = await waitForNewRunId({
+            runsRootPath: result.config.runsRoot.path,
+            baselineIds,
+            timeoutMs: 120_000,
+          });
+          if (!runId) {
+            throw new Error(
+              'Timed out waiting for a new run directory to appear under runsRoot. ' +
+                'The `o` session is running in the terminal; check its output for errors.',
+            );
+          }
+
+          const runRootPath = path.join(result.config.runsRoot.path, runId);
+          output.appendLine(`Dispatched run (from terminal): ${runId}`);
+          output.appendLine(`Run root: ${runRootPath}`);
+          runsTreeView.refresh();
+          return { runId, runRootPath, stdout: '', stderr: '' };
+        }
+
         const dispatched = await dispatchNewRunViaO({
           oBinaryPath: result.config.oBinary.path,
           workspaceRoot,
@@ -485,6 +570,32 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
               'Install WSL2 (recommended) or set `babysitter.o.install.bashPath` to your Git Bash `bash.exe`.',
           );
           throw new Error('No usable Bash runtime found for Windows `o` bash script.');
+        }
+
+        if (
+          process.platform === 'win32' &&
+          !isLikelyWindowsNativeBinary(result.config.oBinary.path) &&
+          !windowsInvocation.windowsRuntime &&
+          windowsInvocation.windowsBashPath
+        ) {
+          const bashCmd = [
+            'set -euo pipefail',
+            `cd \"$(cygpath -u ${bashSingleQuote(workspaceRoot)})\"`,
+            `\"$(cygpath -u ${bashSingleQuote(result.config.oBinary.path)})\" ${bashSingleQuote(runId)} ${bashSingleQuote(prompt)}`,
+          ].join('; ');
+
+          openGitBashTerminalAndSend({
+            name: `o (resume ${runId})`,
+            bashPath: windowsInvocation.windowsBashPath,
+            workspaceRoot,
+            command: bashCmd,
+          });
+
+          const runRootPath = path.join(result.config.runsRoot.path, runId);
+          output.appendLine(`Resuming run in terminal: ${runId}`);
+          output.appendLine(`Run root: ${runRootPath}`);
+          runsTreeView.refresh();
+          return { runId, runRootPath, stdout: '', stderr: '' };
         }
 
         const resumed = await resumeExistingRunViaO({
