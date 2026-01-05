@@ -32,6 +32,7 @@
     "onCommand:babysitter.sendEsc",
     "onCommand:babysitter.sendEnter",
     "onCommand:babysitter.locateOBinary",
+    "onCommand:babysitter.installOInWorkspace",
     "onCommand:babysitter.showConfigurationErrors",
     "onCommand:babysitter.openPromptBuilder",
     "onCommand:babysitter.openRunDetails",
@@ -64,6 +65,10 @@
       {
         "command": "babysitter.locateOBinary",
         "title": "Babysitter: Locate `o` Binary"
+      },
+      {
+        "command": "babysitter.installOInWorkspace",
+        "title": "Babysitter: Install/Update `o` in Workspace"
       },
       {
         "command": "babysitter.showConfigurationErrors",
@@ -193,6 +198,11 @@
           "type": "string",
           "default": "",
           "description": "Optional path to a JSON global config file. Supported keys: `oBinaryPath`, `runsRoot`."
+        },
+        "babysitter.o.install.bashPath": {
+          "type": "string",
+          "default": "",
+          "description": "Windows only: optional full path to a Bash executable (e.g. Git Bash `bash.exe`) for running the upstream `o` installer when WSL is unavailable."
         }
       }
     }

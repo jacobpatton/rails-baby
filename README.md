@@ -41,6 +41,7 @@ See `CHANGELOG.md`.
   - `Babysitter: Send ESC to \`o\``
   - `Babysitter: Send Enter to \`o\``
   - `Babysitter: Locate \`o\` Binary`
+  - `Babysitter: Install/Update \`o\` in Workspace`
   - `Babysitter: Show Configuration Errors`
   - `Babysitter: Open Run Details`
   - `Babysitter: Open Run Logs`
@@ -142,9 +143,24 @@ Babysitter expects `o` to be either:
 - Available on `PATH`, or
 - Configured explicitly via VS Code setting `babysitter.o.binaryPath` (or legacy `babysitter.oPath`)
 
+If you want Babysitter to install/update `o` into a workspace folder, use `Babysitter: Install/Update \`o\` in Workspace`.
+
 Use `Babysitter: Locate \`o\` Binary` to see what Babysitter is resolving and where it was found.
 
 If you recently changed `PATH`, fully restart VS Code so the extension host picks up the updated environment.
+
+### Installing/updating `o` in a workspace
+
+`Babysitter: Install/Update \`o\` in Workspace` downloads and runs the upstream `o` installer (`curl | bash`) and installs into the selected workspace folder.
+
+- It creates/updates `<workspaceRoot>/o` and `<workspaceRoot>/.a5c/*` (and may edit `<workspaceRoot>/.gitignore` unless you select `--no-gitignore`).
+- To update later, rerun the command.
+  - Select `--force` to overwrite existing files.
+  - Select `--no-gitignore` to avoid managed `.gitignore` edits.
+- Windows:
+  - WSL2 is recommended (the command will use `wsl.exe` + `bash`).
+  - If WSL is unavailable, install Git Bash and set `babysitter.o.install.bashPath` to your `bash.exe` (or let Babysitter auto-detect it).
+- Security: the command is gated by a modal consent prompt because it executes a downloaded script.
 
 ### Configuration validation
 

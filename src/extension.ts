@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 
 import {
   resolveBabysitterConfig,
@@ -6,6 +8,14 @@ import {
   type ConfigIssue,
 } from './core/config';
 import { dispatchNewRunViaO, resumeExistingRunViaO } from './core/oDispatch';
+import {
+  findGitBashCandidates,
+  firstExistingPath,
+  isWslAvailable,
+  runOInstaller,
+  type OInstallOptions,
+  type WindowsInstallerRuntime,
+} from './core/oInstaller';
 import type { PtyProcess } from './core/ptyProcess';
 import { OProcessInteractionTracker } from './core/oProcessInteraction';
 import { isRunId } from './core/runId';
@@ -565,6 +575,165 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
     },
   );
 
+  const installOInWorkspaceDisposable = vscode.commands.registerCommand(
+    'babysitter.installOInWorkspace',
+    async () => {
+      const folder = await vscode.window.showWorkspaceFolderPick({
+        placeHolder: 'Select a workspace folder to install/update `o` into',
+      });
+      if (!folder) {
+        await vscode.window.showErrorMessage(
+          'Babysitter: open a workspace folder to install/update `o`.',
+        );
+        return;
+      }
+      const workspaceRoot = folder.uri.fsPath;
+
+      const consent = await vscode.window.showWarningMessage(
+        'Babysitter will download and run the upstream `o` installer (curl | bash) and modify files in this workspace (./o, ./.a5c/*, and possibly ./.gitignore).',
+        { modal: true },
+        'Continue',
+      );
+      if (consent !== 'Continue') return;
+
+      const hasExistingO =
+        fs.existsSync(path.join(workspaceRoot, 'o')) ||
+        fs.existsSync(path.join(workspaceRoot, '.a5c', 'o.md')) ||
+        fs.existsSync(path.join(workspaceRoot, '.a5c', 'functions')) ||
+        fs.existsSync(path.join(workspaceRoot, '.a5c', 'processes'));
+
+      const forceOptionLabel = 'Overwrite existing files';
+      const noGitignoreOptionLabel = 'Do not modify .gitignore';
+      const picked = await vscode.window.showQuickPick(
+        [
+          {
+            label: forceOptionLabel,
+            description: '--force',
+            picked: hasExistingO,
+          },
+          {
+            label: noGitignoreOptionLabel,
+            description: '--no-gitignore',
+            picked: false,
+          },
+        ],
+        {
+          canPickMany: true,
+          title: 'Babysitter: Install/Update `o` options',
+        },
+      );
+      if (!picked) return;
+
+      const options: OInstallOptions = {
+        force: picked.some((p) => p.label === forceOptionLabel),
+        noGitignore: picked.some((p) => p.label === noGitignoreOptionLabel),
+      };
+
+      let windowsRuntime: WindowsInstallerRuntime | undefined;
+      if (process.platform === 'win32') {
+        const wslAvailable = await isWslAvailable();
+        const cfg = vscode.workspace.getConfiguration('babysitter', folder.uri);
+        const configuredBashPath = (cfg.get<string>('o.install.bashPath') ?? '').trim();
+        const detectedGitBashPath =
+          (configuredBashPath && fs.existsSync(configuredBashPath) ? configuredBashPath : '') ||
+          firstExistingPath(findGitBashCandidates());
+
+        const runtimeChoices: Array<{
+          label: string;
+          description: string;
+          runtime: WindowsInstallerRuntime;
+        }> = [];
+        if (wslAvailable) {
+          runtimeChoices.push({
+            label: 'WSL (recommended)',
+            description: 'Uses wsl.exe + bash',
+            runtime: { kind: 'wsl' },
+          });
+        }
+        if (detectedGitBashPath) {
+          runtimeChoices.push({
+            label: 'Git Bash',
+            description: detectedGitBashPath,
+            runtime: { kind: 'git-bash', bashPath: detectedGitBashPath },
+          });
+        }
+
+        if (runtimeChoices.length === 0) {
+          const openSettings = 'Open Settings';
+          const choice = await vscode.window.showErrorMessage(
+            'Babysitter: cannot install `o` on Windows without WSL or Git Bash. Install WSL2 (recommended) or set `babysitter.o.install.bashPath` to your Git Bash `bash.exe`.',
+            openSettings,
+          );
+          if (choice === openSettings) {
+            await vscode.commands.executeCommand(
+              'workbench.action.openSettings',
+              'babysitter.o.install.bashPath',
+            );
+          }
+          return;
+        }
+
+        if (runtimeChoices.length === 1) {
+          windowsRuntime = runtimeChoices[0]?.runtime;
+        } else {
+          const selected = await vscode.window.showQuickPick(runtimeChoices, {
+            title: 'Babysitter: Choose a Bash runtime for installing `o`',
+          });
+          if (!selected) return;
+          windowsRuntime = selected.runtime;
+        }
+      }
+
+      output.show(true);
+      output.appendLine(`Installing/updating \`o\` into: ${workspaceRoot}`);
+      output.appendLine(
+        `Installer flags: ${options.force ? '--force' : '(no --force)'} ${options.noGitignore ? '--no-gitignore' : '(gitignore managed)'}`,
+      );
+      if (process.platform === 'win32') {
+        const runtimeLabel =
+          windowsRuntime?.kind === 'wsl'
+            ? 'WSL'
+            : windowsRuntime?.kind === 'git-bash'
+              ? `Git Bash (${windowsRuntime.bashPath})`
+              : '(unknown)';
+        output.appendLine(`Windows runtime: ${runtimeLabel}`);
+      }
+
+      try {
+        await vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: 'Babysitter: Installing/updating `o` in workspace...',
+            cancellable: false,
+          },
+          async () => {
+            const installerParams: Parameters<typeof runOInstaller>[0] = {
+              workspaceRoot,
+              options,
+              platform: process.platform,
+              onOutput: (line) => output.appendLine(line),
+            };
+            if (windowsRuntime) installerParams.windowsRuntime = windowsRuntime;
+            await runOInstaller(installerParams);
+          },
+        );
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        output.appendLine(`Babysitter: install/update failed: ${message}`);
+        await vscode.window.showErrorMessage(
+          'Babysitter: failed to install/update `o`. See Output > Babysitter for details.',
+        );
+        return;
+      }
+
+      output.appendLine('Babysitter: install/update completed.');
+      await vscode.window.showInformationMessage(
+        'Babysitter: `o` installed/updated in workspace root.',
+      );
+      void refreshConfig(false);
+    },
+  );
+
   void refreshConfig(true);
 
   context.subscriptions.push(
@@ -578,6 +747,7 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
     sendEnterDisposable,
     showConfigErrorsDisposable,
     locateOBinaryDisposable,
+    installOInWorkspaceDisposable,
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration('babysitter')) void refreshConfig(false);
     }),
