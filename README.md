@@ -1,56 +1,114 @@
-# babysitter ide
+# Babysitter (VS Code Extension)
 
-Babysitter is a VS Code extension for orchestrating and monitoring `o` runs.
+Babysitter is a VS Code extension for orchestrating and monitoring **`o` runs** from inside your editor.
 
-## Install
+It adds a **Babysitter Runs** view (Explorer sidebar), plus commands and webviews to:
 
-This repository is the extension source. To install a built VSIX:
+- Dispatch new runs via `o`
+- Monitor run state/events (`state.json`, `journal.jsonl`)
+- Browse artifacts (`run/artifacts/`) and work summaries (`run/work_summaries/`)
+- Resume existing runs
+- Respond when `o` is awaiting input (send text / Enter / Esc)
+- Build prompts from `.a5c/processes/**` via a dedicated Prompt Builder UI
 
-- Reproducible build + package: `npm ci && npm run package`
-- Install the VSIX:
-  - VS Code: Extensions view -> `...` -> **Install from VSIX...**
-  - Or: `code --install-extension babysitter-*.vsix`
+## Requirements
 
-## Develop
+- VS Code: `^1.90.0`
+- An `o` binary available via one of:
+  - `<workspaceRoot>/o` (this repo includes an `o` file at `./o`), or
+  - `PATH`, or
+  - `babysitter.o.binaryPath`
 
-- Install deps: `npm install`
-- Build once: `npm run build`
-- Watch (recommended while iterating): `npm run watch`
-- Lint/format: `npm run lint` / `npm run format`
-- Tests:
-  - All: `npm test`
-  - Headless (CI-friendly): `npm run test:ci`
+Windows notes:
 
-## CI
+- WSL2 is recommended.
+- If WSL isn't available, install Git Bash and set `babysitter.o.install.bashPath` to the full path of `bash.exe`.
 
-On pull requests, GitHub Actions runs lint, unit tests, and extension tests, and also packages a VSIX for download/verification. See the workflow run artifacts: `test-logs` and `vsix`.
+## Installation
 
-## Release notes
+### Option A: Install from a VSIX (recommended for this repo)
 
-See `CHANGELOG.md`.
+If you already have a VSIX (this repo includes `babysitter-*.vsix` files at the root):
 
-## Run (extension)
+- VS Code UI: Extensions view → `...` → **Install from VSIX...**
+- CLI:
 
-- Open this repo in VS Code
-- Start the extension host: press `F5`
-- Command Palette:
-  - `Babysitter: Activate (Log Output)`
-  - `Babysitter: Dispatch Run`
-  - `Babysitter: Prompt Builder`
-  - `Babysitter: Resume Run`
-  - `Babysitter: Send ESC to \`o\``
-  - `Babysitter: Send Enter to \`o\``
-  - `Babysitter: Locate \`o\` Binary`
-  - `Babysitter: Install/Update \`o\` in Workspace`
-  - `Babysitter: Show Configuration Errors`
-  - `Babysitter: Open Run Details`
-  - `Babysitter: Open Run Logs`
-  - `Babysitter: Reveal Run Folder in Explorer`
-  - `Babysitter: Refresh Runs`
+```bash
+code --install-extension babysitter-*.vsix
+```
+
+### Option B: Build and package a VSIX
+
+```bash
+npm ci
+npm run package
+code --install-extension babysitter-*.vsix
+```
+
+Notes:
+
+- Packaging uses `vsce` (`npm run package`).
+- If you change `PATH` (for `o`), fully restart VS Code so the extension host inherits the environment.
+
+## Quickstart
+
+1. Open a workspace that has (or will have) `.a5c/runs`.
+2. Run **Command Palette** → `Babysitter: Activate (Log Output)`.
+3. Confirm the **Output** panel has a `Babysitter` channel.
+4. Run **Command Palette** → `Babysitter: Dispatch Run`.
+5. Watch progress in:
+   - **Explorer** → **Babysitter Runs**
+   - `Babysitter: Open Run Details`
+   - `Babysitter: Open Run Logs`
+
+## Core Concepts
+
+### Runs and run folders
+
+By default Babysitter discovers runs by scanning the runs root (default: `.a5c/runs`) for folders named like:
+
+- `run-YYYYMMDD-HHMMSS`
+
+Within a run folder, Babysitter commonly reads:
+
+- `state.json` (current state)
+- `journal.jsonl` (append-only event stream)
+- `run/work_summaries/` (generated summaries)
+- `run/artifacts/` (artifacts to browse/open)
+
+## Features
+
+- **Runs Tree View** in Explorer with live refresh and context actions
+- **Run Details** webview: metadata, state, journal tail, summaries, artifacts
+- **Run Logs** webview: tails `journal.jsonl` and live `o` output when available
+- **Dispatch / Resume** flows integrated with `o`
+- **Awaiting Input** support (send text, Enter, Esc) via PTY
+- **Prompt Builder** that scans `.a5c/processes/**/*.js` and helps generate prompts
+- Resilient parsing for partial writes (e.g., a `journal.jsonl` line being written)
+
+## Commands
+
+| Title | Command ID |
+| --- | --- |
+| Babysitter: Activate (Log Output) | `babysitter.activate` |
+| Babysitter: Dispatch Run | `babysitter.dispatchRun` |
+| Babysitter: Resume Run | `babysitter.resumeRun` |
+| Babysitter: Send ESC to `o` | `babysitter.sendEsc` |
+| Babysitter: Send Enter to `o` | `babysitter.sendEnter` |
+| Babysitter: Locate `o` Binary | `babysitter.locateOBinary` |
+| Babysitter: Install/Update `o` in Workspace | `babysitter.installOInWorkspace` |
+| Babysitter: Show Configuration Errors | `babysitter.showConfigurationErrors` |
+| Babysitter: Prompt Builder | `babysitter.openPromptBuilder` |
+| Babysitter: Open Run Details | `babysitter.openRunDetails` |
+| Babysitter: Open Run Logs | `babysitter.openRunLogs` |
+| Babysitter: Reveal Run Folder in Explorer | `babysitter.revealRunFolder` |
+| Babysitter: Refresh Runs | `babysitter.runs.refresh` |
+| Babysitter: Archive Run | `babysitter.archiveRun` |
+| Babysitter: Mark Run Completed | `babysitter.markRunComplete` |
 
 ## Keyboard shortcuts
 
-Babysitter ships a small set of chorded shortcuts (press the first combo, then the second key):
+Babysitter ships chorded shortcuts (press the first combo, then the second key):
 
 - `Ctrl+Alt+B`, then `P`: Prompt Builder
 - `Ctrl+Alt+B`, then `N`: Dispatch Run
@@ -63,112 +121,151 @@ Babysitter ships a small set of chorded shortcuts (press the first combo, then t
 
 Inside webviews:
 
-- Prompt Builder: `Ctrl+Enter` dispatch, `Ctrl+Shift+Enter` insert, `Ctrl+F` focus search, `Ctrl+L` focus request
-- Run Details (when awaiting input): `Ctrl+R` refresh, `Ctrl+Enter` send response, `Enter` send Enter, `Esc` send ESC, `/` focus input
+- Prompt Builder: `Ctrl+Enter` dispatch, `Ctrl+Shift+Enter` insert, `Ctrl+F` search, `Ctrl+L` focus request
+- Run Details (awaiting input): `Ctrl+R` refresh, `Ctrl+Enter` send response, `Enter` send Enter, `Esc` send ESC, `/` focus input
 - Run Logs: `Ctrl+F` focus filter, `Ctrl+L` clear active source, `Esc` clears filter
 
-## Runs View
+## Configuration
 
-Babysitter adds a **Babysitter Runs** TreeView in the Explorer sidebar showing discovered runs and their current status.
+Settings are under the `babysitter` namespace.
 
-- Click a run (or run `Babysitter: Open Run Details`) to open a Run Details webview with:
-  - Key run metadata + current `state.json`
+| Setting | Type | Default | Description |
+| --- | --- | --- | --- |
+| `babysitter.o.binaryPath` | `string` | `""` | Optional full path to `o` (or directory containing it). If empty, looks in workspace root, then `PATH`. |
+| `babysitter.oPath` | `string` | `""` | Legacy alias for `babysitter.o.binaryPath`. |
+| `babysitter.runsRoot` | `string` | `.a5c/runs` | Runs root directory (relative paths resolve from workspace root). |
+| `babysitter.globalConfigPath` | `string` | `""` | Optional path to a JSON config file. Supported keys: `oBinaryPath`, `runsRoot`. |
+| `babysitter.o.install.bashPath` | `string` | `""` | Windows only: path to `bash.exe` (Git Bash) for installing `o` when WSL isn't available. |
+
+Example `settings.json`:
+
+```jsonc
+{
+  "babysitter.runsRoot": ".a5c/runs",
+  "babysitter.o.binaryPath": "./o"
+}
+```
+
+Global config file example (point `babysitter.globalConfigPath` at this file):
+
+```json
+{
+  "oBinaryPath": "C:/tools/o/o.exe",
+  "runsRoot": ".a5c/runs"
+}
+```
+
+## Usage Guide
+
+### Runs View
+
+Babysitter adds a **Babysitter Runs** TreeView in the Explorer sidebar.
+
+- Click a run to open **Run Details**:
+  - Key run metadata + parsed `state.json`
   - Latest `journal.jsonl` events
-  - Work summaries (`run/work_summaries/`) with preview + open-in-editor
-  - Artifacts browser (`run/artifacts/`) with reveal + open-in-editor
-- Open streaming output/logs for a run: `Babysitter: Open Run Logs` (tails `journal.jsonl` and live `o` output when available).
-- Right-click a run to reveal its run folder in Explorer/Finder.
-
-## Flows
-
-Babysitter is designed around these primary user flows (per `requirements.md`):
+  - Work summaries (`run/work_summaries/`) with preview + open
+  - Artifacts browser (`run/artifacts/`) with reveal + open
+- Open streaming output/logs: `Babysitter: Open Run Logs`
+- Context menu: resume, reveal folder, archive, mark completed
 
 ### Dispatch
 
-- Create a new run by dispatching an `o` request.
-- Use `Babysitter: Dispatch Run` to invoke `o` with your request prompt.
-- For a guided prompt UI that scans `.a5c/processes/` (and supports file drag/drop), use `Babysitter: Prompt Builder`.
+- `Babysitter: Dispatch Run` invokes `o` with your request prompt.
+- For a guided UI, use `Babysitter: Prompt Builder`.
 
 ### Monitor
 
-- Follow a run by inspecting its run directory, including `journal.jsonl`, `state.json`, and artifacts under `run/artifacts/`.
-- Run views auto-refresh on changes to `state.json`, `journal.jsonl`, and `run/artifacts/**` (debounced).
-- Parsers are resilient to partial writes (e.g. `journal.jsonl` line currently being written).
-- Runs are discovered by scanning the runs root (default `.a5c/runs`) for directories named like `run-YYYYMMDD-HHMMSS`.
-- View task stdout and work summaries as the run progresses.
+- Views auto-refresh on changes to `state.json`, `journal.jsonl`, and `run/artifacts/**` (debounced).
 
 ### Resume
 
-- Resume an existing run by re-dispatching using the run id and the updated request/prompt.
-- Use `Babysitter: Resume Run` to select a run and enter an updated request, then Babysitter invokes `o` with `[runId, prompt]`.
-- Continue monitoring from the same run directory and journal stream.
+- `Babysitter: Resume Run` selects a run and prompts for an updated request.
 
-### Pause
+### Pause / Awaiting input
 
-- When `o` is awaiting input (breakpoints/prompts), the Run Details view shows an **Awaiting Input** card with:
-  - A text box to send a response/steering instruction
-  - Buttons to send `Enter` / `ESC`
-- You can also send raw keys from the Command Palette:
-  - `Babysitter: Send ESC to \`o\``
-  - `Babysitter: Send Enter to \`o\``
+When `o` is awaiting input (breakpoints/prompts), Run Details shows an **Awaiting Input** card where you can:
 
-Note: Babysitter runs `o` under a pseudo-terminal so interactive key presses work reliably. Output is captured as a single stream (stdout/stderr are not separated when attached to a PTY).
+- Send a response/steering instruction
+- Send `Enter` / `Esc`
 
-## Prompt Builder / Process Catalog
+Babysitter runs `o` under a pseudo-terminal so interactive key presses work reliably.
+
+### Prompt Builder / Process Catalog
 
 `Babysitter: Prompt Builder` scans `.a5c/processes/**/*.js` and builds an in-memory catalog of exported process functions.
 
-- Schema: `src/core/processCatalog.ts` (`ProcessCatalog` -> `ProcessExport` -> `ProcessParam`)
-- Extraction: parse JS with the TypeScript AST to find exported functions/arrow functions, infer parameter names/defaults/rest, and (best-effort) return-object keys; classify kinds from paths (core/loop/role/recipe/aspect/domain/shared).
-- File drag/drop: drag files from the VS Code Explorer into the **Files** drop zone to include them in the generated prompt (workspace files become workspace-relative paths; external files stay as `file://` links).
-- Persistence: the Prompt Builder remembers your last selected process, args, request, and files per-workspace.
-
-## Manual QA checklist
-
-- Configuration: verify status bar shows Ready, and `Babysitter: Locate o Binary` finds `o`
-- Runs Tree: verify empty state and Refresh Runs behavior
-- Dispatch: dispatch a run and confirm it appears in the Runs view
-- Prompt Builder: scan processes, select process, generate prompt, drag/drop file link, dispatch
-- Run Details: open a run, verify loading/error state, work summary preview, artifacts open/reveal
-- Awaiting Input: verify Awaiting Input card shows, send response, send Enter/ESC, and keyboard shortcuts work
-- Run Logs: open logs, switch sources, filter, follow, copy/clear
+- Schema: `src/core/processCatalog.ts`
+- Extraction: parses JS with the TypeScript AST to find exported functions/arrow functions, infer parameters/defaults/rest, and best-effort return-object keys; classifies kinds based on file paths.
+- File drag/drop: drag files from the VS Code Explorer into the **Files** drop zone to include them in the prompt.
+- Persistence: remembers last selected process, args, request, and files per workspace.
 
 ## Troubleshooting
 
 ### Babysitter can't find the `o` binary
 
-Babysitter expects `o` to be either:
+Babysitter resolves `o` in this order:
 
-- In the workspace root (this repo includes an `o` binary at `./o`), or
-- Available on `PATH`, or
-- Configured explicitly via VS Code setting `babysitter.o.binaryPath` (or legacy `babysitter.oPath`)
+1. Workspace root (`<workspaceRoot>/o`)
+2. `PATH`
+3. `babysitter.o.binaryPath` (or legacy `babysitter.oPath`)
 
-If you want Babysitter to install/update `o` into a workspace folder, use `Babysitter: Install/Update \`o\` in Workspace`.
+Use:
 
-Use `Babysitter: Locate \`o\` Binary` to see what Babysitter is resolving and where it was found.
+- `Babysitter: Locate \`o\` Binary` to see what is being resolved
+- `Babysitter: Show Configuration Errors` to see config validation output
 
-If you recently changed `PATH`, fully restart VS Code so the extension host picks up the updated environment.
+If you changed `PATH`, fully restart VS Code.
 
 ### Installing/updating `o` in a workspace
 
-`Babysitter: Install/Update \`o\` in Workspace` downloads and runs the upstream `o` installer (`curl | bash`) and installs into the selected workspace folder.
+`Babysitter: Install/Update \`o\` in Workspace` downloads and runs the upstream `o` installer (`curl | bash`) and installs into a selected workspace folder.
 
-- It creates/updates `<workspaceRoot>/o` and `<workspaceRoot>/.a5c/*` (and may edit `<workspaceRoot>/.gitignore` unless you select `--no-gitignore`).
-- To update later, rerun the command.
-  - Select `--force` to overwrite existing files.
-  - Select `--no-gitignore` to avoid managed `.gitignore` edits.
-- Windows:
-  - WSL2 is recommended (the command will use `wsl.exe` + `bash`).
-  - If WSL is unavailable, install Git Bash and set `babysitter.o.install.bashPath` to your `bash.exe` (or let Babysitter auto-detect it).
-  - Dispatch/resume will also prefer WSL automatically when `o` is a bash script on Windows; otherwise it uses Git Bash if configured/detected.
-- Security: the command is gated by a modal consent prompt because it executes a downloaded script.
+- Creates/updates `<workspaceRoot>/o` and `<workspaceRoot>/.a5c/*`
+- May edit `<workspaceRoot>/.gitignore` unless you select `--no-gitignore`
+- On Windows:
+  - Prefers WSL automatically when available
+  - Falls back to Git Bash if configured/detected
 
-### Configuration validation
+Security note: this command is gated by a modal consent prompt because it executes a downloaded script.
 
-Babysitter validates its configuration on activation and shows a status bar indicator when something is wrong.
+### Where to find logs
 
-- View details: `Babysitter: Show Configuration Errors`
-- Settings:
-  - `babysitter.o.binaryPath`: path to the `o` executable (or a directory containing it)
-  - `babysitter.runsRoot`: runs root (default `.a5c/runs`, relative to the workspace root)
-  - `babysitter.globalConfigPath`: optional JSON config file with keys `oBinaryPath` and `runsRoot`
+- VS Code: **View → Output** → select `Babysitter`
+- If extension tests fail in CI, see workflow artifacts: `test-logs` and `vsix`
+
+## Development
+
+### Prerequisites
+
+- Node.js 20+ (CI uses Node 20)
+- npm
+
+### Common tasks
+
+```bash
+npm install
+npm run build
+npm run watch
+npm run lint
+npm run format
+npm test
+npm run test:ci
+npm run package
+```
+
+### Debug the extension
+
+- Open this repo in VS Code
+- Press `F5` to start an **Extension Development Host**
+- Use the Command Palette commands listed above
+
+Tip: for a predictable demo workspace, you can open `src/test/fixtures/workspace` in the Extension Development Host (it includes a minimal `.a5c/runs` fixture).
+
+## Release notes
+
+See `CHANGELOG.md`.
+
+## License
+
+`UNLICENSED` (see `LICENSE.txt`).
