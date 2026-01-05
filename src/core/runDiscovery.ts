@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import type { Run, RunPaths, RunStatus } from './run';
+import type { Run, RunPaths } from './run';
 import { isRunId } from './runId';
 import { readStateJsonFile } from './stateJson';
 
@@ -11,10 +11,6 @@ function isExistingDirectory(dirPath: string): boolean {
   } catch {
     return false;
   }
-}
-
-function readRunStatusFromStateJson(stateJsonPath: string): RunStatus {
-  return readStateJsonFile(stateJsonPath).status;
 }
 
 function statMtimeMs(filePath: string): number | undefined {
@@ -49,14 +45,14 @@ export function discoverRuns(runsRootPath: string): Run[] {
     return [];
   }
 
-  const runIds = dirents
+  const runs: Run[] = [];
+
+  const runDirs = dirents
     .filter((d) => d.isDirectory() && isRunId(d.name))
     .map((d) => d.name)
     .sort((a, b) => b.localeCompare(a));
 
-  const runs: Run[] = [];
-
-  for (const id of runIds) {
+  for (const id of runDirs) {
     const runRoot = path.join(runsRootPath, id);
     let runDirStat: fs.Stats;
     try {
@@ -67,7 +63,9 @@ export function discoverRuns(runsRootPath: string): Run[] {
     }
 
     const paths = buildRunPaths(runRoot);
-    const status = readRunStatusFromStateJson(paths.stateJson);
+    const stateResult = readStateJsonFile(paths.stateJson);
+    if (stateResult.issues.some((i) => i.code === 'STATE_NOT_FOUND')) continue;
+    const status = stateResult.status;
 
     const updatedAtCandidates: number[] = [runDirStat.mtimeMs];
     const stateMtime = statMtimeMs(paths.stateJson);

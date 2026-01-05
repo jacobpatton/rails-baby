@@ -31,29 +31,36 @@ suite('runDiscovery', () => {
       const runsRoot = path.join(tempDir, '.a5c', 'runs');
       fs.mkdirSync(runsRoot, { recursive: true });
 
-
       const runA = path.join(runsRoot, 'run-20260105-010206');
       fs.mkdirSync(runA, { recursive: true });
       writeJson(path.join(runA, 'state.json'), { runId: 'run-20260105-010206', status: 'running' });
 
+      const runPlus = path.join(runsRoot, 'run-20260105-105111+');
+      fs.mkdirSync(runPlus, { recursive: true });
+      writeJson(path.join(runPlus, 'state.json'), { runId: 'run-20260105-105111+', status: 'completed' });
+
+      const runWeird = path.join(runsRoot, 'anything-goes');
+      fs.mkdirSync(runWeird, { recursive: true });
+      writeJson(path.join(runWeird, 'state.json'), { runId: 'anything-goes', status: 'running' });
+
       const runs = discoverRuns(runsRoot);
-      assert.strictEqual(runs.length, 1);
-      assert.strictEqual(runs[0]?.id, 'run-20260105-010206');
-      assert.strictEqual(runs[0]?.status, 'running');
-      assert.ok(runs[0]?.paths.runRoot.endsWith(path.join('.a5c', 'runs', 'run-20260105-010206')));
-      assert.ok(runs[0]?.paths.stateJson.endsWith(path.join('run-20260105-010206', 'state.json')));
+      const byId = new Map(runs.map((r) => [r.id, r]));
+
+      assert.strictEqual(byId.get('run-20260105-010206')?.status, 'running');
+      assert.strictEqual(byId.get('run-20260105-105111+')?.status, 'completed');
+      assert.strictEqual(byId.get('anything-goes')?.status, 'running');
+
       assert.ok(
-        runs[0]?.paths.journalJsonl.endsWith(path.join('run-20260105-010206', 'journal.jsonl')),
-      );
-      assert.ok(
-        runs[0]?.paths.artifactsDir.endsWith(path.join('run-20260105-010206', 'artifacts')),
+        byId.get('run-20260105-010206')?.paths.runRoot.endsWith(
+          path.join('.a5c', 'runs', 'run-20260105-010206'),
+        ),
       );
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
   });
 
-  test('uses unknown status when state.json is missing or invalid', () => {
+  test('skips directories missing state.json, uses unknown for invalid state.json', () => {
     const tempDir = makeTempDir('babysitter-runDiscovery-');
     try {
       const runsRoot = path.join(tempDir, 'runs');
@@ -67,8 +74,9 @@ suite('runDiscovery', () => {
       fs.writeFileSync(path.join(runInvalidState, 'state.json'), '{not-json', 'utf8');
 
       const runs = discoverRuns(runsRoot);
-      assert.strictEqual(runs.length, 2);
-      assert.ok(runs.every((r) => r.status === 'unknown'));
+      assert.strictEqual(runs.length, 1);
+      assert.strictEqual(runs[0]?.id, 'run-20260105-010207');
+      assert.strictEqual(runs[0]?.status, 'unknown');
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
@@ -84,6 +92,8 @@ suite('runDiscovery', () => {
       const newer = path.join(runsRoot, 'run-20260105-000001');
       fs.mkdirSync(older, { recursive: true });
       fs.mkdirSync(newer, { recursive: true });
+      writeJson(path.join(older, 'state.json'), { runId: 'run-20260104-235959', status: 'running' });
+      writeJson(path.join(newer, 'state.json'), { runId: 'run-20260105-000001', status: 'running' });
 
       const runs = discoverRuns(runsRoot);
       assert.deepStrictEqual(

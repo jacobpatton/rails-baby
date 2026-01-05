@@ -18,7 +18,7 @@ suite('runFileChanges', () => {
     const tempDir = makeTempDir('babysitter-runFileChanges-');
     try {
       const runsRoot = path.join(tempDir, 'runs');
-      const runId = 'run-20260105-010206';
+      const runId = 'run-20260105-010206+';
       const statePath = path.join(runsRoot, runId, 'state.json');
       const change = classifyRunFileChange({
         runsRootPath: runsRoot,
@@ -75,20 +75,25 @@ suite('runFileChanges', () => {
     }
   });
 
-  test('ignores paths outside runs root and non-run directories', () => {
+  test('ignores paths outside runs root and unrelated files', () => {
     const tempDir = makeTempDir('babysitter-runFileChanges-');
     try {
       const runsRoot = path.join(tempDir, 'runs');
       const runId = 'run-20260105-010206';
       const outside = path.join(tempDir, 'other', runId, 'state.json');
-      const notRun = path.join(runsRoot, 'not-a-run', 'state.json');
+      const rootFile = path.join(runsRoot, 'state.json');
+      const unrelated = path.join(runsRoot, runId, 'other.json');
 
       assert.strictEqual(
         classifyRunFileChange({ runsRootPath: runsRoot, fsPath: outside, type: 'change' }),
         undefined,
       );
       assert.strictEqual(
-        classifyRunFileChange({ runsRootPath: runsRoot, fsPath: notRun, type: 'change' }),
+        classifyRunFileChange({ runsRootPath: runsRoot, fsPath: rootFile, type: 'change' }),
+        undefined,
+      );
+      assert.strictEqual(
+        classifyRunFileChange({ runsRootPath: runsRoot, fsPath: unrelated, type: 'change' }),
         undefined,
       );
     } finally {
