@@ -2,13 +2,20 @@
 
 Babysitter is a VS Code extension for orchestrating and monitoring **`o` runs** from inside your editor.
 
+### Why Babysitter + `o`
+
+- **Quality-convergence loops inside VS Code** – every run follows the `act → score → breakpoint` loop from `o`, so you can watch iterations converge instead of hoping a single pass is “good enough”.
+- **Event-sourced audit trail** – Babysitter surfaces `.a5c/runs/<run_id>/` (inputs, `journal.jsonl`, `state.json`, prompts, work summaries) so you can rerun, review, or share the exact history.
+- **Repo-local orchestration for your favorite runner** – keep using `codex`, `claude-code`, `gemini`, or a custom CLI while Babysitter handles dispatch/resume, awaiting input, and artifact browsing.
+
 It adds a **Babysitter Runs** view (Explorer sidebar), plus commands and webviews to:
 
 - Dispatch new runs via `o`
 - Monitor run state/events (`state.json`, `journal.jsonl`)
 - Browse artifacts (`run/artifacts/`) and work summaries (`run/work_summaries/`)
-- Resume existing runs
+- Resume existing runs or replay them from any breakpoint
 - Respond when `o` is awaiting input (send text / Enter / Esc)
+- Highlight quality gates by showing latest `score()` feedback inline
 - Build prompts from `.a5c/processes/**` via a dedicated Prompt Builder UI
 
 ## Requirements
@@ -63,6 +70,8 @@ Notes:
 
 For a predictable walkthrough using the included fixture workspace, see `DEMO.md`.
 
+Need a deeper dive into `o` + Babysitter? Read [`USER_GUIDE.md`](./USER_GUIDE.md) for the quality-convergence model, event-sourced runs, and troubleshooting tips.
+
 ## Core Concepts
 
 ### Runs and run folders
@@ -77,6 +86,8 @@ Within a run folder, Babysitter commonly reads:
 - `journal.jsonl` (append-only event stream)
 - `run/work_summaries/` (generated summaries)
 - `run/artifacts/` (artifacts to browse/open)
+
+Babysitter hyperlinks these artifacts so you can replay the **quality-convergence loop** for any run: open `prompts/` to see what the agent was asked, inspect `work_summaries/` to read the response, and review `journal.jsonl` to understand when breakpoints or scope pivots happened.
 
 ## Features
 
