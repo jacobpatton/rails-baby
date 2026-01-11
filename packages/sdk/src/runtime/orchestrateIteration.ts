@@ -1,0 +1,215 @@
+import path from "path";
+import { pathToFileURL } from "url";
+import { appendEvent } from "../storage/journal";
+import { writeRunOutput } from "../storage/runFiles";
+import { createReplayEngine, type ReplayEngine } from "./replay/createReplayEngine";
+import { withProcessContext } from "./processContext";
+import {
+  EffectPendingError,
+  EffectRequestedError,
+  ParallelPendingError,
+  RunFailedError,
+} from "./exceptions";
+import { IterationResult, OrchestrateOptions, EffectAction, EffectSchedulerHints } from "./types";
+import { serializeUnknownError } from "./errorUtils";
+import { emitRuntimeMetric } from "./instrumentation";
+
+type ProcessFunction = (inputs: unknown, ctx: any, extra?: unknown) => unknown | Promise<unknown>;
+
+export async function orchestrateIteration(options: OrchestrateOptions): Promise<IterationResult> {
+  const iterationStartedAt = Date.now();
+  const nowFn = resolveNow(options.now);
+  const engine = await initializeReplayEngine(options, nowFn, iterationStartedAt);
+  const defaultEntrypoint = {
+    importPath: engine.metadata.entrypoint?.importPath ?? engine.metadata.processPath,
+    exportName: engine.metadata.entrypoint?.exportName,
+  };
+  const processFn = await loadProcessFunction(options, defaultEntrypoint, options.runDir);
+  const inputs = options.inputs ?? engine.inputs;
+  let finalStatus: IterationResult["status"] = "failed";
+  const logger = engine.internalContext.logger ?? options.logger;
+
+  try {
+    const output = await withProcessContext(engine.internalContext, () =>
+      processFn(inputs, engine.context, options.context)
+    );
+    const outputRef = await writeRunOutput(options.runDir, output);
+    await appendEvent({
+      runDir: options.runDir,
+      eventType: "RUN_COMPLETED",
+      event: {
+        outputRef,
+      },
+    });
+    const result: IterationResult = { status: "completed", output };
+    finalStatus = result.status;
+    return result;
+  } catch (error) {
+    const waiting = asWaitingResult(error);
+    if (waiting) {
+      finalStatus = waiting.status;
+      return {
+        status: "waiting",
+        nextActions: annotateWaitingActions(waiting.nextActions),
+      };
+    }
+    const failure = serializeUnknownError(error);
+    await appendEvent({
+      runDir: options.runDir,
+      eventType: "RUN_FAILED",
+      event: { error: failure },
+    });
+    const result: IterationResult = { status: "failed", error: failure };
+    finalStatus = result.status;
+    return result;
+  } finally {
+    emitRuntimeMetric(logger, "replay.iteration", {
+      duration_ms: Date.now() - iterationStartedAt,
+      status: finalStatus,
+      runId: engine.runId,
+      stepCount: engine.replayCursor.value,
+    });
+  }
+}
+
+interface EntrypointDefaults {
+  importPath?: string;
+  exportName?: string;
+}
+
+async function loadProcessFunction(
+  options: OrchestrateOptions,
+  defaults: EntrypointDefaults,
+  runDir: string
+): Promise<ProcessFunction> {
+  const importPath = options.process?.importPath ?? defaults.importPath;
+  if (!importPath) {
+    throw new RunFailedError("Process import path is missing");
+  }
+  const exportName = options.process?.exportName ?? defaults.exportName ?? "process";
+  const resolvedPath = path.isAbsolute(importPath) ? importPath : path.resolve(runDir, importPath);
+  const moduleUrl = pathToFileURL(resolvedPath).href;
+  let mod: Record<string, unknown>;
+  try {
+    mod = await import(moduleUrl);
+  } catch (error) {
+    throw new RunFailedError(`Failed to load process module at ${resolvedPath}`, {
+      error: serializeUnknownError(error),
+    });
+  }
+
+  const candidate =
+    (exportName && mod[exportName]) ??
+    (!exportName && mod.default) ??
+    mod.process ??
+    mod.default;
+
+  if (typeof candidate !== "function") {
+    throw new RunFailedError(`Export '${exportName}' was not a function in ${resolvedPath}`);
+  }
+
+  return candidate as ProcessFunction;
+}
+
+function asWaitingResult(error: unknown): IterationResult | null {
+  if (error instanceof ParallelPendingError) {
+    return { status: "waiting", nextActions: error.batch.actions };
+  }
+  if (error instanceof EffectRequestedError || error instanceof EffectPendingError) {
+    return { status: "waiting", nextActions: [error.action] };
+  }
+  return null;
+}
+
+function resolveNow(now?: Date | (() => Date)): () => Date {
+  if (!now) return () => new Date();
+  if (typeof now === "function") {
+    return now as () => Date;
+  }
+  const fixed = now;
+  return () => fixed;
+}
+
+async function initializeReplayEngine(
+  options: OrchestrateOptions,
+  nowFn: () => Date,
+  iterationStartedAt: number
+): Promise<ReplayEngine> {
+  try {
+    return await createReplayEngine({ runDir: options.runDir, now: nowFn, logger: options.logger });
+  } catch (error) {
+    emitRuntimeMetric(options.logger, "replay.iteration", {
+      duration_ms: Date.now() - iterationStartedAt,
+      status: "failed",
+      runDir: options.runDir,
+      phase: "initialize",
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
+}
+
+function annotateWaitingActions(actions: EffectAction[]): EffectAction[] {
+  const pendingCount = actions.length;
+  return actions.map((action) => {
+    const derivedSleep = deriveSleepHint(action);
+    const nextHints = mergeSchedulerHints(action.schedulerHints, {
+      pendingCount,
+      sleepUntilEpochMs: derivedSleep,
+    });
+    if (
+      nextHints === action.schedulerHints ||
+      (nextHints === undefined && action.schedulerHints === undefined)
+    ) {
+      return action;
+    }
+    return {
+      ...action,
+      schedulerHints: nextHints,
+    };
+  });
+}
+
+function deriveSleepHint(action: EffectAction): number | undefined {
+  if (typeof action.schedulerHints?.sleepUntilEpochMs === "number") {
+    return action.schedulerHints.sleepUntilEpochMs;
+  }
+  const direct = action.taskDef?.sleep?.targetEpochMs;
+  if (typeof direct === "number") {
+    return direct;
+  }
+  const metadataTarget = (action.taskDef?.metadata as { targetEpochMs?: number } | undefined)?.targetEpochMs;
+  return typeof metadataTarget === "number" ? metadataTarget : undefined;
+}
+
+function mergeSchedulerHints(
+  base: EffectSchedulerHints | undefined,
+  extra: EffectSchedulerHints
+): EffectSchedulerHints | undefined {
+  const merged: EffectSchedulerHints = { ...(base ?? {}) };
+  let changed = false;
+
+  if (extra.pendingCount !== undefined && merged.pendingCount !== extra.pendingCount) {
+    merged.pendingCount = extra.pendingCount;
+    changed = true;
+  }
+  if (
+    extra.sleepUntilEpochMs !== undefined &&
+    merged.sleepUntilEpochMs !== extra.sleepUntilEpochMs
+  ) {
+    merged.sleepUntilEpochMs = extra.sleepUntilEpochMs;
+    changed = true;
+  }
+  if (
+    extra.parallelGroupId !== undefined &&
+    merged.parallelGroupId !== extra.parallelGroupId
+  ) {
+    merged.parallelGroupId = extra.parallelGroupId;
+    changed = true;
+  }
+
+  if (!changed) {
+    return base;
+  }
+  return merged;
+}

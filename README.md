@@ -70,7 +70,7 @@ Notes:
 
 For a predictable walkthrough using the included fixture workspace, see `DEMO.md`.
 
-Need a deeper dive into `o` + Babysitter? Read [`USER_GUIDE.md`](./USER_GUIDE.md) for the quality-convergence model, event-sourced runs, and troubleshooting tips.
+Need a deeper dive into `o` + Babysitter? Read [`USER_GUIDE.md`](https://github.com/a5c-ai/babysitter/blob/main/USER_GUIDE.md) for the quality-convergence model, event-sourced runs, and troubleshooting tips.
 
 ## Core Concepts
 

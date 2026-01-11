@@ -36,6 +36,11 @@ jobs:
           set -o pipefail
           npm run lint 2>&1 | tee artifacts/test-logs/lint.log
 
+      - name: Verify metadata
+        run: |
+          set -o pipefail
+          npm run verify:metadata 2>&1 | tee artifacts/test-logs/metadata.log
+
       - name: Build
         run: |
           set -o pipefail
