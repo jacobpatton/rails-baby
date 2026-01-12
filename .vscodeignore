@@ -3,6 +3,8 @@
 **/.vscode-test/**
 **/.a5c/**
 **/.github/**
+node_modules/**
+!node_modules/**/*
 **/*.map
 *.vsix
 src/**
