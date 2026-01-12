@@ -959,6 +959,8 @@ This spec is the foundation for implementing `@a5c/babysitter-sdk` as a small, d
 
 The CLI is the primary way to **interact with intrinsics** (tasks, breakpoints, sleep gates) and to drive runs without writing custom orchestration code.
 
+> Looking for a concrete walkthrough? See [`docs/cli-examples.md`](docs/cli-examples.md) for an end-to-end session that runs `run:create`, `task:list`, `task:run`, `run:continue --auto-node-tasks`, and the deterministic harness side-by-side.
+
 Binary name (placeholder): `babysitter`
 
 ### 12.1 CLI responsibilities
