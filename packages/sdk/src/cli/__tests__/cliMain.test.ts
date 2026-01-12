@@ -40,6 +40,32 @@ describe("CLI main entry", () => {
     errorSpy.mockRestore();
   });
 
+  it("exposes the usage block via formatHelp()", () => {
+    const cli = createBabysitterCli();
+    const helpText = cli.formatHelp();
+
+    expect(helpText).toContain("Usage:");
+    expect(helpText).toContain("babysitter run:create");
+  });
+
+  it("prints help and exits zero when invoked without args", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([]);
+
+    expect(exitCode).toBe(0);
+    expect(logSpy).toHaveBeenCalledWith(cli.formatHelp());
+    expect(readRunMetadataMock).not.toHaveBeenCalled();
+  });
+
+  it("prints help when --help flag is provided alongside a command", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run(["run:status", "runs/demo", "--help"]);
+
+    expect(exitCode).toBe(0);
+    expect(logSpy).toHaveBeenCalledWith(cli.formatHelp());
+    expect(readRunMetadataMock).not.toHaveBeenCalled();
+  });
+
   it("executes task:run and prints refs", async () => {
     runNodeTaskFromCliMock.mockResolvedValue(
       mockRunResult({
@@ -61,6 +87,31 @@ describe("CLI main entry", () => {
     expect(logSpy).toHaveBeenCalledWith("[task:run] status=ok");
   });
 
+  it("supports task:run --dry-run JSON output", async () => {
+    runNodeTaskFromCliMock.mockResolvedValue(
+      mockRunResult({
+        exitCode: null,
+        committed: undefined,
+      })
+    );
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run(["task:run", "runs/demo", "ef-123", "--dry-run", "--json"]);
+
+    expect(exitCode).toBe(0);
+    expect(runNodeTaskFromCliMock).toHaveBeenCalledWith({
+      runDir: path.resolve("runs/demo"),
+      effectId: "ef-123",
+      dryRun: true,
+    });
+    const payload = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0] ?? "{}"));
+    expect(payload.status).toBe("skipped");
+    expect(payload.committed).toBeNull();
+    expect(payload.stdoutRef).toBe("tasks/mock/stdout.log");
+    expect(payload.stderrRef).toBe("tasks/mock/stderr.log");
+    expect(payload.resultRef).toBe("tasks/mock/result.json");
+  });
+
   it("reports waiting actions when auto-node is disabled", async () => {
     orchestrateIterationMock.mockResolvedValue({
       status: "waiting",
@@ -77,8 +128,8 @@ describe("CLI main entry", () => {
     const exitCode = await cli.run(["run:continue", "runs/demo"]);
 
     expect(exitCode).toBe(0);
-    expect(logSpy).toHaveBeenCalledWith("[run:continue] status=waiting pending=1");
-    expect(logSpy).toHaveBeenCalledWith("- ef-manual [breakpoint] needs approval");
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("[run:continue] status=waiting"));
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("- ef-manual [breakpoint] needs approval"));
   });
 
   it("auto-runs node actions until completion", async () => {
@@ -115,8 +166,8 @@ describe("CLI main entry", () => {
       invocationKey: undefined,
       dryRun: false,
     });
-    expect(logSpy).toHaveBeenCalledWith("[auto-run] ef-auto [node] auto");
-    expect(logSpy).toHaveBeenCalledWith("[run:continue] status=completed autoNode=1");
+    expect(errorSpy).toHaveBeenCalledWith("[auto-run] ef-auto [node] auto");
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("[run:continue] status=completed autoNode=1"));
   });
 
   it("emits JSON summary for waiting runs", async () => {
@@ -160,8 +211,44 @@ describe("CLI main entry", () => {
     const exitCode = await cli.run(["run:continue", "runs/demo"]);
 
     expect(exitCode).toBe(1);
-    expect(errorSpy).toHaveBeenCalledWith("[run:continue] status=failed");
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("[run:continue] status=failed"));
     expect(errorSpy).toHaveBeenCalledWith({ message: "boom" });
+  });
+
+  it("describes dry-run auto-node plans and skips runner execution", async () => {
+    const taskDef: TaskDef = {
+      kind: "node",
+      node: { entry: "./script.js" },
+    };
+    orchestrateIterationMock.mockResolvedValue({
+      status: "waiting",
+      nextActions: [
+        {
+          effectId: "ef-auto",
+          kind: "node",
+          label: "auto",
+          taskDef,
+        },
+      ],
+    });
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run(["run:continue", "runs/demo", "--auto-node-tasks", "--dry-run"]);
+
+    expect(exitCode).toBe(0);
+    expect(runNodeTaskFromCliMock).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("dry-run auto-node tasks count=1"));
+  });
+
+  it("rejects --now for run:continue and points to run:step", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run(["run:continue", "runs/demo", "--now", "2026-01-01T00:00:00Z"]);
+
+    expect(exitCode).toBe(1);
+    expect(orchestrateIterationMock).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith(
+      "[run:continue] --now is not supported; use run:step for single iterations"
+    );
   });
 
   describe("run:step", () => {
@@ -171,16 +258,16 @@ describe("CLI main entry", () => {
         output: { ok: true },
       });
 
-      const cli = createBabysitterCli();
-      const exitCode = await cli.run(["run:step", "runs/demo"]);
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run(["run:step", "runs/demo"]);
 
-      expect(exitCode).toBe(0);
-      expect(orchestrateIterationMock).toHaveBeenCalledWith({
-        runDir: path.resolve("runs/demo"),
-        now: expect.any(Date),
-      });
-      expect(logSpy).toHaveBeenCalledWith('[run:step] status=completed output={"ok":true}');
+    expect(exitCode).toBe(0);
+    expect(orchestrateIterationMock).toHaveBeenCalledWith({
+      runDir: path.resolve("runs/demo"),
+      now: expect.any(Date),
     });
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('[run:step] status=completed output={"ok":true}'));
+  });
 
     it("prints pending action summaries when waiting", async () => {
       orchestrateIterationMock.mockResolvedValue({
@@ -194,13 +281,13 @@ describe("CLI main entry", () => {
         ],
       });
 
-      const cli = createBabysitterCli();
-      const exitCode = await cli.run(["run:step", "runs/demo"]);
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run(["run:step", "runs/demo"]);
 
-      expect(exitCode).toBe(0);
-      expect(logSpy).toHaveBeenCalledWith("[run:step] status=waiting pending=1");
-      expect(logSpy).toHaveBeenCalledWith("- ef-manual [breakpoint] needs approval");
-    });
+    expect(exitCode).toBe(0);
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("[run:step] status=waiting pending=1"));
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("- ef-manual [breakpoint] needs approval"));
+  });
 
     it("prints failures and exits with status 1", async () => {
       const errorPayload = { message: "iteration failed" };
@@ -213,7 +300,7 @@ describe("CLI main entry", () => {
       const exitCode = await cli.run(["run:step", "runs/demo"]);
 
       expect(exitCode).toBe(1);
-      expect(errorSpy).toHaveBeenCalledWith("[run:step] status=failed");
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("[run:step] status=failed"));
       expect(errorSpy).toHaveBeenCalledWith(errorPayload);
     });
 
@@ -260,6 +347,22 @@ describe("CLI main entry", () => {
       expect(exitCode).toBe(1);
       expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("Usage:"));
       expect(orchestrateIterationMock).not.toHaveBeenCalled();
+    });
+
+    it("emits verbose diagnostics when --verbose is provided", async () => {
+      orchestrateIterationMock.mockResolvedValue({
+        status: "completed",
+        output: { done: true },
+      });
+      const nowIso = "2026-01-12T08:00:00.000Z";
+
+      const cli = createBabysitterCli();
+      const exitCode = await cli.run(["run:step", "runs/demo", "--verbose", "--now", nowIso]);
+
+      expect(exitCode).toBe(0);
+      expect(errorSpy).toHaveBeenCalledWith(
+        `[run:step] verbose runDir=${path.resolve("runs/demo")} now=${nowIso} json=false`
+      );
     });
   });
 });

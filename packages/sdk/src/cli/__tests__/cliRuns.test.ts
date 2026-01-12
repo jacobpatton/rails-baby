@@ -4,10 +4,15 @@ import os from "os";
 import { promises as fs } from "node:fs";
 import { createBabysitterCli } from "../main";
 import { readRunMetadata } from "../../storage/runFiles";
-import { DEFAULT_LAYOUT_VERSION } from "../../storage/paths";
+import { DEFAULT_LAYOUT_VERSION, getStateFile } from "../../storage/paths";
 import { appendEvent, loadJournal } from "../../storage/journal";
 import { createRunDir } from "../../storage/createRunDir";
 import { createStateCacheSnapshot, writeStateCache } from "../../runtime/replay/stateCache";
+import * as orchestrateIterationModule from "../../runtime/orchestrateIteration";
+import * as nodeTaskRunnerModule from "../nodeTaskRunner";
+import * as runFilesModule from "../../storage/runFiles";
+
+const realReadRunMetadata = readRunMetadata;
 
 describe("babysitter run:create CLI", () => {
   let runsRoot: string;
@@ -99,6 +104,72 @@ describe("babysitter run:create CLI", () => {
     });
   });
 
+  it("describes dry-run plans without creating run directories", async () => {
+    const entryFile = await writeEntrypoint("processes/dry-run.mjs", `export const handler = () => "dry";\n`);
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/dry",
+      "--entry",
+      `${entryFile}#handler`,
+      "--dry-run",
+      "--request",
+      "deploy/req-dry",
+    ]);
+
+    expect(exitCode).toBe(0);
+    const line = String(logSpy.mock.calls.at(-1)?.[0] ?? "");
+    expect(line).toContain("[run:create] dry-run");
+    expect(line).toContain(`runsDir=${runsRoot}`);
+    expect(line).toContain("processId=ci/dry");
+    expect(await listRunDirs()).toHaveLength(0);
+  });
+
+  it("emits JSON summaries for run:create --dry-run and leaves disk untouched", async () => {
+    const entryFile = await writeEntrypoint("processes/dry-json.mjs", `export const handler = () => "dry-json";\n`);
+    const inputsPath = path.join(runsRoot, "inputs.json");
+    await fs.writeFile(inputsPath, JSON.stringify({ branch: "main" }));
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/json",
+      "--entry",
+      `${entryFile}#handler`,
+      "--run-id",
+      "manual-run",
+      "--process-revision",
+      "rev-json",
+      "--request",
+      "deploy/json",
+      "--inputs",
+      inputsPath,
+      "--dry-run",
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(0);
+    const payload = readLastJsonLine(logSpy);
+    expect(payload).toEqual({
+      dryRun: true,
+      runsDir: runsRoot,
+      processId: "ci/json",
+      entry: `${entryFile}#handler`,
+      runId: "manual-run",
+      request: "deploy/json",
+      processRevision: "rev-json",
+      inputsPath,
+    });
+    expect(await listRunDirs()).toHaveLength(0);
+  });
+
   it("fails fast when required flags are missing", async () => {
     const cli = createBabysitterCli();
     const exitCode = await cli.run(["run:create", "--entry", "./process.mjs"]);
@@ -122,6 +193,13 @@ describe("babysitter run:create CLI", () => {
       throw new Error(`Expected run directory inside ${runsRoot}, found: ${entries.map((entry) => entry.name).join(", ")}`);
     }
     return path.join(runsRoot, runDir.name);
+  }
+
+  async function listRunDirs(): Promise<string[]> {
+    const entries = await fs.readdir(runsRoot, { withFileTypes: true });
+    return entries
+      .filter((entry) => entry.isDirectory() && /^[0-9A-Za-z]{26}$/.test(entry.name))
+      .map((entry) => path.join(runsRoot, entry.name));
   }
 
   function toPosixRelative(fromDir: string, target: string): string {
@@ -362,6 +440,194 @@ describe("run lifecycle inspection commands", () => {
       });
       expect(typeof payload.metadata.stateVersion).toBe("number");
     });
+
+    it("describes dry-run plans without touching the state cache", async () => {
+      const runDir = await createRunWithPendingEffects();
+
+      const exitCode = await cli.run(["run:rebuild-state", runDir, "--dry-run"]);
+
+      expect(exitCode).toBe(0);
+      const line = findSingleLine(logSpy, (entry) => entry.startsWith("[run:rebuild-state] dry-run"));
+      expect(line).toContain(`runDir=${runDir}`);
+      expect(line).toContain("plan=rebuild_state_cache");
+      expect(line).toContain("reason=cli_manual");
+      await expectStateCacheMissing(runDir);
+    });
+
+    it("emits JSON summaries for run:rebuild-state --dry-run", async () => {
+      const runDir = await createRunWithPendingEffects();
+
+      const exitCode = await cli.run(["run:rebuild-state", runDir, "--dry-run", "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload).toEqual({
+        dryRun: true,
+        runDir,
+        plan: "rebuild_state_cache",
+        reason: "cli_manual",
+      });
+      await expectStateCacheMissing(runDir);
+    });
+  });
+
+  describe("run:continue", () => {
+    let orchestrateSpy: ReturnType<typeof vi.spyOn>;
+    let runNodeTaskSpy: ReturnType<typeof vi.spyOn>;
+    let readMetadataSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      orchestrateSpy = vi.spyOn(orchestrateIterationModule, "orchestrateIteration");
+      runNodeTaskSpy = vi.spyOn(nodeTaskRunnerModule, "runNodeTaskFromCli").mockResolvedValue({} as any);
+      readMetadataSpy = vi.spyOn(runFilesModule, "readRunMetadata");
+    });
+
+    afterEach(() => {
+      orchestrateSpy.mockRestore();
+      runNodeTaskSpy.mockRestore();
+      readMetadataSpy.mockRestore();
+    });
+
+    async function stubRunMetadata(runDir: string) {
+      const metadata = await realReadRunMetadata(runDir);
+      readMetadataSpy.mockResolvedValue(metadata);
+    }
+
+    it("auto-runs node tasks until the run completes", async () => {
+      const runDir = await createRunSkeleton("run-auto-success");
+      await stubRunMetadata(runDir);
+      const taskDef = { kind: "node", node: { entry: "./script.js" } };
+      orchestrateSpy
+        .mockResolvedValueOnce({
+          status: "waiting",
+          nextActions: [
+            {
+              effectId: "ef-auto",
+              invocationKey: "invoke-ef-auto",
+              kind: "node",
+              label: "auto node",
+              taskDef,
+            },
+          ],
+          metadata: { pendingEffectsByKind: { node: 1 }, stateVersion: 1 },
+        })
+        .mockResolvedValueOnce({
+          status: "completed",
+          output: { ok: true },
+          metadata: { stateVersion: 2 },
+        });
+
+      const exitCode = await cli.run(["run:continue", runDir, "--auto-node-tasks", "--json"]);
+
+      expect(exitCode).toBe(0);
+      expect(orchestrateSpy).toHaveBeenCalledTimes(2);
+      expect(runNodeTaskSpy).toHaveBeenCalledTimes(1);
+      expect(runNodeTaskSpy).toHaveBeenCalledWith({
+        runDir,
+        effectId: "ef-auto",
+        task: taskDef,
+        invocationKey: "invoke-ef-auto",
+        dryRun: false,
+      });
+      const payload = readLastJson(logSpy);
+      expect(payload.status).toBe("completed");
+      expect(payload.autoRun.executed).toHaveLength(1);
+      expect(payload.autoRun.executed[0]).toMatchObject({ effectId: "ef-auto", kind: "node" });
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("[auto-run] ef-auto [node]"));
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("[run:continue] status=completed"));
+    });
+
+    it("describes dry-run auto-node plans without invoking runners", async () => {
+      const runDir = await createRunSkeleton("run-auto-dry");
+      await stubRunMetadata(runDir);
+      const taskDef = { kind: "node", node: { entry: "./plan.js" } };
+      orchestrateSpy.mockResolvedValueOnce({
+        status: "waiting",
+        nextActions: [
+          {
+            effectId: "ef-plan",
+            invocationKey: "invoke-plan",
+            kind: "node",
+            label: "plan-only",
+            taskDef,
+          },
+        ],
+        metadata: { pendingEffectsByKind: { node: 1 }, stateVersion: 5 },
+      });
+
+      const exitCode = await cli.run(["run:continue", runDir, "--auto-node-tasks", "--dry-run", "--json"]);
+
+      expect(exitCode).toBe(0);
+      expect(runNodeTaskSpy).not.toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("dry-run auto-node tasks count=1"));
+      const payload = readLastJson(logSpy);
+      expect(payload.status).toBe("waiting");
+      expect(payload.autoRun.executed).toHaveLength(0);
+      expect(payload.autoRun.pending).toHaveLength(1);
+      expect(payload.pending).toHaveLength(1);
+      expect(payload.metadata).toMatchObject({
+        stateVersion: 5,
+        pendingEffectsByKind: { node: 1 },
+      });
+    });
+
+    it("propagates failure metadata and errors", async () => {
+      const runDir = await createRunSkeleton("run-failure");
+      await stubRunMetadata(runDir);
+      orchestrateSpy.mockResolvedValueOnce({
+        status: "failed",
+        error: { message: "boom" },
+        metadata: {
+          stateVersion: 3,
+          stateRebuilt: true,
+          stateRebuildReason: "runtime_refresh",
+          pendingEffectsByKind: { node: 2 },
+        },
+      });
+
+      const exitCode = await cli.run(["run:continue", runDir, "--json"]);
+
+      expect(exitCode).toBe(1);
+      const payload = readLastJson(logSpy);
+      expect(payload).toMatchObject({
+        status: "failed",
+        error: { message: "boom" },
+        metadata: {
+          stateVersion: 3,
+          stateRebuilt: true,
+          stateRebuildReason: "runtime_refresh",
+          pendingEffectsByKind: { node: 2 },
+        },
+      });
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("[run:continue] status=failed"));
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("pending[node]=2"));
+    });
+
+    it("logs scheduler sleep hints when pending actions provide sleep targets", async () => {
+      const runDir = await createRunSkeleton("run-sleep");
+      await stubRunMetadata(runDir);
+      const sleepUntilEpochMs = Date.now() + 1_000;
+      orchestrateSpy.mockResolvedValueOnce({
+        status: "waiting",
+        nextActions: [
+          {
+            effectId: "ef-sleep",
+            invocationKey: "invoke-sleep",
+            kind: "node",
+            label: "sleepy",
+            taskDef: { kind: "node", node: { entry: "./sleep.js" } },
+            schedulerHints: { sleepUntilEpochMs, pendingCount: 4 },
+          },
+        ],
+      });
+
+      const exitCode = await cli.run(["run:continue", runDir]);
+
+      expect(exitCode).toBe(0);
+      const iso = new Date(sleepUntilEpochMs).toISOString();
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining(`[run:continue] sleep-until=${iso} effect=ef-sleep`));
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("pendingCount=4"));
+    });
   });
 
   async function createRunWithPendingEffects() {
@@ -484,5 +750,17 @@ describe("run lifecycle inspection commands", () => {
 
   function hasLineContaining(spy: ReturnType<typeof vi.spyOn>, needle: string) {
     return linesFrom(spy).some((line) => line.includes(needle));
+  }
+
+  async function expectStateCacheMissing(runDir: string) {
+    const stateFile = getStateFile(runDir);
+    await fs
+      .access(stateFile)
+      .then(() => {
+        throw new Error(`Expected ${stateFile} to be missing`);
+      })
+      .catch((error: NodeJS.ErrnoException) => {
+        expect(error.code).toBe("ENOENT");
+      });
   }
 });

@@ -14,21 +14,30 @@ import { readRunMetadata } from "../storage/runFiles";
 import type { JournalEvent, RunMetadata } from "../storage/types";
 
 const USAGE = `Usage:
-  babysitter run:create --process-id <id> --entry <path#export> [--runs-dir <dir>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--json]
+  babysitter run:create --process-id <id> --entry <path#export> [--runs-dir <dir>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--json] [--dry-run]
   babysitter run:status <runDir> [--runs-dir <dir>] [--json]
   babysitter run:events <runDir> [--runs-dir <dir>] [--json] [--limit <n>] [--reverse] [--filter-type <type>]
-  babysitter run:rebuild-state <runDir> [--runs-dir <dir>] [--json]
+  babysitter run:rebuild-state <runDir> [--runs-dir <dir>] [--json] [--dry-run]
   babysitter task:run <runDir> <effectId> [--runs-dir <dir>] [--json] [--dry-run]
   babysitter run:step <runDir> [--runs-dir <dir>] [--json] [--now <iso8601>]
   babysitter run:continue <runDir> [--runs-dir <dir>] [--json] [--dry-run] [--auto-node-tasks]
   babysitter task:list <runDir> [--runs-dir <dir>] [--pending] [--kind <kind>] [--json]
-  babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]`;
+  babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]
+
+Global flags:
+  --runs-dir <dir>   Override the runs directory (defaults to current working directory).
+  --json             Emit JSON output when supported by the command.
+  --dry-run          Describe planned mutations without changing on-disk state.
+  --verbose          Log resolved paths and options to stderr for debugging.
+  --help, -h         Show this help text.`;
 
 interface ParsedArgs {
   command?: string;
   runsDir: string;
   json: boolean;
   dryRun: boolean;
+  verbose: boolean;
+  helpRequested: boolean;
   autoNodeTasks: boolean;
   pendingOnly: boolean;
   kindFilter?: string;
@@ -70,19 +79,29 @@ interface TaskListEntry {
 }
 
 function parseArgs(argv: string[]): ParsedArgs {
-  const [command, ...rest] = argv;
+  const [initialCommand, ...rest] = argv;
   const parsed: ParsedArgs = {
-    command,
+    command: initialCommand,
     runsDir: ".",
     json: false,
     dryRun: false,
+    verbose: false,
+    helpRequested: false,
     autoNodeTasks: false,
     pendingOnly: false,
     reverseOrder: false,
   };
+  if (parsed.command === "--help" || parsed.command === "-h") {
+    parsed.command = undefined;
+    parsed.helpRequested = true;
+  }
   const positionals: string[] = [];
   for (let i = 0; i < rest.length; i += 1) {
     const arg = rest[i];
+    if (arg === "--help" || arg === "-h") {
+      parsed.helpRequested = true;
+      continue;
+    }
     if (arg === "--runs-dir") {
       parsed.runsDir = expectFlagValue(rest, ++i, "--runs-dir");
       continue;
@@ -93,6 +112,10 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
     if (arg === "--dry-run") {
       parsed.dryRun = true;
+      continue;
+    }
+    if (arg === "--verbose") {
+      parsed.verbose = true;
       continue;
     }
     if (arg === "--auto-node-tasks") {
@@ -195,13 +218,111 @@ function summarizeActions(actions: EffectAction[]): ActionSummary[] {
   }));
 }
 
-function logPending(command: string, actions: EffectAction[]) {
+function logPendingActions(
+  actions: EffectAction[],
+  options: { command?: string; includeHeader?: boolean; metadataParts?: string[] } = {}
+): ActionSummary[] {
   const summaries = summarizeActions(actions);
-  console.log(`[${command}] status=waiting pending=${summaries.length}`);
+  if (options.command && options.includeHeader !== false) {
+    const headerParts = [
+      `[${options.command}] status=waiting`,
+      `pending=${summaries.length}`,
+      ...(options.metadataParts ?? []),
+    ];
+    console.error(headerParts.join(" "));
+  }
   for (const summary of summaries) {
     const label = summary.label ? ` ${summary.label}` : "";
-    console.log(`- ${summary.effectId} [${summary.kind}]${label}`);
+    console.error(`- ${summary.effectId} [${summary.kind}]${label}`);
   }
+  return summaries;
+}
+
+function countActionsByKind(actions: EffectAction[]): Record<string, number> {
+  const counts = new Map<string, number>();
+  for (const action of actions) {
+    counts.set(action.kind, (counts.get(action.kind) ?? 0) + 1);
+  }
+  return Object.fromEntries(Array.from(counts.entries()).sort(([a], [b]) => a.localeCompare(b)));
+}
+
+function enrichIterationMetadata(
+  metadata: IterationMetadata | undefined,
+  pendingActions?: EffectAction[]
+): IterationMetadata | undefined {
+  if (!pendingActions?.length) {
+    return metadata;
+  }
+  if (metadata?.pendingEffectsByKind) {
+    return metadata;
+  }
+  return {
+    ...(metadata ?? {}),
+    pendingEffectsByKind: countActionsByKind(pendingActions),
+  };
+}
+
+function logSleepHints(actions: EffectAction[]) {
+  for (const action of actions) {
+    const sleepMs = action.schedulerHints?.sleepUntilEpochMs;
+    if (typeof sleepMs !== "number") continue;
+    const iso = new Date(sleepMs).toISOString();
+    const label = action.label ? ` ${action.label}` : "";
+    const pendingInfo =
+      typeof action.schedulerHints?.pendingCount === "number"
+        ? ` pendingCount=${action.schedulerHints.pendingCount}`
+        : "";
+    console.error(`[run:continue] sleep-until=${iso} effect=${action.effectId}${label}${pendingInfo}`);
+  }
+}
+
+function logRunContinueStatus(
+  iterationStatus: "completed" | "failed" | "waiting",
+  executedCount: number,
+  metadataParts: string[],
+  options: { dryRun: boolean }
+) {
+  const parts = [`[run:continue] status=${iterationStatus}`];
+  if (options.dryRun) {
+    parts.push("dryRun=true");
+  }
+  if (executedCount > 0) {
+    parts.push(`autoNode=${executedCount}`);
+  }
+  parts.push(...metadataParts);
+  console.error(parts.join(" "));
+}
+
+function logAutoRunPlan(nodeSummaries: ActionSummary[]) {
+  console.error(`[run:continue] dry-run auto-node tasks count=${nodeSummaries.length}`);
+  if (!nodeSummaries.length) {
+    return;
+  }
+  for (const summary of nodeSummaries) {
+    const label = summary.label ? ` ${summary.label}` : "";
+    console.error(`  - ${summary.effectId} [${summary.kind}]${label}`);
+  }
+}
+
+function formatResolvedEntrypoint(importPath: string, exportName?: string) {
+  return `${importPath}${exportName ? `#${exportName}` : ""}`;
+}
+
+function formatVerboseValue(value: unknown): string {
+  if (value === null) return "null";
+  if (value === undefined) return "undefined";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return JSON.stringify(value);
+}
+
+function logVerbose(command: string, parsed: ParsedArgs, details: Record<string, unknown>) {
+  if (!parsed.verbose) return;
+  const formatted = Object.entries(details)
+    .filter(([, value]) => value !== undefined)
+    .map(([key, value]) => `${key}=${formatVerboseValue(value)}`)
+    .join(" ");
+  console.error(`[${command}] verbose ${formatted}`);
 }
 
 function determineTaskStatus(result: CliRunNodeTaskResult): string {
@@ -275,6 +396,18 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   }
   const runsDir = path.resolve(parsed.runsDir);
   const absoluteImportPath = path.resolve(entrypoint.importPath);
+  const resolvedEntry = formatResolvedEntrypoint(absoluteImportPath, entrypoint.exportName);
+  logVerbose("run:create", parsed, {
+    runsDir,
+    processId: parsed.processId,
+    entry: resolvedEntry,
+    dryRun: parsed.dryRun,
+    json: parsed.json,
+    request: parsed.requestId,
+    processRevision: parsed.processRevision,
+    runId: parsed.runIdOverride,
+    inputsPath: parsed.inputsPath ? path.resolve(parsed.inputsPath) : undefined,
+  });
   let inputs: unknown | undefined;
   if (parsed.inputsPath) {
     try {
@@ -283,6 +416,34 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
       console.error(error instanceof Error ? error.message : String(error));
       return 1;
     }
+  }
+  if (parsed.dryRun) {
+    const summary = {
+      dryRun: true,
+      runsDir,
+      processId: parsed.processId,
+      entry: resolvedEntry,
+      runId: parsed.runIdOverride ?? null,
+      request: parsed.requestId ?? null,
+      processRevision: parsed.processRevision ?? null,
+      inputsPath: parsed.inputsPath ? path.resolve(parsed.inputsPath) : null,
+    };
+    if (parsed.json) {
+      console.log(JSON.stringify(summary));
+    } else {
+      const parts = [
+        "[run:create] dry-run",
+        `runsDir=${runsDir}`,
+        `processId=${parsed.processId}`,
+        `entry=${resolvedEntry}`,
+        `runId=${summary.runId ?? "auto"}`,
+      ];
+      if (parsed.requestId) parts.push(`request=${parsed.requestId}`);
+      if (parsed.processRevision) parts.push(`processRevision=${parsed.processRevision}`);
+      if (summary.inputsPath) parts.push(`inputs=${summary.inputsPath}`);
+      console.log(parts.join(" "));
+    }
+    return 0;
   }
   const result = await createRun({
     runsDir,
@@ -313,6 +474,10 @@ async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
     return 1;
   }
   const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("run:status", parsed, {
+    runDir,
+    json: parsed.json,
+  });
   const metadata = await readRunMetadataSafe(runDir, "run:status");
   if (!metadata) return 1;
   const journal = await loadJournalSafe(runDir, "run:status");
@@ -362,6 +527,13 @@ async function handleRunEvents(parsed: ParsedArgs): Promise<number> {
     return 1;
   }
   const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("run:events", parsed, {
+    runDir,
+    json: parsed.json,
+    limit: parsed.limit,
+    reverse: parsed.reverseOrder,
+    filterType: parsed.filterType,
+  });
   if (!(await readRunMetadataSafe(runDir, "run:events"))) return 1;
   const journal = await loadJournalSafe(runDir, "run:events");
   if (!journal) return 1;
@@ -398,7 +570,21 @@ async function handleRunRebuildState(parsed: ParsedArgs): Promise<number> {
     return 1;
   }
   const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("run:rebuild-state", parsed, {
+    runDir,
+    dryRun: parsed.dryRun,
+    json: parsed.json,
+  });
   if (!(await readRunMetadataSafe(runDir, "run:rebuild-state"))) return 1;
+  if (parsed.dryRun) {
+    const plan = { dryRun: true, runDir, plan: "rebuild_state_cache", reason: "cli_manual" };
+    if (parsed.json) {
+      console.log(JSON.stringify(plan));
+    } else {
+      console.log(`[run:rebuild-state] dry-run runDir=${runDir} plan=${plan.plan} reason=${plan.reason}`);
+    }
+    return 0;
+  }
   const snapshot = await rebuildStateCache(runDir, { reason: "cli_manual" });
   const metadata: IterationMetadata = {
     pendingEffectsByKind: snapshot.pendingEffectsByKind,
@@ -423,6 +609,12 @@ async function handleTaskRun(parsed: ParsedArgs): Promise<number> {
     return 1;
   }
   const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("task:run", parsed, {
+    runDir,
+    effectId: parsed.effectId,
+    dryRun: parsed.dryRun,
+    json: parsed.json,
+  });
   const result = await runNodeTaskFromCli({
     runDir,
     effectId: parsed.effectId,
@@ -464,10 +656,8 @@ async function autoRunNodeTasks(
       label: action.label,
     };
     executed.push(summary);
-    if (!parsed.json) {
-      const label = summary.label ? ` ${summary.label}` : "";
-      console.log(`[auto-run] ${summary.effectId} [${summary.kind}]${label}`);
-    }
+    const label = summary.label ? ` ${summary.label}` : "";
+    console.error(`[auto-run] ${summary.effectId} [${summary.kind}]${label}`);
     await runNodeTaskFromCli({
       runDir,
       effectId: action.effectId,
@@ -478,40 +668,32 @@ async function autoRunNodeTasks(
   }
 }
 
-function logFinalStatus(
-  iterationStatus: "completed" | "failed" | "waiting",
-  executedCount: number,
-  parsed: ParsedArgs
-) {
-  const suffix = executedCount > 0 ? ` autoNode=${executedCount}` : "";
-  const message = `[run:continue] status=${iterationStatus}${suffix}`;
-  if (iterationStatus === "failed") {
-    console.error(message);
-  } else {
-    console.log(message);
-  }
-}
-
 function emitJsonResult(
   iteration:
-    | { status: "completed"; output: unknown; metadata?: IterationMetadata }
-    | { status: "failed"; error: unknown; metadata?: IterationMetadata }
-    | { status: "waiting"; pending: ActionSummary[]; metadata?: IterationMetadata },
-  executed: ActionSummary[],
-  pending: ActionSummary[]
+    | { status: "completed"; output: unknown }
+    | { status: "failed"; error: unknown }
+    | { status: "waiting" },
+  context: {
+    executed: ActionSummary[];
+    pending: ActionSummary[];
+    autoPending: ActionSummary[];
+    metadata?: IterationMetadata | null;
+    error?: unknown;
+    output?: unknown;
+  }
 ) {
   const payload: Record<string, unknown> = {
     status: iteration.status,
-    autoRun: { executed, pending },
+    autoRun: { executed: context.executed, pending: context.autoPending },
+    metadata: context.metadata ?? null,
   };
   if (iteration.status === "completed") {
-    payload.output = iteration.output;
+    payload.output = context.output;
   } else if (iteration.status === "failed") {
-    payload.error = iteration.error ?? null;
+    payload.error = context.error ?? null;
   } else {
-    payload.pending = pending;
+    payload.pending = context.pending;
   }
-  payload.metadata = iteration.metadata ?? null;
   console.log(JSON.stringify(payload));
 }
 
@@ -520,55 +702,101 @@ async function handleRunContinue(parsed: ParsedArgs): Promise<number> {
     console.error(USAGE);
     return 1;
   }
+  if (parsed.nowOverride) {
+    console.error("[run:continue] --now is not supported; use run:step for single iterations");
+    return 1;
+  }
   const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("run:continue", parsed, {
+    runDir,
+    dryRun: parsed.dryRun,
+    json: parsed.json,
+    autoNodeTasks: parsed.autoNodeTasks,
+  });
+  if (!(await readRunMetadataSafe(runDir, "run:continue"))) return 1;
   const executed: ActionSummary[] = [];
 
   while (true) {
     const iteration = await orchestrateIteration({ runDir });
+    const pendingActions = iteration.status === "waiting" ? iteration.nextActions : undefined;
+    const metadata = enrichIterationMetadata(iteration.metadata, pendingActions);
+    const formattedMetadata = formatIterationMetadata(metadata);
+    logRunContinueStatus(iteration.status, executed.length, formattedMetadata.textParts, {
+      dryRun: parsed.dryRun,
+    });
 
-    if (iteration.status === "waiting" && parsed.autoNodeTasks) {
+    if (iteration.status === "waiting") {
+      const pending = logPendingActions(iteration.nextActions, {
+        command: "run:continue",
+        includeHeader: false,
+      });
+      logSleepHints(iteration.nextActions);
       const nodeActions = iteration.nextActions.filter((action) => action.kind === "node");
-      if (nodeActions.length === 0) {
-        const pending = summarizeActions(iteration.nextActions);
-        if (parsed.json) {
-          emitJsonResult({ status: "waiting", pending, metadata: iteration.metadata }, executed, pending);
-        } else {
-          logFinalStatus("waiting", executed.length, parsed);
-          logPending("run:continue", iteration.nextActions);
+      const nodeSummaries = summarizeActions(nodeActions);
+      if (parsed.autoNodeTasks && nodeActions.length > 0) {
+        if (parsed.dryRun) {
+          logAutoRunPlan(nodeSummaries);
+          if (parsed.json) {
+            emitJsonResult(
+              { status: "waiting" },
+              {
+                executed,
+                pending,
+                autoPending: nodeSummaries,
+                metadata: formattedMetadata.jsonMetadata ?? null,
+              }
+            );
+          }
+          return 0;
         }
-        return 0;
+        await autoRunNodeTasks(runDir, nodeActions, parsed, executed);
+        continue;
       }
-      await autoRunNodeTasks(runDir, nodeActions, parsed, executed);
-      continue;
-    }
-
-    if (iteration.status === "completed") {
       if (parsed.json) {
-        emitJsonResult(iteration, executed, []);
-      } else {
-        logFinalStatus("completed", executed.length, parsed);
+        emitJsonResult(
+          { status: "waiting" },
+          {
+            executed,
+            pending,
+            autoPending: parsed.autoNodeTasks ? nodeSummaries : [],
+            metadata: formattedMetadata.jsonMetadata ?? null,
+          }
+        );
       }
       return 0;
     }
 
-    if (iteration.status === "failed") {
+    if (iteration.status === "completed") {
       if (parsed.json) {
-        emitJsonResult(iteration, executed, []);
-      } else {
-        logFinalStatus("failed", executed.length, parsed);
-        if (iteration.error) console.error(iteration.error);
+        emitJsonResult(
+          { status: "completed" },
+          {
+            executed,
+            pending: [],
+            autoPending: [],
+            metadata: formattedMetadata.jsonMetadata ?? null,
+            output: iteration.output,
+          }
+        );
       }
-      return 1;
+      return 0;
     }
 
-    const pending = summarizeActions(iteration.nextActions);
     if (parsed.json) {
-      emitJsonResult({ status: "waiting", pending, metadata: iteration.metadata }, executed, pending);
-    } else {
-      logFinalStatus("waiting", executed.length, parsed);
-        logPending("run:continue", iteration.nextActions);
+      emitJsonResult(
+        { status: "failed" },
+        {
+          executed,
+          pending: [],
+          autoPending: [],
+          metadata: formattedMetadata.jsonMetadata ?? null,
+          error: iteration.error ?? null,
+        }
+      );
+    } else if (iteration.error !== undefined) {
+      console.error(iteration.error);
     }
-    return 0;
+    return 1;
   }
 }
 
@@ -587,6 +815,11 @@ async function handleRunStep(parsed: ParsedArgs): Promise<number> {
     return 1;
   }
   const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("run:step", parsed, {
+    runDir,
+    now: parsed.nowOverride ?? "auto",
+    json: parsed.json,
+  });
   if (!(await readRunMetadataSafe(runDir, "run:step"))) return 1;
 
   let now: Date;
@@ -598,23 +831,32 @@ async function handleRunStep(parsed: ParsedArgs): Promise<number> {
   }
 
   const iteration = await orchestrateIteration({ runDir, now });
+  const pendingActions = iteration.status === "waiting" ? iteration.nextActions : undefined;
+  const metadata = enrichIterationMetadata(iteration.metadata, pendingActions);
+  const formattedMetadata = formatIterationMetadata(metadata);
   if (parsed.json) {
-    console.log(JSON.stringify({ ...iteration, metadata: iteration.metadata ?? null }));
+    console.log(JSON.stringify({ ...iteration, metadata: formattedMetadata.jsonMetadata ?? null }));
     return iteration.status === "failed" ? 1 : 0;
   }
 
   if (iteration.status === "completed") {
     const output = JSON.stringify(iteration.output ?? null);
-    console.log(`[run:step] status=completed output=${output}`);
+    const suffix = formattedMetadata.textParts.length ? ` ${formattedMetadata.textParts.join(" ")}` : "";
+    console.error(`[run:step] status=completed output=${output}${suffix}`);
     return 0;
   }
 
   if (iteration.status === "waiting") {
-    logPending("run:step", iteration.nextActions);
+    logPendingActions(iteration.nextActions, {
+      command: "run:step",
+      metadataParts: formattedMetadata.textParts,
+    });
+    logSleepHints(iteration.nextActions);
     return 0;
   }
 
-  console.error("[run:step] status=failed");
+  const suffix = formattedMetadata.textParts.length ? ` ${formattedMetadata.textParts.join(" ")}` : "";
+  console.error(`[run:step] status=failed${suffix}`);
   if (iteration.error !== undefined) {
     console.error(iteration.error);
   }
@@ -627,6 +869,12 @@ async function handleTaskList(parsed: ParsedArgs): Promise<number> {
     return 1;
   }
   const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("task:list", parsed, {
+    runDir,
+    json: parsed.json,
+    pending: parsed.pendingOnly,
+    kind: parsed.kindFilter,
+  });
   const index = await buildEffectIndexSafe(runDir, "task:list");
   if (!index) return 1;
 
@@ -658,6 +906,11 @@ async function handleTaskShow(parsed: ParsedArgs): Promise<number> {
     return 1;
   }
   const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("task:show", parsed, {
+    runDir,
+    effectId: parsed.effectId,
+    json: parsed.json,
+  });
   const index = await buildEffectIndexSafe(runDir, "task:show");
   if (!index) return 1;
 
@@ -883,6 +1136,10 @@ export function createBabysitterCli() {
     async run(argv: string[] = process.argv.slice(2)): Promise<number> {
       try {
         const parsed = parseArgs(argv);
+        if (!parsed.command || parsed.helpRequested) {
+          console.log(USAGE);
+          return 0;
+        }
         if (parsed.command === "run:create") {
           return await handleRunCreate(parsed);
         }
@@ -916,6 +1173,9 @@ export function createBabysitterCli() {
         console.error(error instanceof Error ? error.message : String(error));
         return 1;
       }
+    },
+    formatHelp(): string {
+      return USAGE;
     },
   };
 }
