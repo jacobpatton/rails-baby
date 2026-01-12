@@ -62,12 +62,20 @@ suite('Dispatch', () => {
     await cfg.update('runsRoot', '.a5c/runs', vscode.ConfigurationTarget.Workspace);
 
     const prompt = 'dispatch integration test prompt';
-    const result = await vscode.commands.executeCommand<{
-      runId: string;
-      runRootPath: string;
-      stdout: string;
-      stderr: string;
-    }>('babysitter.dispatchRun', { prompt });
+    const previousHeadless = process.env.BABYSITTER_HEADLESS;
+    process.env.BABYSITTER_HEADLESS = '1';
+    const result = await (async () => {
+      try {
+        return await vscode.commands.executeCommand<{
+          runId: string;
+          runRootPath: string;
+          stdout: string;
+          stderr: string;
+        }>('babysitter.dispatchRun', { prompt });
+      } finally {
+        process.env.BABYSITTER_HEADLESS = previousHeadless;
+      }
+    })();
 
     assert.ok(result.runRootPath.includes(result.runId), 'expected run root to include run id');
     assert.ok(result.stdout.includes('runRoot='), 'expected output to contain runRoot marker');
