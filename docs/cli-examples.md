@@ -237,3 +237,39 @@ rm -rf .a5c/runs/run-20260112-130455
 ---
 
 Need another scenario documented? Open an issue with the desired flow (CLI flags, harness behavior, etc.) and the team will extend this file. For the deeper specification refer to [`sdk.md`](../sdk.md).
+
+---
+
+## Appendix A. Regenerating this walkthrough (deterministic workflow)
+
+The CLI transcripts above are **not** hand-edited—they are captured via the deterministic smoke harness described in sdk.md §10.6 and the Part 7 verification plan. When you change CLI output, flags, or doc wording that relies on real commands:
+
+1. **Run the smoke harness for every platform/Node version you support.**
+
+```bash
+# macOS/Linux
+pnpm --filter @a5c/babysitter-sdk run smoke:cli \
+  -- --runs-dir .a5c/runs/docs-cli \
+     --record docs/cli-examples/baselines
+
+# Windows (PowerShell wrapper)
+pwsh -File scripts/docs/run_cli_examples.ps1 `
+  -RunsDir .a5c/runs/docs-cli `
+  -BaselineDir docs/cli-examples/baselines
+```
+
+2. **Commit the refreshed baselines + hashes.**
+   - Every `*.stdout`, `*.stderr`, and `*.json` file in `docs/cli-examples/baselines/` is hashed via `sha256sum > docs/cli-examples/baselines/hashes.json`.  
+   - CI uploads `_ci_artifacts/cli/<os>-node<version>/smoke-cli-report.json` so reviewers can diff outputs and metadata pairs (`stateVersion`, `pending[...]`, `journalHead`).
+
+3. **Respect redaction and Windows guidance.**
+   - CLI output intentionally prints POSIX-style paths even on Windows so docs stay stable; keep the callout near the top of this file.
+   - Task payloads remain redacted unless `BABYSITTER_ALLOW_SECRET_LOGS=true` **and** `--json --verbose` are used together (see sdk.md §12.4). The smoke harness enforces this by scanning for `payloads: redacted`.
+
+4. **Link back to the deterministic harness.**
+   - When expanding examples, ensure corresponding snippets exist in `packages/sdk/src/testing/README.md` or sdk.md §§8–13 so the snippet extractor and fake-runner tests cover them.
+
+5. **Archive run metadata.**
+   - Each replay stores `_ci_artifacts/cli/run-metadata.json` with OS, Node version, git commit, and env vars so future contributors can reproduce the walkthrough exactly.
+
+Failing to regenerate outputs will cause the docs CI jobs (`docs:lint`, `docs:snippets`, `smoke:cli`, `docs:testing-readme`) to fail once the Part 7 verification matrix runs in CI. When in doubt, run `pnpm --filter @a5c/babysitter-sdk run docs:plan` locally to execute all doc checks before opening a PR.

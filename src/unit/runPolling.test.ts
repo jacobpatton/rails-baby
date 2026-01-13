@@ -18,10 +18,10 @@ suite('runPolling', () => {
       fs.mkdirSync(path.join(runsRootPath, 'run-old'), { recursive: true });
 
       const baselineIds = new Set(listRunIds(runsRootPath));
-      const afterTimeMs = Date.now();
+      const afterTimeMs = new Date('2025-01-01T00:00:00Z').getTime();
 
-      const runEarly = 'run-early';
-      const runLate = 'run-late';
+      const runEarly = 'run-20250101-010000';
+      const runLate = 'run-20250101-020000';
       const earlyPath = path.join(runsRootPath, runEarly);
       const latePath = path.join(runsRootPath, runLate);
       fs.mkdirSync(earlyPath, { recursive: true });

@@ -48,4 +48,16 @@ suite('serverMermaid renderer', () => {
     assert.ifError(first.error);
     assert.match(second.error || '', /limit/i);
   });
+
+  test('does not override existing global performance implementation', async () => {
+    const original = globalThis.performance;
+    assert.ok(original, 'expected node performance implementation');
+    const input = ['```mermaid', 'flowchart TD', '  A --> B', '```'].join('\n');
+    await renderMermaidBlocksFromMarkdown({ markdown: input });
+    assert.strictEqual(
+      globalThis.performance,
+      original,
+      'expected server-side render setup to keep existing performance object',
+    );
+  });
 });

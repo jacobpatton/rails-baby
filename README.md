@@ -1,5 +1,52 @@
 # Babysitter (VS Code Extension)
 
+Babysitter ships two complementary experiences:
+
+1. **SDK + CLI** (`@a5c/babysitter-sdk` / `babysitter` binary) for building and replaying event-sourced processes with deterministic harnesses.
+2. **VS Code extension** (this repo) for observing and steering `.a5c/runs/<runId>/` without leaving your editor.
+
+Unless you only need the editor UI, start with the SDK/CLI quickstart below so your docs and walkthroughs match the deterministic harness behavior delivered in `packages/sdk`.
+
+## SDK & CLI Quickstart
+
+### Prerequisites
+- Node.js **18.x or 20.x** (the deterministic harness and CLI smoke jobs run on both).
+- macOS, Linux, or Windows (CLI always emits POSIX-style paths; Windows users should run via Git Bash/WSL for parity).
+- `pnpm` for workspace commands (see `package.json` scripts).
+
+### Install & bootstrap
+```bash
+# install the SDK + CLI in your workspace
+pnpm add -D @a5c/babysitter-sdk
+
+# build the package so the babysitter CLI is ready for docs walkthroughs
+pnpm --filter @a5c/babysitter-sdk run build
+
+# create a demo run using the CLI (matches sdk.md §§8–13 examples)
+pnpm --filter @a5c/babysitter-sdk exec babysitter run:create \
+  --process-id demo/sample \
+  --entry examples/processes/sample.mjs#process \
+  --inputs examples/inputs/sample.json
+```
+
+### Deterministic docs & harness workflow
+- **CLI walkthroughs** (`docs/cli-examples.md`) are regenerated via  
+  `pnpm --filter @a5c/babysitter-sdk run smoke:cli -- --runs-dir .a5c/runs/docs-cli --record docs/cli-examples/baselines`
+- **Snippets** (`sdk.md` §§8–13, testing README) compile with  
+  `pnpm --filter @a5c/babysitter-sdk run docs:snippets:tsc`
+- **Fake runner examples** live in `packages/sdk/src/testing/README.md` and are validated with  
+  `pnpm --filter @a5c/babysitter-sdk run docs:testing-readme`
+
+Re-run those commands before editing docs so CLI transcripts, snippet hashes, and harness logs remain deterministic (see `part7_test_plan.md` for the full verification matrix).
+
+## Docs Map
+- **sdk.md §§8–13** – canonical orchestrator/CLI/API tables, metadata pairs, ambient helpers, and deterministic harness notes.
+- **docs/cli-examples.md** – end-to-end CLI walkthrough generated via the smoke harness; includes redaction + Windows path guidance.
+- **packages/sdk/src/testing/README.md** – detailed fake-runner + harness how-to (clock/ULID seeding, snapshot helpers).
+- **README.md (this file)** – high-level landing page with SDK/CLI quickstart plus extension usage.
+
+## VS Code Extension Overview
+
 Babysitter is a VS Code extension for orchestrating and monitoring **`o` runs** from inside your editor.
 
 ### Why Babysitter + `o`

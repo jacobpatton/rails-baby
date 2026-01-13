@@ -95,3 +95,29 @@ expect(snapshot.state?.effectsByInvocation).toMatchObject({
 
 - `readJournalSnapshot` and `readStateSnapshot` expose the individual pieces when you only need one.
 - The snapshots are safe to compare directly across OSes because the clock/ULID seeding above strips nondeterminism from `recordedAt`, filenames, and effect IDs.
+
+## Keeping docs + harness examples in sync
+
+Sections 10.5 and 13 of `sdk.md`, the CLI walkthrough (`docs/cli-examples.md`), and the SDK quickstart in `README.md` quote the APIs above verbatim. Before changing this README or any referenced snippet:
+
+1. **Run the harness doc suite.**
+
+```bash
+pnpm --filter @a5c/babysitter-sdk run docs:testing-readme
+```
+
+This command executes every fenced example in this file (and any referenced fixtures under `packages/sdk/src/testing/__examples__`) using the deterministic clock/ULID helpers. It produces `_ci_artifacts/testing-harness/<platform>/report.json` so reviewers can diff execution logs, pending counts, and seeds.
+
+2. **Sync with `sdk.md` and `docs/cli-examples.md`.**
+   - Snippets extracted from sdk.md §§8–13 and this README are compiled via `pnpm --filter @a5c/babysitter-sdk run docs:snippets:tsc`.
+   - The CLI walkthrough records real runs with `pnpm --filter @a5c/babysitter-sdk run smoke:cli` and links back to this README when it references `runToCompletionWithFakeRunner` or `captureRunSnapshot`.
+
+3. **Capture artifacts and hashes.**
+   - Store execution logs, snapshot archives, and deterministic seed data under `_ci_artifacts/testing-harness/`.
+   - Include a short note in your PR describing which snippets were regenerated and how to reproduce them (see `part7_test_plan.md` for the full checklist).
+
+4. **Respect redaction + platform notes.**
+   - Keep examples redacted unless explicitly describing the `BABYSITTER_ALLOW_SECRET_LOGS` guard (sdk.md §12.4).
+   - Mention that CLI output uses POSIX-style paths even on Windows; tests here should normalize separators to match the docs.
+
+Following this workflow ensures the SDK docs, README quickstart, and CLI walkthrough stay consistent with the deterministic harness delivered in `packages/sdk`.

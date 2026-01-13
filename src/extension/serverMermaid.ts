@@ -231,7 +231,10 @@ async function ensureMermaidEnvironment(): Promise<void> {
       'cancelAnimationFrame',
       windowAny.cancelAnimationFrame?.bind(windowAny) || ((id: number) => clearTimeout(Number(id))),
     );
-    forceSetGlobalProperty('performance', windowAny.performance);
+    const globalPerf = (globalThis as Partial<GlobalShim>).performance as Performance | undefined;
+    if (!globalPerf || typeof globalPerf.now !== 'function') {
+      forceSetGlobalProperty('performance', windowAny.performance);
+    }
     forceSetGlobalProperty('MutationObserver', windowAny.MutationObserver);
 
     const createDOMPurify = (

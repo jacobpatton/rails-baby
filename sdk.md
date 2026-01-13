@@ -920,6 +920,21 @@ if (result.status === "waiting") {
 * Returns `{ status, output|error, pending, metadata, executed }`, giving you the same high-level surface as the CLI / orchestrator but without invoking real runners.
 * Supports safety rails such as `maxIterations` (defaults to 100) and `onIteration` hooks for advanced inspection.
 
+### 10.6 Deterministic docs + CLI walkthrough workflow
+
+To keep the documentation and examples in sync with the shipped runtime/CLI, every edit to `sdk.md`, `README.md`, `docs/cli-examples.md`, or `packages/sdk/src/testing/README.md` should be paired with the deterministic harness jobs below (see `part7_test_plan.md` for the full matrix):
+
+1. **Regenerate CLI walkthroughs**  
+   `pnpm --filter @a5c/babysitter-sdk run smoke:cli -- --runs-dir .a5c/runs/docs-cli --record docs/cli-examples/baselines`  
+   Stores hashed stdout/JSON outputs under `_ci_artifacts/cli/<platform>/<node>/` so reviewers can diff transcripts.
+2. **Compile/execute code fences**  
+   `pnpm --filter @a5c/babysitter-sdk run docs:snippets:extract && pnpm --filter @a5c/babysitter-sdk run docs:snippets:tsc`  
+   Optional `docs:snippets:test` runs snippets (e.g., fake runner how-tos) against the seeded harness fixtures.
+3. **Verify fake-runner docs**  
+   `pnpm --filter @a5c/babysitter-sdk run docs:testing-readme` – executes the examples in `packages/sdk/src/testing/README.md`, ensuring `installFixedClock`, `installDeterministicUlids`, and `runToCompletionWithFakeRunner` behave as documented.
+
+All outputs (hashes, logs, manifests) feed CI jobs on Node 18/20 for macOS, Linux, and Windows. The docs map in `README.md` points contributors to the authoritative sections, and `packages/sdk/src/testing/README.md` contains the harness details referenced above.
+
 --- 
 
 ## 11. Reasoning Recap
