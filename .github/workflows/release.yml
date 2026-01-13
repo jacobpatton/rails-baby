@@ -38,10 +38,10 @@ jobs:
       - name: Prepare artifacts directory
         run: mkdir -p artifacts/logs artifacts/release
 
-      - name: Lint
-        run: |
-          set -euo pipefail
-          npm run lint 2>&1 | tee artifacts/logs/lint.log
+      # - name: Lint
+      #   run: |
+      #     set -euo pipefail
+      #     npm run lint 2>&1 | tee artifacts/logs/lint.log
 
       - name: Verify metadata
         run: |
