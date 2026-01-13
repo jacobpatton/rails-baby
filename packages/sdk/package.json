@@ -1,5 +1,5 @@
 {
-  "name": "@a5c/babysitter-sdk",
+  "name": "@a5c-ai/babysitter-sdk",
   "version": "0.0.1",
   "description": "Storage and run-registry primitives for event-sourced babysitter workflows.",
   "license": "UNLICENSED",
