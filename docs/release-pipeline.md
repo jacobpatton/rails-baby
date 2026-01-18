@@ -8,7 +8,7 @@
 ## Secrets & Permissions
 - The workflow-level permissions block sets `contents: write` and `id-token: write`; `validate` reduces its scope to `contents: read`.
 - `GITHUB_TOKEN` **must** retain `contents: write` on `main` to push version bump commits and tags. If branch protection blocks the Actions bot, create a scoped PAT and store it as `RELEASE_BOT_TOKEN`, then replace usages in the workflow.
-- `NPM_TOKEN` authenticates `npm publish`; it must correspond to an account with publish rights to `@a5c/babysitter-sdk` and should be rotated every 90 days.
+- `NPM_TOKEN` authenticates `npm publish`; it must correspond to an account with publish rights to `@a5c-ai/babysitter-sdk` and should be rotated every 90 days.
 - `VSCE_PAT` is not yet consumed, but Security owns the secret. Store it as an org/repo secret named `VSCE_PAT`, rotate every 90 days, and scope usage to the eventual Marketplace publish step only.
 
 ## Guardrails

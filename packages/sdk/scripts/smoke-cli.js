@@ -108,7 +108,7 @@ function printHelp() {
       "  --cli        CLI entry file (default: dist/cli/main.js).",
       "  --keep       Skip cleanup so the staged run can be inspected manually.",
       "",
-      "This harness is also published as `pnpm --filter @a5c/babysitter-sdk run smoke:cli`.",
+      "This harness is also published as `pnpm --filter @a5c-ai/babysitter-sdk run smoke:cli`.",
     ].join("\n")
   );
 }
@@ -128,10 +128,10 @@ function resolveWorkspacePath(input) {
 }
 
 async function ensureBuildArtifacts(cliEntry) {
-  await ensureFile(cliEntry, "CLI entrypoint missing. Run `pnpm --filter @a5c/babysitter-sdk run build` first.");
+  await ensureFile(cliEntry, "CLI entrypoint missing. Run `pnpm --filter @a5c-ai/babysitter-sdk run build` first.");
   await ensureFile(
     deterministicModulePath,
-    "Deterministic helpers missing. Run `pnpm --filter @a5c/babysitter-sdk run build` first."
+    "Deterministic helpers missing. Run `pnpm --filter @a5c-ai/babysitter-sdk run build` first."
   );
 }
 

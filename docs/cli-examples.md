@@ -1,6 +1,6 @@
 # Babysitter CLI & SDK Examples
 
-This guide walks through a realistic flow that exercises the `babysitter` CLI and the new deterministic test harness exposed from `@a5c/babysitter-sdk/testing`. The examples assume you are standing in the repo root (or a project that already vendored the CLI + SDK) and that `.a5c/runs` is the default runs directory.
+This guide walks through a realistic flow that exercises the `babysitter` CLI and the new deterministic test harness exposed from `@a5c-ai/babysitter-sdk/testing`. The examples assume you are standing in the repo root (or a project that already vendored the CLI + SDK) and that `.a5c/runs` is the default runs directory.
 
 > **Tip:** All CLI paths in this document are rendered with POSIX separators (matching the CLI output convention) even when running on Windows.
 
@@ -184,11 +184,11 @@ JSON payload (when `--json` is supplied) shows what was executed vs. filtered ou
 
 ## 7. Unit-test a process with the deterministic harness
 
-The SDK now exports `runToCompletionWithFakeRunner` from `@a5c/babysitter-sdk/testing`. Use it to exercise process logic without invoking real node runners:
+The SDK now exports `runToCompletionWithFakeRunner` from `@a5c-ai/babysitter-sdk/testing`. Use it to exercise process logic without invoking real node runners:
 
 ```ts
-import { runToCompletionWithFakeRunner } from "@a5c/babysitter-sdk/testing";
-import { createRun } from "@a5c/babysitter-sdk";
+import { runToCompletionWithFakeRunner } from "@a5c-ai/babysitter-sdk/testing";
+import { createRun } from "@a5c-ai/babysitter-sdk";
 import path from "node:path";
 import os from "node:os";
 import fs from "node:fs/promises";
@@ -248,7 +248,7 @@ The CLI transcripts above are **not** hand-edited—they are captured via the de
 
 ```bash
 # macOS/Linux
-pnpm --filter @a5c/babysitter-sdk run smoke:cli \
+pnpm --filter @a5c-ai/babysitter-sdk run smoke:cli \
   -- --runs-dir .a5c/runs/docs-cli \
      --record docs/cli-examples/baselines
 
@@ -272,4 +272,4 @@ pwsh -File scripts/docs/run_cli_examples.ps1 `
 5. **Archive run metadata.**
    - Each replay stores `_ci_artifacts/cli/run-metadata.json` with OS, Node version, git commit, and env vars so future contributors can reproduce the walkthrough exactly.
 
-Failing to regenerate outputs will cause the docs CI jobs (`docs:lint`, `docs:snippets`, `smoke:cli`, `docs:testing-readme`) to fail once the Part 7 verification matrix runs in CI. When in doubt, run `pnpm --filter @a5c/babysitter-sdk run docs:plan` locally to execute all doc checks before opening a PR.
+Failing to regenerate outputs will cause the docs CI jobs (`docs:lint`, `docs:snippets`, `smoke:cli`, `docs:testing-readme`) to fail once the Part 7 verification matrix runs in CI. When in doubt, run `pnpm --filter @a5c-ai/babysitter-sdk run docs:plan` locally to execute all doc checks before opening a PR.

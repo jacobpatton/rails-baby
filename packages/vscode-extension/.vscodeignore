@@ -156,8 +156,8 @@ node_modules/**
 !node_modules/xmlchars/**
 # END auto-generated dependency allowlist
 node_modules/@a5c/**
-node_modules/@a5c
-node_modules/@a5c/babysitter-sdk
+node_modules/@a5c-ai/**
+node_modules/@a5c-ai/babysitter-sdk
 **/*.map
 *.vsix
 src/**

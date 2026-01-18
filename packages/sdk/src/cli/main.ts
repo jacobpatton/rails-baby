@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { spawn } from "node:child_process";
 import { promises as fs } from "node:fs";
 import { createRequire } from "node:module";
 import * as path from "node:path";
@@ -448,60 +447,45 @@ function toPosixPath(value: string): string {
   return value.replace(/\\/g, "/");
 }
 
-function resolveBreakpointsBin(): string {
+function resolveBreakpointsSkillSource(): { sourceDir: string; skillName: string } {
   const pkgPath = breakpointsRequire.resolve("@a5c-ai/babysitter-breakpoints/package.json");
   const pkgDir = path.dirname(pkgPath);
-  const pkgJson = breakpointsRequire(pkgPath) as { bin?: string | Record<string, string> };
-  let binRelative: string | undefined;
-  if (typeof pkgJson.bin === "string") {
-    binRelative = pkgJson.bin;
-  } else if (pkgJson.bin && typeof pkgJson.bin === "object") {
-    binRelative = pkgJson.bin.breakpoints ?? pkgJson.bin["babysitter-breakpoints"] ?? Object.values(pkgJson.bin)[0];
-  }
-  if (!binRelative) {
-    throw new Error("missing bin entry in @a5c-ai/babysitter-breakpoints package.json");
-  }
-  return path.resolve(pkgDir, binRelative);
+  const sourceDir = path.join(pkgDir, ".codex", "skills", "babysitter-breakpoint");
+  return { sourceDir, skillName: path.basename(sourceDir) };
 }
 
 async function installBreakpointsSkill(parsed: ParsedArgs, skillsDir: string): Promise<BreakpointsInstallSummary> {
-  if (parsed.dryRun) {
-    return { status: "planned", message: "dry-run: skipped breakpoints install" };
-  }
-  let binPath: string;
+  let sourceDir: string;
+  let skillName: string;
   try {
-    binPath = resolveBreakpointsBin();
+    ({ sourceDir, skillName } = resolveBreakpointsSkillSource());
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return { status: "error", message };
   }
-  const args = [binPath, "install-skill", "--target", parsed.skillType, "--scope", parsed.skillScope];
-  if (parsed.skillsDir) {
-    args.push("--skills-dir", skillsDir);
+  const destinationDir = path.join(skillsDir, skillName);
+  try {
+    const sourceExists = await pathExists(sourceDir);
+    if (!sourceExists) {
+      return { status: "error", message: "breakpoints skill source missing" };
+    }
+    const destinationExists = await pathExists(destinationDir);
+    if (destinationExists && !parsed.force) {
+      return { status: "skipped", message: "already installed" };
+    }
+    if (parsed.dryRun) {
+      return { status: "planned", message: "dry-run: skipped breakpoints install" };
+    }
+    if (destinationExists && parsed.force) {
+      await fs.rm(destinationDir, { recursive: true, force: true });
+    }
+    await fs.mkdir(skillsDir, { recursive: true });
+    await fs.cp(sourceDir, destinationDir, { recursive: true });
+    return { status: "installed" };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { status: "error", message };
   }
-  if (parsed.json) {
-    args.push("--json");
-  }
-  const child = spawn(process.execPath, args, {
-    stdio: parsed.json ? ["ignore", "pipe", "pipe"] : "inherit",
-  });
-  const stdoutChunks: Buffer[] = [];
-  const stderrChunks: Buffer[] = [];
-  if (parsed.json) {
-    child.stdout?.on("data", (chunk) => stdoutChunks.push(Buffer.from(chunk)));
-    child.stderr?.on("data", (chunk) => stderrChunks.push(Buffer.from(chunk)));
-  }
-  const exitCode = await new Promise<number>((resolve) => {
-    child.on("close", (code) => resolve(code ?? 1));
-    child.on("error", () => resolve(1));
-  });
-  const stdout = parsed.json ? Buffer.concat(stdoutChunks).toString().trim() : undefined;
-  const stderr = parsed.json ? Buffer.concat(stderrChunks).toString().trim() : undefined;
-  if (exitCode === 0) {
-    return { status: "installed", exitCode, stdout: stdout || undefined, stderr: stderr || undefined };
-  }
-  const message = stderr || stdout || `breakpoints install-skill exited with code ${exitCode}`;
-  return { status: "error", exitCode, message, stdout: stdout || undefined, stderr: stderr || undefined };
 }
 
 async function installBundledSkillDir(

@@ -9,7 +9,7 @@ The helpers in `packages/sdk/src/testing` provide a deterministic harness for ex
 ## Seeding clocks and ULIDs
 
 ```ts
-import { installFixedClock, installDeterministicUlids } from "@a5c/babysitter-sdk/testing";
+import { installFixedClock, installDeterministicUlids } from "@a5c-ai/babysitter-sdk/testing";
 
 const clock = installFixedClock({ start: "2025-01-01T00:00:00Z", stepMs: 250 });
 const ulids = installDeterministicUlids({ randomnessSeed: 42 });
@@ -26,7 +26,7 @@ ulids.restore();
 ## Deterministic run harness
 
 ```ts
-import { createDeterministicRunHarness } from "@a5c/babysitter-sdk/testing";
+import { createDeterministicRunHarness } from "@a5c-ai/babysitter-sdk/testing";
 
 const harness = await createDeterministicRunHarness({
   processSource: `
@@ -84,7 +84,7 @@ Use it to assert deterministic ordering, scheduler hints (e.g., `parallelGroupId
 After a fake run you can diff the entire run directory with one helper:
 
 ```ts
-import { captureRunSnapshot } from "@a5c/babysitter-sdk/testing";
+import { captureRunSnapshot } from "@a5c-ai/babysitter-sdk/testing";
 
 const snapshot = await captureRunSnapshot(harness.runDir);
 expect(snapshot.journal).toMatchInlineSnapshot();
@@ -103,14 +103,14 @@ Sections 10.5 and 13 of `sdk.md`, the CLI walkthrough (`docs/cli-examples.md`), 
 1. **Run the harness doc suite.**
 
 ```bash
-pnpm --filter @a5c/babysitter-sdk run docs:testing-readme
+pnpm --filter @a5c-ai/babysitter-sdk run docs:testing-readme
 ```
 
 This command executes every fenced example in this file (and any referenced fixtures under `packages/sdk/src/testing/__examples__`) using the deterministic clock/ULID helpers. It produces `_ci_artifacts/testing-harness/<platform>/report.json` so reviewers can diff execution logs, pending counts, and seeds.
 
 2. **Sync with `sdk.md` and `docs/cli-examples.md`.**
-   - Snippets extracted from sdk.md §§8–13 and this README are compiled via `pnpm --filter @a5c/babysitter-sdk run docs:snippets:tsc`.
-   - The CLI walkthrough records real runs with `pnpm --filter @a5c/babysitter-sdk run smoke:cli` and links back to this README when it references `runToCompletionWithFakeRunner` or `captureRunSnapshot`.
+   - Snippets extracted from sdk.md §§8–13 and this README are compiled via `pnpm --filter @a5c-ai/babysitter-sdk run docs:snippets:tsc`.
+   - The CLI walkthrough records real runs with `pnpm --filter @a5c-ai/babysitter-sdk run smoke:cli` and links back to this README when it references `runToCompletionWithFakeRunner` or `captureRunSnapshot`.
 
 3. **Capture artifacts and hashes.**
    - Store execution logs, snapshot archives, and deterministic seed data under `_ci_artifacts/testing-harness/`.

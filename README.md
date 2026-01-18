@@ -2,7 +2,7 @@
 
 Babysitter ships two complementary experiences:
 
-1. **SDK + CLI** (`@a5c/babysitter-sdk` / `babysitter` binary) for building and replaying event-sourced processes with deterministic harnesses.
+1. **SDK + CLI** (`@a5c-ai/babysitter-sdk` / `babysitter` binary) for building and replaying event-sourced processes with deterministic harnesses.
 2. **VS Code extension** (this repo) for observing and steering `.a5c/runs/<runId>/` without leaving your editor.
 
 Unless you only need the editor UI, start with the SDK/CLI quickstart below so your docs and walkthroughs match the deterministic harness behavior delivered in `packages/sdk`.
@@ -17,13 +17,13 @@ Unless you only need the editor UI, start with the SDK/CLI quickstart below so y
 ### Install & bootstrap
 ```bash
 # install the SDK + CLI in your workspace
-pnpm add -D @a5c/babysitter-sdk
+pnpm add -D @a5c-ai/babysitter-sdk
 
 # build the package so the babysitter CLI is ready for docs walkthroughs
-pnpm --filter @a5c/babysitter-sdk run build
+pnpm --filter @a5c-ai/babysitter-sdk run build
 
 # create a demo run using the CLI (matches sdk.md §§8–13 examples)
-pnpm --filter @a5c/babysitter-sdk exec babysitter run:create \
+pnpm --filter @a5c-ai/babysitter-sdk exec babysitter run:create \
   --process-id demo/sample \
   --entry examples/processes/sample.mjs#process \
   --inputs examples/inputs/sample.json
@@ -31,11 +31,11 @@ pnpm --filter @a5c/babysitter-sdk exec babysitter run:create \
 
 ### Deterministic docs & harness workflow
 - **CLI walkthroughs** (`docs/cli-examples.md`) are regenerated via  
-  `pnpm --filter @a5c/babysitter-sdk run smoke:cli -- --runs-dir .a5c/runs/docs-cli --record docs/cli-examples/baselines`
+  `pnpm --filter @a5c-ai/babysitter-sdk run smoke:cli -- --runs-dir .a5c/runs/docs-cli --record docs/cli-examples/baselines`
 - **Snippets** (`sdk.md` §§8–13, testing README) compile with  
-  `pnpm --filter @a5c/babysitter-sdk run docs:snippets:tsc`
+  `pnpm --filter @a5c-ai/babysitter-sdk run docs:snippets:tsc`
 - **Fake runner examples** live in `packages/sdk/src/testing/README.md` and are validated with  
-  `pnpm --filter @a5c/babysitter-sdk run docs:testing-readme`
+  `pnpm --filter @a5c-ai/babysitter-sdk run docs:testing-readme`
 
 Re-run those commands before editing docs so CLI transcripts, snippet hashes, and harness logs remain deterministic (see `part7_test_plan.md` for the full verification matrix).
 

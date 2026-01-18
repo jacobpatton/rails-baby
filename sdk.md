@@ -1,8 +1,8 @@
-# @a5c/babysitter-sdk — Event-Sourced Process Orchestration SDK
+# @a5c-ai/babysitter-sdk — Event-Sourced Process Orchestration SDK
 
 ## 0. Overview
 
-`@a5c/babysitter-sdk` is a JavaScript/TypeScript SDK for **event‑sourced process orchestration**.
+`@a5c-ai/babysitter-sdk` is a JavaScript/TypeScript SDK for **event‑sourced process orchestration**.
 
 Core ideas:
 
@@ -427,7 +427,7 @@ export function defineTask<TArgs = any, TResult = any>(
 
 ```ts
 // tasks/build.ts
-import { defineTask } from "@a5c/babysitter-sdk";
+import { defineTask } from "@a5c-ai/babysitter-sdk";
 
 export const buildTask = defineTask<
   { target: string },
@@ -454,7 +454,7 @@ export const buildTask = defineTask<
 
 ```ts
 // tasks/code-review.ts
-import { defineTask } from "@a5c/babysitter-sdk";
+import { defineTask } from "@a5c-ai/babysitter-sdk";
 
 export const codeReviewAgentTask = defineTask<
   { diffRef: string },
@@ -756,7 +756,7 @@ User process code can catch these errors and implement its own compensation / re
 
 ```ts
 // process/hello.ts
-import { defineTask, type ProcessContext } from "@a5c/babysitter-sdk";
+import { defineTask, type ProcessContext } from "@a5c-ai/babysitter-sdk";
 
 const helloTask = defineTask<
   { name: string },
@@ -790,7 +790,7 @@ export async function process(inputs: any, ctx: ProcessContext) {
 import {
   defineTask,
   type ProcessContext,
-} from "@a5c/babysitter-sdk";
+} from "@a5c-ai/babysitter-sdk";
 
 // Assume buildTask, lintTask, testTask, codeReviewAgentTask are defined similarly to above
 
@@ -864,7 +864,7 @@ On first iteration before 09:00, `sleepUntil` throws a pending effect, and the o
   * a human label (`label`)
   * a kind (`"node"`, `"breakpoint"`, etc.)
 * Journal events are small, typed, and stable; task definitions and results live in separate files.
-* A future CLI (`@a5c/babysitter-cli`) can:
+* A future CLI (`@a5c-ai/babysitter-cli`) can:
 
   * show “current status” of a run
   * list pending tasks
@@ -886,7 +886,7 @@ A simple test harness layered on top of the SDK could:
 Example pseudo-API:
 
 ```ts
-import { runToCompletionWithFakeRunner } from "@a5c/babysitter-sdk/testing";
+import { runToCompletionWithFakeRunner } from "@a5c-ai/babysitter-sdk/testing";
 
 const { runDir } = await createRun({
   runsDir: tmpDir,
@@ -913,7 +913,7 @@ if (result.status === "waiting") {
 }
 ```
 
-`runToCompletionWithFakeRunner` ships as part of `@a5c/babysitter-sdk/testing` and:
+`runToCompletionWithFakeRunner` ships as part of `@a5c-ai/babysitter-sdk/testing` and:
 
 * Accepts a `resolve(action)` callback that returns either `{ status: "ok", value }` or `{ status: "error", error }` (plus optional stdout/stderr/metadata) for actions you want to satisfy deterministically.
 * Commits those fake results to the run directory, accumulating a log of executed actions so your tests can assert against them.
@@ -925,13 +925,13 @@ if (result.status === "waiting") {
 To keep the documentation and examples in sync with the shipped runtime/CLI, every edit to `sdk.md`, `README.md`, `docs/cli-examples.md`, or `packages/sdk/src/testing/README.md` should be paired with the deterministic harness jobs below (see `part7_test_plan.md` for the full matrix):
 
 1. **Regenerate CLI walkthroughs**  
-   `pnpm --filter @a5c/babysitter-sdk run smoke:cli -- --runs-dir .a5c/runs/docs-cli --record docs/cli-examples/baselines`  
+   `pnpm --filter @a5c-ai/babysitter-sdk run smoke:cli -- --runs-dir .a5c/runs/docs-cli --record docs/cli-examples/baselines`  
    Stores hashed stdout/JSON outputs under `_ci_artifacts/cli/<platform>/<node>/` so reviewers can diff transcripts.
 2. **Compile/execute code fences**  
-   `pnpm --filter @a5c/babysitter-sdk run docs:snippets:extract && pnpm --filter @a5c/babysitter-sdk run docs:snippets:tsc`  
+   `pnpm --filter @a5c-ai/babysitter-sdk run docs:snippets:extract && pnpm --filter @a5c-ai/babysitter-sdk run docs:snippets:tsc`  
    Optional `docs:snippets:test` runs snippets (e.g., fake runner how-tos) against the seeded harness fixtures.
 3. **Verify fake-runner docs**  
-   `pnpm --filter @a5c/babysitter-sdk run docs:testing-readme` – executes the examples in `packages/sdk/src/testing/README.md`, ensuring `installFixedClock`, `installDeterministicUlids`, and `runToCompletionWithFakeRunner` behave as documented.
+   `pnpm --filter @a5c-ai/babysitter-sdk run docs:testing-readme` – executes the examples in `packages/sdk/src/testing/README.md`, ensuring `installFixedClock`, `installDeterministicUlids`, and `runToCompletionWithFakeRunner` behave as documented.
 
 All outputs (hashes, logs, manifests) feed CI jobs on Node 18/20 for macOS, Linux, and Windows. The docs map in `README.md` points contributors to the authoritative sections, and `packages/sdk/src/testing/README.md` contains the harness details referenced above.
 
@@ -963,14 +963,14 @@ All outputs (hashes, logs, manifests) feed CI jobs on Node 18/20 for macOS, Linu
 
 **Why external tasks (orchestrator-only dispatch)?**
 
-* Keeps `@a5c/babysitter-sdk` focused: it decides the next action, but doesn’t know how or where tasks run.
+* Keeps `@a5c-ai/babysitter-sdk` focused: it decides the next action, but doesn’t know how or where tasks run.
 * Allows flexible runners: local Node, containers, remote queues, human UIs, etc.
 
-This spec is the foundation for implementing `@a5c/babysitter-sdk` as a small, deterministic, git‑friendly orchestration core with a clean path to richer tooling and CLI support later.
+This spec is the foundation for implementing `@a5c-ai/babysitter-sdk` as a small, deterministic, git‑friendly orchestration core with a clean path to richer tooling and CLI support later.
 
 ---
 
-## 12. CLI Design — `@a5c/babysitter-cli`
+## 12. CLI Design — `@a5c-ai/babysitter-cli`
 
 The CLI is the primary way to **interact with intrinsics** (tasks, breakpoints, sleep gates) and to drive runs without writing custom orchestration code.
 
@@ -1287,7 +1287,7 @@ Potential future commands for richer DevEx:
 
 ## 13. Ambient API & Decorators for Better DevEx
 
-The previous sections used `ctx.task` / `ctx.sleepUntil` to emphasize mechanics. For developer experience, `@a5c/babysitter-sdk` also exposes an **ambient API** that removes the need to thread `ctx` through process code.
+The previous sections used `ctx.task` / `ctx.sleepUntil` to emphasize mechanics. For developer experience, `@a5c-ai/babysitter-sdk` also exposes an **ambient API** that removes the need to thread `ctx` through process code.
 
 ### 13.1 Ambient run context
 
@@ -1309,14 +1309,14 @@ The runtime exports explicit helpers for managing this scope:
 * `getActiveProcessContext()` returns the current ambient context or `undefined` if none is active.
 * `requireProcessContext()` returns the current context or throws `MissingProcessContextError` so callers get a deterministic failure instead of silently running outside a run.
 
-These helpers are exported from `@a5c/babysitter-sdk` and enable downstream code to call intrinsics (or helper decorators) without manually threading `ctx` through every function.
+These helpers are exported from `@a5c-ai/babysitter-sdk` and enable downstream code to call intrinsics (or helper decorators) without manually threading `ctx` through every function.
 
 ### 13.2 Task decorator-style API
 
 Instead of writing `ctx.task(taskFn, args)`, a developer can import `task` once and define callables that automatically integrate with the orchestration machinery.
 
 ```ts
-import { task, sleepUntil, breakpoint } from "@a5c/babysitter-sdk";
+import { task, sleepUntil, breakpoint } from "@a5c-ai/babysitter-sdk";
 
 // Define a task that produces a TaskDef
 export const build = task<
@@ -1369,7 +1369,7 @@ Internally, `task(...)` is sugar over `defineTask` + an ambient-aware call wrapp
 To remove the need for `ctx.sleepUntil` and `ctx.breakpoint`, the SDK exports ambient-aware helpers:
 
 ```ts
-import { sleepUntil, breakpoint } from "@a5c/babysitter-sdk";
+import { sleepUntil, breakpoint } from "@a5c-ai/babysitter-sdk";
 
 export async function process(inputs: any) {
   await sleepUntil("2026-01-10T09:00:00.000Z");
@@ -1429,7 +1429,7 @@ The orchestrator can decide whether to pass `ctx` as an argument when invoking t
    Provide higher‑level helpers like:
 
    ```ts
-   import { nodeTask, shellTask } from "@a5c/babysitter-sdk";
+   import { nodeTask, shellTask } from "@a5c-ai/babysitter-sdk";
 
    export const lint = nodeTask<LintArgs, LintResult>("lint", {
      entry: "scripts/lint.js",
@@ -1443,4 +1443,4 @@ The orchestrator can decide whether to pass `ctx` as an argument when invoking t
    * `runProcessOnce(processFn, inputs)` — runs in direct mode for quick debugging.
    * `simulateRun(processFn, inputs, resolvers)` — uses in-memory journal and fake task resolvers to let users test process behavior without touching the filesystem.
 
-These DevEx layers sit on top of the core event-sourced model and are strictly optional, but they make `@a5c/babysitter-sdk` feel like a “normal” JS workflow library rather than a low-level orchestration engine.
+These DevEx layers sit on top of the core event-sourced model and are strictly optional, but they make `@a5c-ai/babysitter-sdk` feel like a “normal” JS workflow library rather than a low-level orchestration engine.
