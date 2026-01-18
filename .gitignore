@@ -20,3 +20,6 @@ _ci_artifacts/**
 .a5c/**/**
 .a5c/**
 .a5c/*
+.a5c/processes/**
+.a5c/processes/**/**
+.a5c/processes/index.js
