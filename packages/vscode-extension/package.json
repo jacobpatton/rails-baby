@@ -27,12 +27,6 @@
     "workspace"
   ],
   "main": "./dist/extension.js",
-  "files": [
-    "dist/**",
-    "package.json",
-    "README.md",
-    "LICENSE.txt"
-  ],
   "activationEvents": [
     "onStartupFinished",
     "onView:babysitter.runs",
