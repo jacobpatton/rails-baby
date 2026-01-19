@@ -12,7 +12,8 @@
       "Bash(breakpoints breakpoint create:*)",
       "Bash(breakpoints breakpoint wait:*)",
       "Bash(npm run build:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(test:*)"
     ]
   }
 }
