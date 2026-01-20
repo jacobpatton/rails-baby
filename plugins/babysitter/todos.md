@@ -7,7 +7,7 @@
 - [x] allow packaging processes with skills (/skill/some-skill/process/some-process.js) , meaning documenting it and adding it to the babysitter skill instructions. ✅ Completed 2026-01-20 - Created comprehensive PACKAGING_PROCESSES_WITH_SKILLS.md documentation, comprehensive advanced example process (tdd-quality-convergence.js) demonstrating agent planning, TDD workflow, quality convergence, parallel execution, and breakpoints. Fixed skill invocation pattern (removed incorrect `args` field, added `instructions` to context). Updated SKILL.md and ADVANCED_PATTERNS.md with correct patterns. See PROCESS_EXAMPLES_WITH_AGENT_SKILL_INVOCATION.md
 - [x] populate the plugins/babysitter/commands/ and files with the adapted instructions and verify setup-babysitter-run and the on-stop hooks are implemented correctly. ✅ Completed 2026-01-20 - Created setup-babysitter-run-resume.sh, updated command docs with architecture sections, verified all hooks. See COMMANDS_AND_HOOKS_VERIFICATION_2026-01-20.md
 - [x] write a spec for babysitter plugin ✅ Completed 2026-01-20 - Created comprehensive BABYSITTER_PLUGIN_SPECIFICATION.md covering architecture, components, hooks, CLI, workflows, API reference, and best practices for Version 4.0
-- [ ] README.md for the babysitter plugin
+- [x] README.md for the babysitter plugin ✅ Completed 2026-01-20 - Created comprehensive README.md with quick start, core concepts, usage examples, CLI reference, advanced features, documentation links, troubleshooting, and contribution guidelines
 - [ ] research each of these methodologies and techniques and create an example process for each of them:
 ralph.js (simple ralph wiggum loops that iterates until DONE is emmited)
 plan-and-execute.js
