@@ -33,7 +33,8 @@
       "Bash($CLI run:status \"$RUN_DIR\" --json)",
       "Bash(plugins/babysitter/hooks/on-iteration-start/native-orchestrator.sh)",
       "Bash(npm test:*)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(xargs cat:*)"
     ]
   }
 }

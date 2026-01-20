@@ -105,11 +105,18 @@ Tasks can have `kind: "skill"` to invoke Claude Code skills. Useful for reusing 
 
   skill: {
     name: "codebase-analyzer",    // Skill identifier
-    args: "--scope X --depth Y",  // Skill arguments
-    context: {                     // Structured context
+    context: {                     // Structured context with instructions
+      scope: "src/",
+      depth: "detailed",
       targetFiles: [...],
       analysisType: "consistency",
-      criteria: [...]
+      criteria: ["Code consistency", "Naming conventions"],
+      instructions: [               // Instructions for the skill
+        "Scan specified paths",
+        "Check consistency",
+        "Analyze patterns",
+        "Generate report"
+      ]
     }
   },
 
