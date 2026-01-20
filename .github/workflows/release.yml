@@ -127,7 +127,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json packages/vscode-extension/package.json packages/breakpoints/package.json packages/sdk/package.json packages/babysitter/package.json package-lock.json CHANGELOG.md
+          git add package.json packages/vscode-extension/package.json packages/breakpoints/package.json packages/sdk/package.json packages/babysitter/package.json package-lock.json CHANGELOG.md plugins/babysitter/.claude-plugin/plugin.json plugins/babysitter/plugin.json .claude-plugin/marketplace.json
           if git diff --cached --quiet; then
             echo "No version changes detected."
           else

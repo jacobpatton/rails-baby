@@ -100,7 +100,7 @@ Babysitter supports two primary interaction modes:
                  │
 ┌────────────────▼────────────────────────────────────────────┐
 │              @a5c-ai/babysitter-sdk CLI                      │
-│  (run:create, run:iterate, run:status, task:run, etc.)      │
+│  (run:create, run:iterate, run:status, task:post, etc.)      │
 └───┬──────────────────────────────────────────────────────┬──┘
     │                                                      │
     │ Calls hooks                                          │ Updates
@@ -176,8 +176,8 @@ Babysitter supports two primary interaction modes:
 2. **CLI** loads journal and reconstructs state
 3. **CLI** calls `on-iteration-start` hook with iteration payload
 4. **Hook** examines pending effects and executes tasks:
-   - Calls `task:run <runId> <effectId>` for each task
-   - Tasks update journal and state
+   - Executes the effect externally (hook/worker/agent)
+   - Calls `task:post <runId> <effectId> --status <ok|error>` to commit into journal/state
 5. **Hook** returns execution results as JSON
 6. **CLI** calls `on-iteration-end` hook for finalization
 7. **CLI** returns iteration result to agent/skill:
@@ -245,7 +245,7 @@ npx -y @a5c-ai/babysitter-sdk
 **Task Operations:**
 - `task:list` - List tasks
 - `task:show` - Show task details
-- `task:run` - Execute a task
+- `task:post` - Commit/post a task result
 
 **Utility:**
 - `--version` - Show version
@@ -347,7 +347,7 @@ npx -y @a5c-ai/babysitter-sdk
 
 ### 4.1 Hook Execution Model (Version 4.0)
 
-**Key Change:** Hooks now **execute tasks directly** instead of returning effect definitions.
+**Key Change:** Hooks now **execute tasks directly** instead of returning effect definitions, and then **post results** via `task:post`.
 
 **Before (Version 3.0):**
 ```bash
@@ -363,7 +363,8 @@ npx -y @a5c-ai/babysitter-sdk
 **After (Version 4.0):**
 ```bash
 # Hook executes tasks directly
-"${CLI[@]}" task:run "$RUN_ID" "$EFFECT_ID"
+# ...execute "$EFFECT_ID" externally, then post the result:
+"${CLI[@]}" task:post "$RUN_ID" "$EFFECT_ID" --status ok --json
 
 # Hook returns execution results
 {
@@ -404,7 +405,7 @@ npx -y @a5c-ai/babysitter-sdk
 2. Check terminal states (completed, failed)
 3. List pending tasks via `task:list --pending --json`
 4. Filter auto-runnable tasks (kind="node")
-5. **Execute tasks directly** via `task:run`
+5. **Execute tasks directly**, then **commit** via `task:post`
 6. Return execution results
 
 **Output Format:**
@@ -650,25 +651,29 @@ babysitter task:list run-20260120-example --pending --json
 }
 ```
 
-### 5.6 task:run
+### 5.6 task:post
 
-**Purpose:** Execute a task
+**Purpose:** Post/commit a task result after it was executed externally
 
 **Syntax:**
 ```bash
-babysitter task:run <runId> <effectId> [--dry-run] [--json]
+babysitter task:post <runId> <effectId> --status <ok|error> [--value <file>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>] [--dry-run] [--json]
 ```
 
 **Example:**
 ```bash
-babysitter task:run run-20260120-example effect-abc123 --json
+babysitter task:post run-20260120-example effect-abc123 --status ok --json
 ```
 
 **Output:**
 ```json
 {
-  "status": "ok",
-  "exitCode": 0,
+  "status": "ok|error",
+  "committed": {
+    "resultRef": "tasks/effect-abc123/result.json",
+    "stdoutRef": "tasks/effect-abc123/stdout.log",
+    "stderrRef": "tasks/effect-abc123/stderr.log"
+  },
   "stdoutRef": "tasks/effect-abc123/stdout.log",
   "stderrRef": "tasks/effect-abc123/stderr.log",
   "resultRef": "tasks/effect-abc123/result.json"
@@ -1782,7 +1787,7 @@ cat .a5c/runs/run-20260120-example/state/state.json | jq .
 ```bash
 babysitter --help
 babysitter run:create --help
-babysitter task:run --help
+babysitter task:post --help
 ```
 
 **Check Version:**

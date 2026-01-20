@@ -29,9 +29,9 @@ Created `packages/sdk/src/runtime/hooks/runtime.ts`:
 - `on-run-fail` - Called after RUN_FAILED event
 - `on-iteration-end` - Called in finally block
 
-**In `nodeTaskRunner()` (packages/sdk/src/cli/nodeTaskRunner.ts):**
-- `on-task-start` - Called before task execution
-- `on-task-complete` - Called after task execution completes
+**Task execution hooks:**
+- The SDK no longer executes tasks in-process (the legacy CLI node runner was removed).
+- If you want `on-task-start` / `on-task-complete`, emit them from your external executor (hook/worker) around the work it performs.
 
 ### 3. TypeScript Fixes
 
@@ -92,7 +92,7 @@ Verified hook logging:
 - `packages/sdk/src/runtime/orchestrateIteration.ts`
 - `packages/sdk/src/runtime/types.ts`
 - `packages/sdk/src/runtime/intrinsics/hook.ts`
-- `packages/sdk/src/cli/nodeTaskRunner.ts`
+- (removed) legacy CLI node runner module
 
 ### Documentation (3 files)
 - `packages/sdk/sdk.md`

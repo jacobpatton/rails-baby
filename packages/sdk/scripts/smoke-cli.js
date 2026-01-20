@@ -291,10 +291,10 @@ async function runSmokeSequence(context) {
   const runStatus = await runCliJson(context, withRunsDir(context, ["run:status", context.runId, "--json"]));
   sequence.push({ command: "run:status", detail: runStatus.json });
 
-  const runContinue = await runCliJson(context, withRunsDir(context, ["run:continue", context.runId, "--json"]));
-  ensureWaiting(runContinue.json);
-  const effectId = pickEffectId(runContinue.json);
-  sequence.push({ command: "run:continue", detail: runContinue.json, effectId });
+  const runStep = await runCliJson(context, withRunsDir(context, ["run:step", context.runId, "--json"]));
+  ensureWaiting(runStep.json);
+  const effectId = pickEffectId(runStep.json);
+  sequence.push({ command: "run:step", detail: runStep.json, effectId });
 
   const runEvents = await runCliJson(context, withRunsDir(context, ["run:events", context.runId, "--json"]));
   validateEventPaths(runEvents.json, context.runDir);
@@ -329,12 +329,12 @@ async function runSmokeSequence(context) {
   ensurePayloadVisible(taskShowUnredacted.json, context.secretToken, context.internalKey);
   sequence.push({ command: "task:show (allow secrets)", detail: taskShowUnredacted.json });
 
-  const taskRun = await runCliJson(
+  const taskPost = await runCliJson(
     context,
-    withRunsDir(context, ["task:run", context.runId, effectId, "--dry-run", "--json"])
+    withRunsDir(context, ["task:post", context.runId, effectId, "--status", "ok", "--dry-run", "--json"])
   );
-  ensureDryRunStatus(taskRun.json);
-  sequence.push({ command: "task:run", detail: taskRun.json });
+  ensureDryRunStatus(taskPost.json);
+  sequence.push({ command: "task:post", detail: taskPost.json });
 
   return sequence;
 }
@@ -354,15 +354,15 @@ function validateRunCreate(payload, context) {
 
 function ensureWaiting(payload) {
   if (payload.status !== "waiting") {
-    throw new Error(`run:continue expected waiting status, received ${payload.status || "unknown"}`);
+    throw new Error(`run:step expected waiting status, received ${payload.status || "unknown"}`);
   }
-  if (!Array.isArray(payload.pending) || payload.pending.length === 0) {
-    throw new Error("run:continue did not report any pending actions");
+  if (!Array.isArray(payload.nextActions) || payload.nextActions.length === 0) {
+    throw new Error("run:step did not report any pending actions");
   }
 }
 
 function pickEffectId(payload) {
-  const candidate = Array.isArray(payload.pending) ? payload.pending.find((entry) => entry.kind === "node") : undefined;
+  const candidate = Array.isArray(payload.nextActions) ? payload.nextActions.find((entry) => entry.kind === "node") : undefined;
   if (!candidate?.effectId) {
     throw new Error("Unable to discover pending node effect id");
   }
@@ -426,7 +426,7 @@ function ensurePayloadVisible(payload, secretToken, internalKey) {
 
 function ensureDryRunStatus(payload) {
   if (payload.status !== "skipped") {
-    throw new Error(`task:run --dry-run expected status=skipped, received ${payload.status}`);
+    throw new Error(`task:post --dry-run expected status=skipped, received ${payload.status}`);
   }
 }
 

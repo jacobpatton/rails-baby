@@ -1,0 +1,11 @@
+[2026-01-20T19:08:18Z] RUN_START
+  Hook: on-run-start
+  Run ID: cli-smoke
+  Process: cli-smoke/process
+  Entry: ../processes/smoke-process.mjs#process
+[2026-01-20T19:08:19Z] ITERATION_START
+  Hook: on-iteration-start
+  Run ID: cli-smoke
+[2026-01-20T19:08:22Z] ITERATION_END
+  Hook: on-iteration-end
+  Run ID: cli-smoke

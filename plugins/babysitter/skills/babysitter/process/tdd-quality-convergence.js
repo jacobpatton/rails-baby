@@ -32,22 +32,15 @@ export async function process(inputs, ctx) {
     maxIterations = 5
   } = inputs;
 
-  ctx.log(`Starting TDD quality convergence for: ${feature}`);
-  ctx.log(`Target quality: ${targetQuality}, Max iterations: ${maxIterations}`);
-
   // ============================================================================
   // PHASE 1: PLANNING WITH AGENT
   // ============================================================================
-
-  ctx.log('Phase 1: Generating implementation plan with agent');
 
   const planningResult = await ctx.task(agentPlanningTask, {
     feature,
     requirements: inputs.requirements || [],
     constraints: inputs.constraints || []
   });
-
-  ctx.log(`Plan generated: ${planningResult.approach}`);
 
   // Breakpoint: Review plan before implementation
   await ctx.breakpoint({
@@ -72,9 +65,6 @@ export async function process(inputs, ctx) {
 
   while (iteration < maxIterations && !converged) {
     iteration++;
-    ctx.log(`\n=== Iteration ${iteration}/${maxIterations} ===`);
-    ctx.log(`Current quality: ${currentQuality}/${targetQuality}`);
-
     // Step 1: Write/update tests based on plan and previous feedback
     const testsResult = await ctx.task(writeTestsTask, {
       feature,
@@ -83,15 +73,11 @@ export async function process(inputs, ctx) {
       previousFeedback: iteration > 1 ? iterationResults[iteration - 2].feedback : null
     });
 
-    ctx.log(`Tests written: ${testsResult.testCount} tests`);
-
     // Step 2: Run tests (expect failures on first iteration)
     const testRunResult = await ctx.task(runTestsTask, {
       testFiles: testsResult.testFiles,
       expectFailures: iteration === 1
     });
-
-    ctx.log(`Test run: ${testRunResult.passed}/${testRunResult.total} passed`);
 
     // Step 3: Implement/refine code to pass tests
     const implementationResult = await ctx.task(implementCodeTask, {
@@ -103,19 +89,13 @@ export async function process(inputs, ctx) {
       previousFeedback: iteration > 1 ? iterationResults[iteration - 2].feedback : null
     });
 
-    ctx.log(`Implementation: ${implementationResult.filesModified.length} files modified`);
-
     // Step 4: Run tests again
     const finalTestResult = await ctx.task(runTestsTask, {
       testFiles: testsResult.testFiles,
       expectFailures: false
     });
 
-    ctx.log(`Final test run: ${finalTestResult.passed}/${finalTestResult.total} passed`);
-
     // Step 5: Parallel quality checks
-    ctx.log('Running parallel quality checks');
-
     const [
       coverageResult,
       lintResult,
@@ -127,11 +107,6 @@ export async function process(inputs, ctx) {
       () => ctx.task(typeCheckTask, { files: implementationResult.filesModified }),
       () => ctx.task(securityCheckTask, { files: implementationResult.filesModified })
     ]);
-
-    ctx.log(`Quality checks complete: coverage=${coverageResult.percentage}%, lint=${lintResult.issueCount} issues, types=${typeCheckResult.errorCount} errors, security=${securityResult.vulnerabilityCount} vulnerabilities`);
-
-    // Step 6: Agent-based quality scoring
-    ctx.log('Agent scoring implementation quality');
 
     const qualityScore = await ctx.task(agentQualityScoringTask, {
       feature,
@@ -150,9 +125,6 @@ export async function process(inputs, ctx) {
     });
 
     currentQuality = qualityScore.overallScore;
-
-    ctx.log(`Quality score: ${currentQuality}/100`);
-    ctx.log(`Agent analysis: ${qualityScore.summary}`);
 
     // Store iteration results
     iterationResults.push({
@@ -174,10 +146,7 @@ export async function process(inputs, ctx) {
     // Check convergence
     if (currentQuality >= targetQuality) {
       converged = true;
-      ctx.log(`✓ Quality target reached! (${currentQuality} >= ${targetQuality})`);
     } else {
-      ctx.log(`✗ Quality below target (${currentQuality} < ${targetQuality})`);
-      ctx.log(`Agent recommendations: ${qualityScore.recommendations.slice(0, 3).join(', ')}`);
 
       // Breakpoint: Review iteration results before continuing
       if (iteration < maxIterations) {
@@ -199,8 +168,6 @@ export async function process(inputs, ctx) {
   // ============================================================================
   // PHASE 3: FINAL VERIFICATION
   // ============================================================================
-
-  ctx.log('\nPhase 3: Final verification');
 
   // Parallel final checks
   const [
@@ -225,7 +192,6 @@ export async function process(inputs, ctx) {
     integrationTests: integrationTestResult
   });
 
-  ctx.log(`Final review: ${finalReview.verdict}`);
 
   // Final breakpoint for approval
   await ctx.breakpoint({
@@ -336,17 +302,11 @@ export const agentPlanningTask = defineTask('agent-planner', (args, taskCtx) => 
  * Write tests task
  */
 export const writeTestsTask = defineTask('write-tests', (args, taskCtx) => ({
-  kind: 'node',
+  kind: 'agent',
   title: `Write tests for ${args.feature}`,
   description: 'Generate test files based on plan',
+  agent: {
 
-  node: {
-    entry: '.a5c/orchestrator_scripts/tdd/write-tests.js',
-    args: [
-      '--feature', args.feature,
-      '--iteration', String(args.iteration),
-      '--output', `tasks/${taskCtx.effectId}/result.json`
-    ]
   },
 
   io: {
@@ -386,17 +346,27 @@ export const runTestsTask = defineTask('run-tests', (args, taskCtx) => ({
  * Implement code task
  */
 export const implementCodeTask = defineTask('implement-code', (args, taskCtx) => ({
-  kind: 'node',
+  kind: 'agent',
   title: `Implement ${args.feature}`,
   description: `Write/refine implementation (iteration ${args.iteration})`,
 
-  node: {
-    entry: '.a5c/orchestrator_scripts/tdd/implement-code.js',
-    args: [
-      '--feature', args.feature,
-      '--iteration', String(args.iteration),
-      '--output', `tasks/${taskCtx.effectId}/result.json`
-    ]
+  agent: {
+    name: 'coder',
+    prompt: {
+      role: 'senior software engineer',
+      task: 'Write/refine implementation for the given feature',
+      context: { feature: args.feature, iteration: args.iteration },
+      instructions: ['Write/refine implementation for the given feature', 'Follow plan', 'Write tests', 'Write documentation'],
+      outputFormat: 'JSON with implementation'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['filesCreated', 'filesModified'],
+      properties: {
+        filesCreated: { type: 'array', items: { type: 'string' } },
+        filesModified: { type: 'array', items: { type: 'string' } }
+      }
+    }
   },
 
   io: {
@@ -411,16 +381,29 @@ export const implementCodeTask = defineTask('implement-code', (args, taskCtx) =>
  * Coverage check task
  */
 export const coverageCheckTask = defineTask('coverage-check', (args, taskCtx) => ({
-  kind: 'node',
+  kind: 'agent',
   title: 'Check test coverage',
   description: 'Run coverage analysis',
 
-  node: {
-    entry: '.a5c/orchestrator_scripts/quality/coverage-check.js',
-    args: [
-      '--test-files', JSON.stringify(args.testFiles),
-      '--output', `tasks/${taskCtx.effectId}/result.json`
-    ]
+  agent: {
+    name: 'coverage-checker',
+    prompt: {
+      role: 'senior software engineer',
+      task: 'Run coverage analysis for the given test files',
+      context: { testFiles: args.testFiles },
+      instructions: ['Run coverage analysis for the given test files', 'Follow plan', 'Write tests', 'Write documentation'],
+      outputFormat: 'JSON with coverageResult'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['coverageResult'],
+      properties: {
+        coverageResult: { type: 'object', properties: {
+          coverage: { type: 'number' },
+          files: { type: 'array', items: { type: 'string' } }
+        } }
+      }
+    }
   },
 
   io: {
@@ -435,72 +418,38 @@ export const coverageCheckTask = defineTask('coverage-check', (args, taskCtx) =>
  * Lint check task
  */
 export const lintCheckTask = defineTask('lint-check', (args, taskCtx) => ({
-  kind: 'node',
+  kind: 'shell',
   title: 'Run linter',
   description: 'Check code style and common issues',
-
-  node: {
-    entry: '.a5c/orchestrator_scripts/quality/lint-check.js',
-    args: [
-      '--files', JSON.stringify(args.files),
-      '--output', `tasks/${taskCtx.effectId}/result.json`
-    ]
-  },
-
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
-  },
-
-  labels: ['quality', 'lint']
+  shell: {
+    command: 'npx eslint --fix --files ${args.files} --output ${taskCtx.effectId}/result.json'
+  }
 }));
 
 /**
  * Type check task
  */
 export const typeCheckTask = defineTask('type-check', (args, taskCtx) => ({
-  kind: 'node',
+  kind: 'shell',
   title: 'Run type checker',
   description: 'Verify TypeScript types',
 
-  node: {
-    entry: '.a5c/orchestrator_scripts/quality/type-check.js',
-    args: [
-      '--files', JSON.stringify(args.files),
-      '--output', `tasks/${taskCtx.effectId}/result.json`
-    ]
-  },
-
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
-  },
-
-  labels: ['quality', 'types']
+  shell: {
+    command: 'npx tsc --files ${args.files} --output ${taskCtx.effectId}/result.json'
+  }
 }));
 
 /**
  * Security check task
  */
 export const securityCheckTask = defineTask('security-check', (args, taskCtx) => ({
-  kind: 'node',
+  kind: 'shell',
   title: 'Run security scan',
   description: 'Check for security vulnerabilities',
 
-  node: {
-    entry: '.a5c/orchestrator_scripts/quality/security-check.js',
-    args: [
-      '--files', JSON.stringify(args.files),
-      '--output', `tasks/${taskCtx.effectId}/result.json`
-    ]
-  },
-
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
-  },
-
-  labels: ['quality', 'security']
+  shell: {
+    command: 'npx npx @secure-code-warrior/cli --files ${args.files} --output ${taskCtx.effectId}/result.json'
+  }
 }));
 
 /**
@@ -575,24 +524,13 @@ export const agentQualityScoringTask = defineTask('agent-quality-scorer', (args,
  * Integration test task
  */
 export const integrationTestTask = defineTask('integration-test', (args, taskCtx) => ({
-  kind: 'node',
+  kind: 'shell',
   title: 'Run integration tests',
   description: 'Test feature in integrated environment',
 
-  node: {
-    entry: '.a5c/orchestrator_scripts/tdd/integration-test.js',
-    args: [
-      '--feature', args.feature,
-      '--output', `tasks/${taskCtx.effectId}/result.json`
-    ]
-  },
-
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
-  },
-
-  labels: ['tests', 'integration']
+  shell: {
+    command: 'npx jest --feature ${args.feature} --output ${taskCtx.effectId}/result.json'
+  }
 }));
 
 /**

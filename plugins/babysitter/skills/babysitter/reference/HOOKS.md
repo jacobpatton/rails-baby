@@ -155,10 +155,9 @@ The SDK runtime automatically calls hooks at the following points:
 - `on-iteration-end` - Called in finally block at end of iteration
 - Payloads include: `{ runId, status, output/error, duration, timestamp }`
 
-**In task execution (packages/sdk/src/cli/nodeTaskRunner.ts):**
-- `on-task-start` - Called before task execution begins
-- `on-task-complete` - Called after task execution finishes
-- Payloads include: `{ runId, effectId, taskId, status, duration, timestamp }`
+**In task execution (external):**
+- The SDK no longer executes tasks in-process (the legacy CLI node runner was removed).
+- If you want task lifecycle hooks (`on-task-start`, `on-task-complete`), emit them from your external executor (hook/worker/agent) around the work it performs.
 
 #### Error Handling
 

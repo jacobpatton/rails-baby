@@ -10,7 +10,7 @@ Successfully removed all legacy `run:continue` and auto-run functionality from t
 ## Motivation
 
 With the new hook-driven orchestration:
-- **Hooks execute tasks** via `on-iteration-start` calling `task:run` directly
+- **Hooks execute tasks** via `on-iteration-start` calling `task:post` to commit results
 - **`run:iterate` provides single iteration** command
 - **Skill/agent loops** calling `run:iterate` repeatedly
 

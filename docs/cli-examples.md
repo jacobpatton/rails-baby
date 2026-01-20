@@ -125,60 +125,23 @@ When `result.json` exceeds 1 MiB the CLI prints `result: see tasks/<id>/result
 
 ---
 
-## 5. Dry-run a task execution
+## 5. Dry-run a task result post
 
 ```bash
-babysitter task:run run-20260112-130455 ef-build-001 --dry-run
+babysitter task:post run-20260112-130455 ef-build-001 --status ok --dry-run
 ```
 
 ```
-[task:run] dry-run plan {"command":{"binary":"node","args":["tasks/ef-build-001/node_entry.mjs","--workspace","frontend"],"cwd":"."},"io":{"input":"tasks/ef-build-001/input.json","output":"tasks/ef-build-001/result.json","stdout":"tasks/ef-build-001/stdout.log","stderr":"tasks/ef-build-001/stderr.log"}}
-[task:run] status=skipped
+[task:post] status=skipped
 ```
 
-Dry runs log the serialized plan to stderr, keep stdout silent (to preserve pipelines), and exit `0`.
+Dry runs preview the mutation and exit `0` without changing on-disk state.
 
 ---
 
-## 6. Auto-run pending nodes with safeguards
+## 6. Drive a run without built-in auto-execution
 
-```bash
-babysitter run:continue run-20260112-130455 \
-  --auto-node-tasks \
-  --auto-node-max 1 \
-  --auto-node-label build
-```
-
-Sample stderr:
-
-```
-[auto-run] ef-build-001 [node] build workspace
-[auto-run] reached --auto-node-max=1
-[run:continue] status=waiting autoNode=1 pending[total]=1 stateVersion=2
-```
-
-JSON payload (when `--json` is supplied) shows what was executed vs. filtered out:
-
-```json
-{
-  "status": "waiting",
-  "autoRun": {
-    "executed": [
-      { "effectId": "ef-build-001", "kind": "node", "label": "build workspace" }
-    ],
-    "pending": [
-      { "effectId": "ef-lint-001", "kind": "node", "label": "lint sources" }
-    ]
-  },
-  "metadata": {
-    "stateVersion": 2,
-    "pendingEffectsByKind": { "node": 1 }
-  },
-  "pending": [
-    { "effectId": "ef-lint-001", "kind": "node", "label": "lint sources" }
-  ]
-}
-```
+Instead of `run:continue` (removed), loop `run:iterate`/`run:step`, execute pending effects using your own runner (hook/worker/agent), then commit results with `task:post`.
 
 ---
 

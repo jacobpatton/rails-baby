@@ -41,7 +41,7 @@ The babysitter orchestration system is now **fully hook-driven**. The skill simp
 │ on-iteration-start Hook (EXECUTES orchestration)           │
 │                                                             │
 │  - Get run status and pending tasks                       │
-│  - Execute auto-runnable tasks (calls task:run directly)  │
+│  - Execute auto-runnable tasks and post results (calls task:post)  │
 │  - OR wait for breakpoints/sleeps                         │
 │  - Return execution results                               │
 └─────────────────────────────────────────────────────────────┘
@@ -191,7 +191,7 @@ while [ $ITERATION -lt $MAX_ITERATIONS ]; do
 
     case "$EFFECT_TYPE" in
       execute-task)
-        if ! $CLI task:run "$RUN_DIR" "$EFFECT_ID" 2>&1 >&2; then
+        if ! $CLI task:post "$RUN_DIR" "$EFFECT_ID" --status ok 2>&1 >&2; then
           echo "[skill] Warning: Task $EFFECT_ID failed" >&2
           # Continue with other tasks (error recorded in journal)
         fi
@@ -254,7 +254,7 @@ When orchestrating a run:
    - `"waiting"` → Breakpoint/sleep, pause or handle
 
 4. **Perform effects:**
-   - `execute-task` → Call `task:run <runDir> <effectId>`
+   - `execute-task` → Call `task:post <runDir> <effectId> --status <ok|error>`
    - `handle-breakpoint` → Use on-breakpoint hook
    - `wait-until` → Sleep until specified time
 
@@ -304,7 +304,7 @@ async function orchestrateRun(runId: string) {
     for (const effect of effects) {
       if (effect.type === "execute-task") {
         console.log(`Executing task: ${effect.effectId}`);
-        await bash(`${CLI} task:run ${runDir} ${effect.effectId}`);
+        await bash(`${CLI} task:post ${runDir} ${effect.effectId} --status ok`);
       } else if (effect.type === "handle-breakpoint") {
         // Handle breakpoint
         console.log(`Breakpoint: ${effect.effectId}`);

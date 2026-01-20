@@ -7,7 +7,15 @@ description: Orchestrate .a5c runs via @a5c-ai/babysitter-sdk CLI. Run iteration
 
 Orchestrate `.a5c/runs/<runId>/` through iterative execution. Use the SDK CLI to drive the orchestration loop.
 
-**CLI alias:** `CLI="npx -y @a5c-ai/babysitter-sdk"`
+make sure you have the latest version of the cli:
+
+```bash
+npm i -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk @a5c-ai/babysitter-breakpoints
+```
+
+then use the CLI alias: CLI="babysitter"
+
+**Alternatively, use the CLI alias:** `CLI="npx -y @a5c-ai/babysitter-sdk"`
 
 ---
 
@@ -67,68 +75,35 @@ $CLI task:list .a5c/runs/<runId> --pending --json
 
 ### 3. Perform Effects
 
-```bash
-$CLI task:run .a5c/runs/<runId> <effectId> --json
-```
+Run the effect externally (by you, your hook, or another worker). After execution, post the outcome into the run by calling `task:post`, which:
+- Writes the committed result to `tasks/<effectId>/result.json`
+- Appends an `EFFECT_RESOLVED` event to the journal
+- Updates the state cache
 
-**Output:**
-```json
-{
-  "status": "ok|error",
-  "exitCode": 0,
-  "stdoutRef": "tasks/effect-abc123/stdout.log",
-  "stderrRef": "tasks/effect-abc123/stderr.log",
-  "resultRef": "tasks/effect-abc123/result.json"
-}
-```
 
 ### 4. Results Posting
 
-Task execution automatically:
-- Writes result to `tasks/<effectId>/result.json`
-- Appends event to journal
-- Updates state cache
-
-No manual posting needed.
-
----
-
-## Complete Loop Example
 
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk"
-RUN_ID=".a5c/runs/run-20260120-example"
-ITERATION=0
-
-while true; do
-  ((ITERATION++))
-
-  # Step 1: Run iteration
-  RESULT=$($CLI run:iterate "$RUN_ID" --json --iteration $ITERATION)
-  STATUS=$(echo "$RESULT" | jq -r '.status')
-
-  echo "Iteration $ITERATION: $STATUS"
-
-  # Check terminal states
-  if [ "$STATUS" = "completed" ] || [ "$STATUS" = "failed" ]; then
-    echo "Run $STATUS"
-    break
-  elif [ "$STATUS" = "waiting" ]; then
-    echo "Waiting (breakpoint or sleep)"
-    break
-  fi
-
-  # Status "executed" or "none" - continue
-done
+$CLI task:post .a5c/runs/<runId> <effectId> --status <ok|error> --json
 ```
 
+
+Effects are executed **externally** (by you, your hook, or another worker). After execution, post the outcome into the run by calling `task:post`, which:
+- Writes the committed result to `tasks/<effectId>/result.json`
+- Appends an `EFFECT_RESOLVED` event to the journal
+- Updates the state cache
+
 ---
+
+### 5. repeat orchestration loop by calling run:iterate
 
 ## Task Kinds
 
 | Kind | Description | Executor |
 |------|-------------|----------|
 | `node` | Node.js script | Local node process |
+| `shell` | Shell script | Local shell process |
 | `agent` | LLM agent | Agent runtime |
 | `skill` | Claude Code skill | Skill system |
 | `breakpoint` | Human approval | UI/CLI |
@@ -136,11 +111,12 @@ done
 
 ### Agent Task Example
 
+Important: Check which subagents and agents are actually available before assigning the name. if none, pass the generic agent name.
+
 ```javascript
 export const agentTask = defineTask('agent-scorer', (args, taskCtx) => ({
   kind: 'agent',  // ← Use "agent" not "node"
   title: 'Agent scoring',
-
   agent: {
     name: 'quality-scorer',
     prompt: {
@@ -200,10 +176,10 @@ export const skillTask = defineTask('analyzer-skill', (args, taskCtx) => ({
 
 ## Packaged Processes
 
-Skills can package processes in `.claude/skills/<skill-name>/process/`:
+Skills and agents can package processes in `<skill-name>/process/`:
 
 ```
-.claude/skills/babysitter/
+<skill-name>/
 ├── SKILL.md
 └── process/
     ├── simple-build-and-test.js
@@ -217,7 +193,7 @@ Skills can package processes in `.claude/skills/<skill-name>/process/`:
 ```bash
 $CLI run:create \
   --process-id babysitter/build-test-with-agent-scoring \
-  --entry .claude/skills/babysitter/process/build-test-with-agent-scoring.js#process \
+  --entry <skill-dir>/process/build-test-with-agent-scoring.js#process \
   --inputs inputs.json
 ```
 
@@ -245,9 +221,9 @@ $CLI run:events <runId> --limit 20 --reverse
 $CLI task:list <runId> --pending --json
 ```
 
-**Run task:**
+**Post task result:**
 ```bash
-$CLI task:run <runId> <effectId> --json
+$CLI task:post <runId> <effectId> --status <ok|error> --json
 ```
 
 **Iterate:**

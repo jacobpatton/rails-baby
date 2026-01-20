@@ -236,7 +236,7 @@ jq -n \
 **External Loop (babysitter skill orchestration):**
 1. Skill calls `run:iterate` CLI command
 2. CLI calls `on-iteration-start` hook
-3. Hook executes tasks (via `native-orchestrator.sh` calling `task:run`)
+3. Hook executes tasks and posts results (via `native-orchestrator.sh` calling `task:post`)
 4. Hook returns execution results
 5. CLI calls `on-iteration-end` hook
 6. CLI returns status to skill

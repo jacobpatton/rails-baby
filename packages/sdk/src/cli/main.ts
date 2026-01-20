@@ -1,15 +1,14 @@
 #!/usr/bin/env node
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
-import * as os from "node:os";
-import { runNodeTaskFromCli } from "./nodeTaskRunner";
-import type { CliRunNodeTaskResult } from "./nodeTaskRunner";
+import { commitEffectResult } from "../runtime/commitEffectResult";
 import { orchestrateIteration } from "../runtime/orchestrateIteration";
 import { createRun } from "../runtime/createRun";
 import { buildEffectIndex } from "../runtime/replay/effectIndex";
 import { readStateCache, rebuildStateCache } from "../runtime/replay/stateCache";
 import type { StateCacheSnapshot } from "../runtime/replay/stateCache";
 import { EffectAction, EffectRecord, IterationMetadata } from "../runtime/types";
+import type { JsonRecord } from "../storage/types";
 import { readTaskDefinition, readTaskResult } from "../storage/tasks";
 import { loadJournal } from "../storage/journal";
 import { readRunMetadata } from "../storage/runFiles";
@@ -22,7 +21,7 @@ const USAGE = `Usage:
   babysitter run:events <runDir> [--runs-dir <dir>] [--json] [--limit <n>] [--reverse] [--filter-type <type>]
   babysitter run:rebuild-state <runDir> [--runs-dir <dir>] [--json] [--dry-run]
   babysitter run:iterate <runDir> [--runs-dir <dir>] [--json] [--verbose] [--iteration <n>]
-  babysitter task:run <runDir> <effectId> [--runs-dir <dir>] [--json] [--dry-run]
+  babysitter task:post <runDir> <effectId> --status <ok|error> [--runs-dir <dir>] [--json] [--dry-run] [--value <file>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
   babysitter run:step <runDir> [--runs-dir <dir>] [--json] [--now <iso8601>]
   babysitter task:list <runDir> [--runs-dir <dir>] [--pending] [--kind <kind>] [--json]
   babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]
@@ -48,6 +47,17 @@ interface ParsedArgs {
   filterType?: string;
   runDirArg?: string;
   effectId?: string;
+  taskStatus?: "ok" | "error";
+  valuePath?: string;
+  errorPath?: string;
+  stdoutRef?: string;
+  stderrRef?: string;
+  stdoutFile?: string;
+  stderrFile?: string;
+  startedAt?: string;
+  finishedAt?: string;
+  metadataPath?: string;
+  invocationKey?: string;
   processId?: string;
   entrySpecifier?: string;
   inputsPath?: string;
@@ -148,6 +158,55 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.filterType = expectFlagValue(rest, ++i, "--filter-type");
       continue;
     }
+    if (arg === "--status") {
+      const raw = expectFlagValue(rest, ++i, "--status");
+      const normalized = raw.toLowerCase();
+      if (normalized !== "ok" && normalized !== "error") {
+        throw new Error(`--status must be "ok" or "error" (received: ${raw})`);
+      }
+      parsed.taskStatus = normalized === "ok" ? "ok" : "error";
+      continue;
+    }
+    if (arg === "--value") {
+      parsed.valuePath = expectFlagValue(rest, ++i, "--value");
+      continue;
+    }
+    if (arg === "--error") {
+      parsed.errorPath = expectFlagValue(rest, ++i, "--error");
+      continue;
+    }
+    if (arg === "--stdout-ref") {
+      parsed.stdoutRef = expectFlagValue(rest, ++i, "--stdout-ref");
+      continue;
+    }
+    if (arg === "--stderr-ref") {
+      parsed.stderrRef = expectFlagValue(rest, ++i, "--stderr-ref");
+      continue;
+    }
+    if (arg === "--stdout-file") {
+      parsed.stdoutFile = expectFlagValue(rest, ++i, "--stdout-file");
+      continue;
+    }
+    if (arg === "--stderr-file") {
+      parsed.stderrFile = expectFlagValue(rest, ++i, "--stderr-file");
+      continue;
+    }
+    if (arg === "--started-at") {
+      parsed.startedAt = expectFlagValue(rest, ++i, "--started-at");
+      continue;
+    }
+    if (arg === "--finished-at") {
+      parsed.finishedAt = expectFlagValue(rest, ++i, "--finished-at");
+      continue;
+    }
+    if (arg === "--metadata") {
+      parsed.metadataPath = expectFlagValue(rest, ++i, "--metadata");
+      continue;
+    }
+    if (arg === "--invocation-key") {
+      parsed.invocationKey = expectFlagValue(rest, ++i, "--invocation-key");
+      continue;
+    }
     if (arg === "--process-id") {
       parsed.processId = expectFlagValue(rest, ++i, "--process-id");
       continue;
@@ -178,7 +237,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
     positionals.push(arg);
   }
-  if (parsed.command === "task:run") {
+  if (parsed.command === "task:post") {
     [parsed.runDirArg, parsed.effectId] = positionals;
   } else if (parsed.command === "task:list") {
     [parsed.runDirArg] = positionals;
@@ -321,10 +380,8 @@ function logVerbose(command: string, parsed: ParsedArgs, details: Record<string,
   console.error(`[${command}] verbose ${formatted}`);
 }
 
-function determineTaskStatus(result: CliRunNodeTaskResult): string {
-  if (result.timedOut) return "timeout";
-  if (result.exitCode == null) return "skipped";
-  return result.exitCode === 0 ? "ok" : "error";
+function isJsonRecord(value: unknown): value is JsonRecord {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function toRunRelativePosix(runDir: string, absolutePath?: string): string | undefined {
@@ -413,7 +470,7 @@ async function readInputsFile(filePath: string): Promise<unknown> {
     throw new Error(`Failed to read inputs file ${absolute}: ${error instanceof Error ? error.message : String(error)}`);
   }
   try {
-    return JSON.parse(contents);
+    return JSON.parse(contents) as unknown;
   } catch (error) {
     throw new Error(
       `Failed to parse inputs file ${absolute} as JSON: ${error instanceof Error ? error.message : String(error)}`
@@ -453,7 +510,7 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     runId: parsed.runIdOverride,
     inputsPath: parsed.inputsPath ? path.resolve(parsed.inputsPath) : undefined,
   });
-  let inputs: unknown | undefined;
+  let inputs: unknown = undefined;
   if (parsed.inputsPath) {
     try {
       inputs = await readInputsFile(parsed.inputsPath);
@@ -692,69 +749,176 @@ async function handleRunRebuildState(parsed: ParsedArgs): Promise<number> {
   return 0;
 }
 
-async function handleTaskRun(parsed: ParsedArgs): Promise<number> {
+async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
   if (!parsed.runDirArg || !parsed.effectId) {
     console.error(USAGE);
     return 1;
   }
+  if (!parsed.taskStatus) {
+    console.error(`[task:post] missing required --status <ok|error>`);
+    return 1;
+  }
+  if (parsed.stdoutRef && parsed.stdoutFile) {
+    console.error(`[task:post] cannot combine --stdout-ref with --stdout-file`);
+    return 1;
+  }
+  if (parsed.stderrRef && parsed.stderrFile) {
+    console.error(`[task:post] cannot combine --stderr-ref with --stderr-file`);
+    return 1;
+  }
+
   const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
   const secretLogsAllowed = allowSecretLogs(parsed);
-  const streamers = buildTaskRunStreamers(parsed);
-  logVerbose("task:run", parsed, {
+  logVerbose("task:post", parsed, {
     runDir,
     effectId: parsed.effectId,
+    status: parsed.taskStatus,
     dryRun: parsed.dryRun,
     json: parsed.json,
     secretLogsAllowed,
   });
-  const index = await buildEffectIndexSafe(runDir, "task:run");
+
+  const index = await buildEffectIndexSafe(runDir, "task:post");
   if (!index) return 1;
   const record = index.getByEffectId(parsed.effectId);
   if (!record) {
-    console.error(`[task:run] effect ${parsed.effectId} not found at ${runDir}`);
+    console.error(`[task:post] effect ${parsed.effectId} not found at ${runDir}`);
     return 1;
   }
-  const kind = (record.kind ?? "").toLowerCase();
-  if (kind !== "node") {
-    console.error(
-      `[task:run] effect ${parsed.effectId} has kind=${record.kind ?? "unknown"}; task:run only supports kind="node"`
-    );
+  if (record.status !== "requested") {
+    console.error(`[task:post] effect ${parsed.effectId} is not requested (status=${record.status ?? "unknown"})`);
     return 1;
-  }
-  const result = await runNodeTaskFromCli({
-    runDir,
-    effectId: parsed.effectId,
-    invocationKey: record.invocationKey,
-    dryRun: parsed.dryRun,
-    onStdoutChunk: streamers.onStdoutChunk,
-    onStderrChunk: streamers.onStderrChunk,
-  });
-  const status = determineTaskStatus(result);
-  const stdoutRef = resolveTaskRunArtifactRef(runDir, result.committed?.stdoutRef, result.io.stdoutPath);
-  const stderrRef = resolveTaskRunArtifactRef(runDir, result.committed?.stderrRef, result.io.stderrPath);
-  const outputRef = resolveTaskRunArtifactRef(runDir, result.committed?.resultRef, result.io.outputJsonPath);
-  const planPayload = parsed.dryRun ? buildTaskRunPlanPayload(runDir, result) : null;
-  if (parsed.dryRun && planPayload) {
-    logTaskRunPlan(planPayload);
   }
 
-  if (parsed.json) {
-    const payload: Record<string, unknown> = {
-      status,
-      committed: result.committed ?? null,
-      stdoutRef: stdoutRef ?? null,
-      stderrRef: stderrRef ?? null,
-      resultRef: outputRef ?? null,
-    };
-    console.log(JSON.stringify(payload));
+  const nowIso = new Date().toISOString();
+  const startedAt = parsed.startedAt ?? nowIso;
+  const finishedAt = parsed.finishedAt ?? nowIso;
+
+  const resolveMaybeRunRelative = (candidate?: string) => {
+    if (!candidate) return undefined;
+    if (candidate === "-") return candidate;
+    if (path.isAbsolute(candidate) || /^[A-Za-z]:[\\/]/.test(candidate)) {
+      return candidate;
+    }
+    return path.join(runDir, candidate);
+  };
+
+  const readJsonFile = async (_label: string, filename?: string): Promise<unknown | undefined> => {
+    if (!filename) return undefined;
+    if (filename === "-") {
+      const raw = await readStdinUtf8();
+      const trimmed = raw.trim();
+      return trimmed.length ? (JSON.parse(trimmed) as unknown) : undefined;
+    }
+    const absolute = resolveMaybeRunRelative(filename)!;
+    const raw = await fs.readFile(absolute, "utf8");
+    const trimmed = raw.trim();
+    return trimmed.length ? (JSON.parse(trimmed) as unknown) : undefined;
+  };
+
+  const readTextFile = async (_label: string, filename?: string): Promise<string | undefined> => {
+    if (!filename) return undefined;
+    if (filename === "-") {
+      return await readStdinUtf8();
+    }
+    const absolute = resolveMaybeRunRelative(filename)!;
+    return await fs.readFile(absolute, "utf8");
+  };
+
+  const metadataRaw = await readJsonFile("metadata", parsed.metadataPath);
+  const metadata: JsonRecord | undefined = isJsonRecord(metadataRaw) ? metadataRaw : undefined;
+  const stdout = parsed.stdoutFile ? await readTextFile("stdout", parsed.stdoutFile) : undefined;
+  const stderr = parsed.stderrFile ? await readTextFile("stderr", parsed.stderrFile) : undefined;
+
+  let value: unknown = undefined;
+  let errorPayload: unknown = undefined;
+  if (parsed.taskStatus === "ok") {
+    value = await readJsonFile("value", parsed.valuePath);
   } else {
-    const parts = [`[task:run] status=${status}`];
+    errorPayload =
+      (await readJsonFile("error", parsed.errorPath)) ??
+      ({
+        name: "Error",
+        message: "Task reported failure",
+      } as const);
+  }
+
+  const invocationKey = parsed.invocationKey ?? record.invocationKey;
+
+  const plan = {
+    runDir: toRunRelativePosix(runDir, runDir) ?? runDir,
+    effectId: parsed.effectId,
+    status: parsed.taskStatus,
+    valueProvided: parsed.valuePath ? true : false,
+    errorProvided: parsed.errorPath ? true : false,
+    stdoutRef: parsed.stdoutRef ?? null,
+    stderrRef: parsed.stderrRef ?? null,
+    stdoutFile: parsed.stdoutFile ?? null,
+    stderrFile: parsed.stderrFile ?? null,
+  };
+
+  if (parsed.dryRun) {
+    if (parsed.json) {
+      console.log(JSON.stringify({ status: "skipped", dryRun: true, plan }));
+    } else {
+      console.log(`[task:post] status=skipped`);
+      console.error(`[task:post] dry-run plan ${JSON.stringify(plan)}`);
+    }
+    return 0;
+  }
+
+  const committed = await commitEffectResult({
+    runDir,
+    effectId: parsed.effectId,
+    invocationKey,
+    result:
+      parsed.taskStatus === "ok"
+        ? {
+            status: "ok",
+            value,
+            stdout,
+            stderr,
+            stdoutRef: parsed.stdoutRef,
+            stderrRef: parsed.stderrRef,
+            startedAt,
+            finishedAt,
+            metadata,
+          }
+        : {
+            status: "error",
+            error: errorPayload,
+            stdout,
+            stderr,
+            stdoutRef: parsed.stdoutRef,
+            stderrRef: parsed.stderrRef,
+            startedAt,
+            finishedAt,
+            metadata,
+          },
+  });
+
+  const stdoutRef = normalizeArtifactRef(runDir, committed.stdoutRef) ?? null;
+  const stderrRef = normalizeArtifactRef(runDir, committed.stderrRef) ?? null;
+  const resultRef = normalizeArtifactRef(runDir, committed.resultRef) ?? null;
+
+  if (parsed.json) {
+    console.log(
+      JSON.stringify({
+        status: parsed.taskStatus,
+        committed,
+        stdoutRef,
+        stderrRef,
+        resultRef,
+      })
+    );
+  } else {
+    const parts = [`[task:post] status=${parsed.taskStatus}`];
     if (stdoutRef) parts.push(`stdoutRef=${stdoutRef}`);
     if (stderrRef) parts.push(`stderrRef=${stderrRef}`);
-    if (outputRef) parts.push(`resultRef=${outputRef}`);
+    if (resultRef) parts.push(`resultRef=${resultRef}`);
     console.log(parts.join(" "));
   }
-  return status === "ok" || status === "skipped" ? 0 : 1;
+  return parsed.taskStatus === "ok" ? 0 : 1;
 }
 
 function parseNowOverride(nowOverride?: string): Date | null {
@@ -1050,50 +1214,13 @@ async function loadTaskResultPreview(
   return { result: data ?? undefined, large: false };
 }
 
-type TaskRunPlanPayload = {
-  command: { binary: string; args: string[]; cwd: string };
-  io: { input: string; output: string; stdout: string; stderr: string };
-};
-
-function buildTaskRunPlanPayload(runDir: string, result: CliRunNodeTaskResult): TaskRunPlanPayload {
-  if (!result.command) {
-    throw new Error("task runner did not supply command metadata for dry-run planning");
-  }
-  const normalize = (absolute: string) => toRunRelativePosix(runDir, absolute) ?? absolute;
-  return {
-    command: {
-      binary: normalize(result.command.binary),
-      args: result.command.args.map((arg, index) => (index === 0 ? normalize(arg) : arg)),
-      cwd: normalize(result.command.cwd),
-    },
-    io: {
-      input: normalize(result.io.inputJsonPath),
-      output: normalize(result.io.outputJsonPath),
-      stdout: normalize(result.io.stdoutPath),
-      stderr: normalize(result.io.stderrPath),
-    },
-  };
-}
-
-function logTaskRunPlan(plan: TaskRunPlanPayload) {
-  console.error(`[task:run] dry-run plan ${JSON.stringify(plan)}`);
-}
-
-function resolveTaskRunArtifactRef(runDir: string, committedRef?: string, fallbackPath?: string): string | undefined {
-  return normalizeArtifactRef(runDir, committedRef) ?? toRunRelativePosix(runDir, fallbackPath);
-}
-
-function buildTaskRunStreamers(parsed: ParsedArgs) {
-  const stdoutTarget = parsed.json ? process.stderr : process.stdout;
-  const stderrTarget = process.stderr;
-  return {
-    onStdoutChunk: (chunk: string) => {
-      stdoutTarget.write(chunk);
-    },
-    onStderrChunk: (chunk: string) => {
-      stderrTarget.write(chunk);
-    },
-  };
+async function readStdinUtf8(): Promise<string> {
+  return await new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    process.stdin.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+    process.stdin.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    process.stdin.on("error", reject);
+  });
 }
 
 function deriveRunState(
@@ -1250,8 +1377,8 @@ export function createBabysitterCli() {
         if (parsed.command === "run:events") {
           return await handleRunEvents(parsed);
         }
-        if (parsed.command === "task:run") {
-          return await handleTaskRun(parsed);
+        if (parsed.command === "task:post") {
+          return await handleTaskPost(parsed);
         }
         if (parsed.command === "run:step") {
           return await handleRunStep(parsed);

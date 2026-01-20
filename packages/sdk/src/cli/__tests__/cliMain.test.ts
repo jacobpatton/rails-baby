@@ -2,17 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MockInstance } from "vitest";
 import path from "path";
 import { createBabysitterCli } from "../main";
-import { runNodeTaskFromCli } from "../nodeTaskRunner";
-import type { CliRunNodeTaskResult } from "../nodeTaskRunner";
 import { orchestrateIteration } from "../../runtime/orchestrateIteration";
 import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { readRunMetadata } from "../../storage/runFiles";
+import { commitEffectResult } from "../../runtime/commitEffectResult";
 import type { EffectRecord } from "../../runtime/types";
-import type { TaskDef } from "../../tasks/types";
-
-vi.mock("../nodeTaskRunner", () => ({
-  runNodeTaskFromCli: vi.fn(),
-}));
 
 vi.mock("../../runtime/orchestrateIteration", () => ({
   orchestrateIteration: vi.fn(),
@@ -26,10 +20,14 @@ vi.mock("../../storage/runFiles", () => ({
   readRunMetadata: vi.fn(),
 }));
 
-const runNodeTaskFromCliMock = runNodeTaskFromCli as unknown as ReturnType<typeof vi.fn>;
+vi.mock("../../runtime/commitEffectResult", () => ({
+  commitEffectResult: vi.fn(),
+}));
+
 const orchestrateIterationMock = orchestrateIteration as unknown as ReturnType<typeof vi.fn>;
 const buildEffectIndexMock = buildEffectIndex as unknown as ReturnType<typeof vi.fn>;
 const readRunMetadataMock = readRunMetadata as unknown as ReturnType<typeof vi.fn>;
+const commitEffectResultMock = commitEffectResult as unknown as ReturnType<typeof vi.fn>;
 
 describe("CLI main entry", () => {
   let logSpy: MockInstance<[message?: any, ...optionalParams: any[]], void>;
@@ -42,6 +40,14 @@ describe("CLI main entry", () => {
     buildEffectIndexMock.mockReset();
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([]));
     readRunMetadataMock.mockResolvedValue(mockRunMetadata());
+    commitEffectResultMock.mockReset();
+    commitEffectResultMock.mockResolvedValue({
+      resultRef: "tasks/mock/result.json",
+      stdoutRef: "tasks/mock/stdout.log",
+      stderrRef: "tasks/mock/stderr.log",
+      startedAt: "2026-01-20T00:00:00.000Z",
+      finishedAt: "2026-01-20T00:00:01.000Z",
+    });
   });
 
   afterEach(() => {
@@ -75,122 +81,70 @@ describe("CLI main entry", () => {
     expect(readRunMetadataMock).not.toHaveBeenCalled();
   });
 
-  it("executes task:run and prints refs", async () => {
+  it("posts task results via task:post and prints refs", async () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-123")]));
-    runNodeTaskFromCliMock.mockResolvedValue(mockRunResult());
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:run", "runs/demo", "ef-123"]);
+    const exitCode = await cli.run(["task:post", "runs/demo", "ef-123", "--status", "ok"]);
 
     expect(exitCode).toBe(0);
-    expect(runNodeTaskFromCliMock).toHaveBeenCalledWith(
+    expect(commitEffectResultMock).toHaveBeenCalledWith(
       expect.objectContaining({
         runDir: path.resolve("runs/demo"),
         effectId: "ef-123",
         invocationKey: "ef-123:inv",
-        dryRun: false,
+        result: expect.objectContaining({
+          status: "ok",
+        }),
       })
     );
     expect(logSpy).toHaveBeenCalledWith(
-      "[task:run] status=ok stdoutRef=tasks/mock/stdout.log stderrRef=tasks/mock/stderr.log resultRef=tasks/mock/result.json"
+      "[task:post] status=ok stdoutRef=tasks/mock/stdout.log stderrRef=tasks/mock/stderr.log resultRef=tasks/mock/result.json"
     );
   });
 
-  it("prefers committed artifact refs in human output", async () => {
-    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-committed")]));
-    runNodeTaskFromCliMock.mockResolvedValue(
-      mockRunResult({
-        committed: {
-          stdoutRef: "tasks/ef-committed/stdout.log",
-          stderrRef: "tasks/ef-committed/stderr.log",
-          resultRef: "tasks/ef-committed/result.json",
-        },
-      })
-    );
-
-    const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:run", "runs/demo", "ef-committed"]);
-
-    expect(exitCode).toBe(0);
-    expect(logSpy).toHaveBeenCalledWith(
-      "[task:run] status=ok stdoutRef=tasks/ef-committed/stdout.log stderrRef=tasks/ef-committed/stderr.log resultRef=tasks/ef-committed/result.json"
-    );
-  });
-
-  it("supports task:run --dry-run JSON output", async () => {
+  it("supports task:post --dry-run JSON output", async () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-123")]));
-    runNodeTaskFromCliMock.mockResolvedValue(
-      mockRunResult({
-        exitCode: null,
-        committed: undefined,
-      })
-    );
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:run", "runs/demo", "ef-123", "--dry-run", "--json"]);
+    const exitCode = await cli.run(["task:post", "runs/demo", "ef-123", "--status", "ok", "--dry-run", "--json"]);
 
     expect(exitCode).toBe(0);
-    expect(runNodeTaskFromCliMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        runDir: path.resolve("runs/demo"),
-        effectId: "ef-123",
-        invocationKey: "ef-123:inv",
-        dryRun: true,
-      })
-    );
+    expect(commitEffectResultMock).not.toHaveBeenCalled();
     const payload = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0] ?? "{}"));
     expect(payload.status).toBe("skipped");
-    expect(payload.committed).toBeNull();
-    expect(payload.stdoutRef).toBe("tasks/mock/stdout.log");
-    expect(payload.stderrRef).toBe("tasks/mock/stderr.log");
-    expect(payload.resultRef).toBe("tasks/mock/result.json");
-  });
-
-  it("refuses to run non-node effects", async () => {
-    buildEffectIndexMock.mockResolvedValue(
-      mockEffectIndex([nodeEffectRecord("ef-break", { kind: "breakpoint" })])
-    );
-
-    const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:run", "runs/demo", "ef-break"]);
-
-    expect(exitCode).toBe(1);
-    expect(runNodeTaskFromCliMock).not.toHaveBeenCalled();
-    expect(errorSpy).toHaveBeenCalledWith(
-      '[task:run] effect ef-break has kind=breakpoint; task:run only supports kind="node"'
-    );
+    expect(payload.dryRun).toBe(true);
   });
 
   it("errors when the effect id is missing from the index", async () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([]));
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:run", "runs/demo", "ef-missing"]);
+    const exitCode = await cli.run(["task:post", "runs/demo", "ef-missing", "--status", "ok"]);
 
     expect(exitCode).toBe(1);
-    expect(runNodeTaskFromCliMock).not.toHaveBeenCalled();
+    expect(commitEffectResultMock).not.toHaveBeenCalled();
     expect(errorSpy).toHaveBeenCalledWith(
-      `[task:run] effect ef-missing not found at ${path.resolve("runs/demo")}`
+      `[task:post] effect ef-missing not found at ${path.resolve("runs/demo")}`
     );
   });
 
-  it("exits non-zero when the node task reports a failure", async () => {
+  it("exits non-zero when posting an error status", async () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-err")]));
-    runNodeTaskFromCliMock.mockResolvedValue(
-      mockRunResult({
-        exitCode: 2,
-        committed: {
-          resultRef: "tasks/ef-err/result.json",
-        },
-      })
-    );
+    commitEffectResultMock.mockResolvedValue({
+      resultRef: "tasks/ef-err/result.json",
+      stdoutRef: "tasks/mock/stdout.log",
+      stderrRef: "tasks/mock/stderr.log",
+      startedAt: "2026-01-20T00:00:00.000Z",
+      finishedAt: "2026-01-20T00:00:01.000Z",
+    });
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:run", "runs/demo", "ef-err"]);
+    const exitCode = await cli.run(["task:post", "runs/demo", "ef-err", "--status", "error"]);
 
     expect(exitCode).toBe(1);
     expect(logSpy).toHaveBeenCalledWith(
-      "[task:run] status=error stdoutRef=tasks/mock/stdout.log stderrRef=tasks/mock/stderr.log resultRef=tasks/ef-err/result.json"
+      "[task:post] status=error stdoutRef=tasks/mock/stdout.log stderrRef=tasks/mock/stderr.log resultRef=tasks/ef-err/result.json"
     );
   });
 
@@ -310,39 +264,6 @@ describe("CLI main entry", () => {
     });
   });
 });
-
-function mockRunResult(overrides: Partial<CliRunNodeTaskResult> = {}): CliRunNodeTaskResult {
-  const now = new Date(0).toISOString();
-  const base: CliRunNodeTaskResult = {
-    task: { kind: "node", node: { entry: "./script.js" } },
-    command: {
-      binary: process.execPath,
-      args: [path.resolve("runs/demo", "tasks/mock/script.js")],
-      cwd: path.resolve("runs/demo"),
-    },
-    stdout: "",
-    stderr: "",
-    exitCode: 0,
-    signal: null,
-    timedOut: false,
-    startedAt: now,
-    finishedAt: now,
-    durationMs: 0,
-    timeoutMs: 0,
-    output: undefined,
-    io: {
-      inputJsonPath: path.resolve("runs/demo", "tasks/mock/input.json"),
-      outputJsonPath: path.resolve("runs/demo", "tasks/mock/result.json"),
-      stdoutPath: path.resolve("runs/demo", "tasks/mock/stdout.log"),
-      stderrPath: path.resolve("runs/demo", "tasks/mock/stderr.log"),
-    },
-    hydrated: { env: {}, hydratedKeys: [], missingKeys: [] },
-    hydratedKeys: [],
-    missingKeys: [],
-    committed: undefined,
-  };
-  return { ...base, ...overrides };
-}
 
 function mockRunMetadata() {
   return {

@@ -26,7 +26,7 @@ CLI Command
 CLI Command
   └─> Calls on-iteration-start hook
       └─> Hook analyzes run state
-      └─> Hook calls CLI commands (task:run, etc.)
+      └─> Hook calls CLI commands (task:post, etc.)
       └─> Hook returns orchestration decision
   └─> CLI executes decision
   └─> Calls on-iteration-end hook
@@ -134,7 +134,7 @@ TASK=$(npx -y @a5c-ai/babysitter-sdk task:list ".a5c/runs/$RUN_ID" \
   --pending --json | jq -r '.[0].effectId // empty')
 
 if [ -n "$TASK" ]; then
-  npx -y @a5c-ai/babysitter-sdk task:run ".a5c/runs/$RUN_ID" "$TASK"
+  npx -y @a5c-ai/babysitter-sdk task:post ".a5c/runs/$RUN_ID" "$TASK" --status ok
   echo '{"action":"executed-tasks","count":1,"tasks":["'$TASK'"]}'
 else
   echo '{"action":"none","reason":"no-tasks"}'
@@ -160,7 +160,7 @@ TASKS=$(npx -y @a5c-ai/babysitter-sdk task:list ".a5c/runs/$RUN_ID" \
 
 # Execute ALL in parallel
 for task in $TASKS; do
-  npx -y @a5c-ai/babysitter-sdk task:run ".a5c/runs/$RUN_ID" "$task" &
+  npx -y @a5c-ai/babysitter-sdk task:post ".a5c/runs/$RUN_ID" "$task" --status ok &
 done
 
 wait  # Wait for all tasks

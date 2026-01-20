@@ -110,7 +110,7 @@ FIRST_TASK=$($CLI task:list "$RUN_DIR" --pending --json 2>/dev/null | \
 
 if [ -n "$FIRST_TASK" ]; then
   echo "[sequential] Executing task: $FIRST_TASK" >&2
-  $CLI task:run "$RUN_DIR" "$FIRST_TASK" >&2
+  $CLI task:post "$RUN_DIR" "$FIRST_TASK" --status ok >&2
   echo '{"action":"executed-tasks","count":1,"tasks":["'$FIRST_TASK'"],"strategy":"sequential"}'
 else
   echo "[sequential] No pending tasks" >&2
@@ -176,7 +176,7 @@ TASK_ARRAY=()
 
 for task in $TASKS; do
   echo "[parallel] Starting task: $task" >&2
-  $CLI task:run "$RUN_DIR" "$task" &
+  $CLI task:post "$RUN_DIR" "$task" --status ok &
   PIDS+=($!)
   TASK_ARRAY+=("$task")
 done
@@ -283,7 +283,7 @@ if [ -n "$HIGH_PRIORITY_TASK" ]; then
     jq -r '.metadata.priority // "unknown"')
 
   echo "[priority] Executing task $HIGH_PRIORITY_TASK (priority: $PRIORITY)" >&2
-  $CLI task:run "$RUN_DIR" "$HIGH_PRIORITY_TASK" >&2
+  $CLI task:post "$RUN_DIR" "$HIGH_PRIORITY_TASK" --status ok >&2
 
   echo '{"action":"executed-tasks","count":1,"tasks":["'$HIGH_PRIORITY_TASK'"],"priority":'$PRIORITY',"strategy":"priority"}'
 else
@@ -421,7 +421,7 @@ TASK=$($CLI task:list "$RUN_DIR" --pending --json 2>/dev/null | \
 
 if [ -n "$TASK" ]; then
   echo "[rate-limit] Executing task: $TASK" >&2
-  $CLI task:run "$RUN_DIR" "$TASK" >&2
+  $CLI task:post "$RUN_DIR" "$TASK" --status ok >&2
 
   # Update rate limit timestamp
   date +%s > "$RATE_LIMIT_FILE"

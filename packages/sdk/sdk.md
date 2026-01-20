@@ -1022,7 +1022,7 @@ This spec is the foundation for implementing `@a5c-ai/babysitter-sdk` as a small
 
 The CLI is the primary way to **interact with intrinsics** (tasks, breakpoints, sleep gates) and to drive runs without writing custom orchestration code.
 
-> Looking for a concrete walkthrough? See [`docs/cli-examples.md`](docs/cli-examples.md) for an end-to-end session that runs `run:create`, `task:list`, `task:run`, `run:continue --auto-node-tasks`, and the deterministic harness side-by-side.
+> Looking for a concrete walkthrough? See [`docs/cli-examples.md`](docs/cli-examples.md) for an end-to-end session that runs `run:create`, `task:list`, `run:step`, and `task:post` side-by-side with a deterministic harness.
 
 Binary name (placeholder): `babysitter`
 
@@ -1031,7 +1031,7 @@ Binary name (placeholder): `babysitter`
 * Create and inspect runs
 * Drive orchestration iterations (`orchestrateIteration`) step-by-step or in an automated mode
 * Discover pending effects (tasks, breakpoints, etc.)
-* Execute tasks that the SDK requested (primarily `kind="node"`)
+* Execute tasks using an external runner of your choice, then commit results via `task:post`
 * Resolve breakpoints with human input
 * Inspect journals, events, and state
 
@@ -1149,41 +1149,11 @@ Flags:
 
 #### `babysitter run:continue <runDir>`
 
-Drive a run until it either completes, hits an error, or is waiting on manual intervention. Every iteration prints `[run:continue] status=<...>` (stderr) with `dryRun=true` when applicable, the cumulative `autoNode=<count>` tally, and metadata pairs such as `stateVersion`, `journalHead`, `stateRebuilt`, plus the `pending[...]` rollups. Waiting passes also list each pending action (`- <effectId> [<kind>] <label?>`) and surface scheduler hints as `[run:continue] sleep-until=<iso> effect=<effectId> pendingCount=<n?>`.
+This command has been removed in favor of a simpler model:
 
-Options:
-
-* `--runs-dir <path>`: override the base runs directory (default current working dir).
-* `--dry-run`: describe the next iteration without mutating on-disk state (auto-node plans are logged instead of executed).
-* `--json`: machine-readable output.
-* `--auto-node-tasks`: automatically execute every `kind="node"` action by piping its TaskDef into `runNodeTaskFromCli`, committing the result, then looping back through `orchestrateIteration` until only manual actions remain.
-* `--auto-node-max <n>`: optional safety cap that limits how many node tasks will be auto-run during this invocation. Once the budget is exhausted, the CLI exits in the current `waiting` state and logs a reminder to re-run with a higher cap if desired.
-* `--auto-node-label <text>`: only auto-run node tasks whose label (or effect id) contains the provided substring (case-insensitive). Combine with `--auto-node-max` when you want to stage specific slices of pending work. Both flags require `--auto-node-tasks`.
-
-In JSON mode stdout stays quiet except for the final payload:
-
-```json
-{
-  "status": "waiting",
-  "pending": [
-    { "effectId": "ef-node", "kind": "node", "label": "build workspace" }
-  ],
-  "autoRun": {
-    "executed": [],
-    "pending": [
-      { "effectId": "ef-node", "kind": "node", "label": "build workspace" }
-    ]
-  },
-  "metadata": {
-    "stateVersion": 7,
-    "pendingEffectsByKind": { "node": 1 }
-  }
-}
-```
-
-`pending` only appears while the run is still waiting. `autoRun.executed` accumulates every node task launched via `--auto-node-tasks`, and `autoRun.pending` lists the next slice of node actions automation plans to run (respecting `--auto-node-max` / `--auto-node-label` filters or, when the flag is absent, every pending node action). Terminal payloads append either `output` (`completed`) or `error` (`failed`), and `metadata.pendingEffectsByKind` is always populated (derived from the pending list when the runtime omits it). All file/effect references are normalized to POSIX-style paths so downstream tooling can resolve them consistently across platforms.
-
-This gives you a just-run-it loop for simple processes; when the CLI reports pending breakpoints/orchestrator tasks you can follow up with the other commands.
+* loop `run:iterate`/`run:step` in your own orchestrator
+* execute effects externally (hook/worker/agent)
+* commit results back into the run with `task:post`
 
 ### 12.4 Task interaction commands
 
@@ -1262,24 +1232,23 @@ These commands operate on pending/resolved **effects** (tasks).
   
   When the guard is satisfied, the CLI returns the literal `task.json` and `result.json` contents inline so security reviewers or forensics tooling can reason about sensitive operations without re-reading the artifacts from disk. Any other combination falls back to redacted output.
 
-#### `babysitter task:run <runDir> <effectId>`
+#### `babysitter task:post <runDir> <effectId>`
 
-  Execute a `kind="node"` task locally and commit its result. The CLI validates the effect kind from the journal index and refuses to run anything but `kind="node"` (breakpoints, orchestrator tasks, etc. must be handled manually). Human output logs `[task:run] status=<...>` followed by stdout/stderr/result refs. `--json` returns `{ status, committed, stdoutRef, stderrRef, resultRef }` with refs normalized relative to `<runDir>` and keeps stdout silent so callers can safely pipe into `jq`. Exit codes follow the status: `ok`/`skipped` return `0`, while `error`/`timeout` return `1`.
+Commit/post a task result after it was executed externally. The CLI validates that the effect exists and is still `status="requested"`, then appends `EFFECT_RESOLVED` + writes `tasks/<effectId>/result.json`.
 
-Behavior:
-
-* reads `tasks/<effectId>/task.json`
-* stages `io.inputJsonPath` if configured
-* runs the specified Node script (`node <entry> ...args`)
-* streams stdout/stderr to both the console and `tasks/<effectId>/stdout.log` / `stderr.log`
-* parses `io.outputJsonPath` if present
-* calls `commitEffectResult` with structured artifacts
+Human output logs `[task:post] status=<ok|error>` followed by stdout/stderr/result refs (when present). `--json` returns `{ status, committed, stdoutRef, stderrRef, resultRef }`. Exit codes follow the status: `ok` returns `0`, while `error` returns `1`. `--dry-run` returns `status=skipped` and makes no on-disk changes.
 
 Options:
 
 * `--runs-dir <path>`: base runs directory (default current working dir)
-* `--dry-run`: print the command without executing or committing; returns `status=skipped`
-* `--json`: emit machine-readable `{ status, committed, stdoutRef, stderrRef, resultRef }`
+* `--status <ok|error>`: required status for the posted result
+* `--value <file>`: JSON file containing the value payload (for `--status ok`)
+* `--error <file>`: JSON file containing `{name,message,stack?,data?}` (for `--status error`)
+* `--stdout-ref <ref>` / `--stderr-ref <ref>`: point at already-written log files (run-relative refs)
+* `--stdout-file <file>` / `--stderr-file <file>`: inline log contents from a file (CLI will write them under `tasks/<effectId>/`)
+* `--metadata <file>`: JSON metadata attached to the result
+* `--invocation-key <key>`: optional safety check (defaults to the effect's invocationKey)
+* `--dry-run`, `--json`
 
 ### 12.5 Breakpoint interaction commands
 

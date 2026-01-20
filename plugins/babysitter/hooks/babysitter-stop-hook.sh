@@ -195,7 +195,7 @@ jq -n \
   --arg msg "$SYSTEM_MSG" \
   '{
     "decision": "block",
-    "instructions": "use the babysitter skill to advance the orchestration to the next state",
+    "instructions": "use the babysitter skill to advance the orchestration to the next state (run:iterate)",
     "reason": $prompt,
     "systemMessage": $msg
   }'

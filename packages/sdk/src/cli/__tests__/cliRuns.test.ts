@@ -9,7 +9,6 @@ import { appendEvent, loadJournal } from "../../storage/journal";
 import { createRunDir } from "../../storage/createRunDir";
 import { createStateCacheSnapshot, writeStateCache } from "../../runtime/replay/stateCache";
 import * as orchestrateIterationModule from "../../runtime/orchestrateIteration";
-import * as nodeTaskRunnerModule from "../nodeTaskRunner";
 import * as runFilesModule from "../../storage/runFiles";
 
 const realReadRunMetadata = readRunMetadata;

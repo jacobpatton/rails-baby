@@ -26,7 +26,7 @@ CLI Command (hook-driven-orchestrate)
   ├─> Invokes on-iteration-start hook
   │   └─> Hook contains orchestration logic
   │       ├─> Analyzes run state
-  │       ├─> Calls CLI commands (task:run, etc.)
+  │       ├─> Calls CLI commands (task:post, etc.)
   │       └─> Returns orchestration decision
   ├─> CLI executes hook decision
   ├─> Invokes on-iteration-end hook
@@ -148,7 +148,7 @@ FIRST_TASK=$(npx -y @a5c-ai/babysitter-sdk task:list "$RUN_DIR" --pending --json
   jq -r '.[0].effectId // empty')
 
 if [ -n "$FIRST_TASK" ]; then
-  npx -y @a5c-ai/babysitter-sdk task:run "$RUN_DIR" "$FIRST_TASK"
+  npx -y @a5c-ai/babysitter-sdk task:post "$RUN_DIR" "$FIRST_TASK" --status ok
   echo '{"action":"executed-tasks","count":1,"tasks":["'$FIRST_TASK'"]}'
 else
   echo '{"action":"none","reason":"no-tasks"}'
@@ -176,7 +176,7 @@ TASKS=$(npx -y @a5c-ai/babysitter-sdk task:list "$RUN_DIR" --pending --json | \
 # Run in parallel
 PIDS=()
 for task in $TASKS; do
-  npx -y @a5c-ai/babysitter-sdk task:run "$RUN_DIR" "$task" &
+  npx -y @a5c-ai/babysitter-sdk task:post "$RUN_DIR" "$task" --status ok &
   PIDS+=($!)
 done
 
@@ -208,7 +208,7 @@ HIGH_PRIORITY=$(npx -y @a5c-ai/babysitter-sdk task:list "$RUN_DIR" --pending --j
   jq -r 'sort_by(.metadata.priority // 0) | reverse | .[0].effectId')
 
 if [ -n "$HIGH_PRIORITY" ] && [ "$HIGH_PRIORITY" != "null" ]; then
-  npx -y @a5c-ai/babysitter-sdk task:run "$RUN_DIR" "$HIGH_PRIORITY"
+  npx -y @a5c-ai/babysitter-sdk task:post "$RUN_DIR" "$HIGH_PRIORITY" --status ok
   echo '{"action":"executed-tasks","count":1,"tasks":["'$HIGH_PRIORITY'"],"priority":true}'
 else
   echo '{"action":"none","reason":"no-high-priority-tasks"}'
@@ -249,7 +249,7 @@ TASK=$(npx -y @a5c-ai/babysitter-sdk task:list "$RUN_DIR" --pending --json | \
   jq -r '.[0].effectId // empty')
 
 if [ -n "$TASK" ]; then
-  npx -y @a5c-ai/babysitter-sdk task:run "$RUN_DIR" "$TASK"
+  npx -y @a5c-ai/babysitter-sdk task:post "$RUN_DIR" "$TASK" --status ok
   date +%s > "$RATE_LIMIT_FILE"
   echo '{"action":"executed-tasks","count":1,"tasks":["'$TASK'"]}'
 else

@@ -28,7 +28,17 @@ const packageManifests = [
   { path: "packages/babysitter/package.json" },
 ];
 
+const pluginManifests = [
+  { path: "plugins/babysitter/.claude-plugin/plugin.json" },
+  { path: "plugins/babysitter/plugin.json" },
+];
+
 const manifests = packageManifests.map(({ path }) => ({
+  path,
+  data: JSON.parse(readFileSync(path, "utf8")),
+}));
+
+const pluginManifestData = pluginManifests.map(({ path }) => ({
   path,
   data: JSON.parse(readFileSync(path, "utf8")),
 }));
@@ -55,6 +65,27 @@ const newVersion = bumpVersion(currentVersion, bumpTarget);
 for (const manifest of manifests) {
   manifest.data.version = newVersion;
   writeFileSync(manifest.path, `${JSON.stringify(manifest.data, null, 2)}\n`);
+}
+
+// Update plugin manifests
+for (const pluginManifest of pluginManifestData) {
+  pluginManifest.data.version = newVersion;
+  writeFileSync(pluginManifest.path, `${JSON.stringify(pluginManifest.data, null, 2)}\n`);
+}
+
+// Update marketplace.json plugin entry
+const marketplacePath = ".claude-plugin/marketplace.json";
+if (existsSync(marketplacePath)) {
+  const marketplaceData = JSON.parse(readFileSync(marketplacePath, "utf8"));
+  if (marketplaceData.plugins) {
+    const babysitterPlugin = marketplaceData.plugins.find(
+      (plugin) => plugin.name === "babysitter"
+    );
+    if (babysitterPlugin) {
+      babysitterPlugin.version = newVersion;
+      writeFileSync(marketplacePath, `${JSON.stringify(marketplaceData, null, 2)}\n`);
+    }
+  }
 }
 
 const lockPath = "package-lock.json";

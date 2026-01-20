@@ -595,27 +595,30 @@ $CLI task:list .a5c/runs/<runId> --pending --json
 ### 3. Perform Effects
 
 ```bash
-$CLI task:run .a5c/runs/<runId> <effectId> --json
+$CLI task:post .a5c/runs/<runId> <effectId> --status <ok|error> --json
 ```
 
 **Output:**
 ```json
 {
   "status": "ok|error",
-  "exitCode": 0,
+  "committed": {
+    "resultRef": "tasks/effect-abc123/result.json",
+    "stdoutRef": "tasks/effect-abc123/stdout.log",
+    "stderrRef": "tasks/effect-abc123/stderr.log"
+  },
   "stdoutRef": "tasks/effect-abc123/stdout.log",
+  "stderrRef": "tasks/effect-abc123/stderr.log",
   "resultRef": "tasks/effect-abc123/result.json"
 }
 ```
 
-### 4. Results Auto-Posted
+### 4. Results Posted
 
-Task execution automatically:
+After executing the effect externally (or inside a hook), `task:post`:
 - Writes result to `tasks/<effectId>/result.json`
 - Appends event to `journal.jsonl`
 - Updates `state.json` cache
-
-**No manual posting needed.**
 
 ---
 
@@ -639,14 +642,11 @@ $CLI run:events <runId> --limit 20 --reverse
 # Iterate once
 $CLI run:step <runId> --json
 
-# Auto-iterate until done
-$CLI run:continue <runId> --auto-node-tasks --auto-node-max 5
-
 # List tasks
 $CLI task:list <runId> --pending --json
 
-# Run task
-$CLI task:run <runId> <effectId> --json
+# Post task result
+$CLI task:post <runId> <effectId> --status <ok|error> --json
 ```
 
 ---
