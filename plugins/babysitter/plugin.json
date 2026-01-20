@@ -1,6 +1,6 @@
 {
   "name": "babysitter",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
   "author": "a5c.ai",
   "license": "MIT",
@@ -10,14 +10,14 @@
   },
   "commands": [
     {
-      "name": "babysitter-run",
+      "name": "run",
       "description": "Create and orchestrate a new babysitter run",
-      "file": "commands/babysitter-run.md"
+      "file": "commands/run.md"
     },
     {
-      "name": "babysitter-resume",
+      "name": "resume",
       "description": "Resume an existing babysitter run",
-      "file": "commands/babysitter-resume.md"
+      "file": "commands/resume.md"
     }
   ],
   "skills": [

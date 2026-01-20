@@ -117,7 +117,7 @@ Babysitter supports two primary interaction modes:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  User: /babysitter-run <PROMPT> --max-iterations <n>        │
+│  User: /babysitter:run <PROMPT> --max-iterations <n>        │
 └─────────────────────┬────────────────────────────────────────┘
                       │
                       ▼
@@ -311,13 +311,13 @@ npx -y @a5c-ai/babysitter-sdk
 
 **Available Commands:**
 
-**/babysitter-run:**
+**/babysitter:run**
 - Start babysitter run in current session
 - Uses stop hook to prevent exit
 - Loops until completion promise or max iterations
-- Location: `plugins/babysitter/commands/babysitter-run.md`
+- Location: `plugins/babysitter/commands/run.md`
 
-**/babysitter-resume:**
+**/babysitter:resume**
 - Resume existing babysitter run
 - Checks run status via CLI
 - Continues from current state
@@ -763,7 +763,7 @@ CLI="npx -y @a5c-ai/babysitter-sdk"
 The in-session loop mechanism enables Claude to work continuously on a task within a single session through a self-referential loop. Instead of Claude finishing and exiting, the system intercepts exit attempts and feeds the same prompt back, creating an iterative improvement cycle.
 
 **Key Components:**
-- `/babysitter-run` and `/babysitter-resume` slash commands
+- `/babysitter:run` and `/babysitter:resume` slash commands
 - `setup-babysitter-run.sh` - Creates loop state
 - `babysitter-session-start-hook.sh` - Persists session ID
 - `babysitter-stop-hook.sh` - Intercepts exit and continues loop
@@ -779,20 +779,20 @@ The in-session loop mechanism enables Claude to work continuously on a task with
 
 ### 7.2 Slash Commands
 
-#### /babysitter-run
+#### /babysitter:run
 
 **Purpose:** Start a new in-session loop
 
 **Syntax:**
 ```bash
-/babysitter-run <PROMPT> [--max-iterations <n>] [--completion-promise '<text>']
+/babysitter:run <PROMPT> [--max-iterations <n>] [--completion-promise '<text>']
 ```
 
 **Examples:**
 ```bash
-/babysitter-run Build a REST API --max-iterations 20 --completion-promise 'DONE'
-/babysitter-run Fix the auth bug --max-iterations 10
-/babysitter-run Improve code quality  # Runs forever
+/babysitter:run Build a REST API --max-iterations 20 --completion-promise 'DONE'
+/babysitter:run Fix the auth bug --max-iterations 10
+/babysitter:run Improve code quality  # Runs forever
 ```
 
 **Arguments:**
@@ -807,21 +807,21 @@ The in-session loop mechanism enables Claude to work continuously on a task with
 3. State file contains iteration counter, limits, and prompt
 4. Stop hook becomes active for the session
 
-#### /babysitter-resume
+#### /babysitter:resume
 
 **Purpose:** Resume existing run in in-session mode
 
 **Syntax:**
 ```bash
-/babysitter-resume <run-id> [--max-iterations <n>] [--completion-promise '<text>']
+/babysitter:resume <run-id> [--max-iterations <n>] [--completion-promise '<text>']
 ```
 
 **Example:**
 ```bash
-/babysitter-resume run-20260120-example --max-iterations 15
+/babysitter:resume run-20260120-example --max-iterations 15
 ```
 
-**Differences from /babysitter-run:**
+**Differences from /babysitter:run:**
 - Takes run ID instead of prompt
 - Validates run exists via `run:status`
 - Prevents resuming completed runs
@@ -831,7 +831,7 @@ The in-session loop mechanism enables Claude to work continuously on a task with
 
 ```
 ┌────────────────────────────────────────┐
-│  User: /babysitter-run Build API      │
+│  User: /babysitter:run Build API      │
 │         --max-iterations 20            │
 │         --completion-promise 'DONE'    │
 └─────────────────┬──────────────────────┘
@@ -1037,21 +1037,21 @@ Output:
 
 **Simple Task:**
 ```bash
-/babysitter-run Fix authentication bug --max-iterations 10
+/babysitter:run Fix authentication bug --max-iterations 10
 ```
 
 Result: Claude iterates up to 10 times, refining the fix each iteration.
 
 **Task with Promise:**
 ```bash
-/babysitter-run Build REST API --completion-promise 'All tests passing' --max-iterations 50
+/babysitter:run Build REST API --completion-promise 'All tests passing' --max-iterations 50
 ```
 
 Result: Claude works until all tests pass (or 50 iterations), outputs `<promise>All tests passing</promise>` to exit.
 
 **Infinite Loop (Caution!):**
 ```bash
-/babysitter-run Improve code quality
+/babysitter:run Improve code quality
 ```
 
 Result: Runs forever, continuously refining. No automatic exit.
@@ -1086,8 +1086,8 @@ plugins/babysitter/
 │           ├── ORCHESTRATION_GUIDE.md
 │           └── ADVANCED_PATTERNS.md
 ├── commands/
-│   ├── babysitter-run.md          # /babysitter-run command
-│   └── babysitter-resume.md       # /babysitter-resume command
+│   ├── run.md          # /babysitter:run command
+│   └── resume.md       # /babysitter:resume command
 ├── hooks/
 │   ├── hooks.json                 # Hook registration (SessionStart, Stop)
 │   ├── hook-dispatcher.sh         # Hook discovery & execution
@@ -1111,8 +1111,8 @@ plugins/babysitter/
 │   ├── post-planning/
 │   └── on-score/
 ├── scripts/
-│   ├── setup-babysitter-run.sh     # /babysitter-run setup
-│   └── setup-babysitter-run-resume.sh  # /babysitter-resume setup
+│   ├── setup-run.sh     # /babysitter:run setup
+│   └── setup-resume.sh  # /babysitter:resume setup
 ├── state/                          # In-session loop state (created at runtime)
 │   └── ${SESSION_ID}.md           # State file per session
 ├── agents/
@@ -1240,9 +1240,9 @@ done
 
 ### 9.2 In-Session Loop (Commands)
 
-**Using /babysitter-run command:**
+**Using /babysitter:run command (in-session loop):**
 
-1. User sends `/babysitter-run Build a REST API --completion-promise 'DONE'`
+1. User sends `/babysitter:run Build a REST API --completion-promise 'DONE'`
 2. `setup-babysitter-run.sh` creates state file
 3. `babysitter-session-start-hook.sh` sets CLAUDE_SESSION_ID
 4. User works on task interactively

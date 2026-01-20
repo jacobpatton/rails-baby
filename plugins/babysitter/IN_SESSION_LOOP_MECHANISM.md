@@ -64,7 +64,7 @@ The in-session loop mechanism allows Claude to work on a task continuously withi
 │                    Claude Code Session                       │
 │                                                              │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │  User: /babysitter-run Build a REST API                │ │
+│  │  User: /babysitter:run Build a REST API                │ │
 │  │         --max-iterations 20                             │ │
 │  │         --completion-promise 'DONE'                     │ │
 │  └─────────────────────┬──────────────────────────────────┘ │
@@ -181,9 +181,9 @@ babysitter-stop-hook.sh → Reads state file
 
 **Available Commands:**
 
-#### /babysitter-run
+#### /babysitter:run
 
-**File:** `babysitter-run.md`
+**File:** `run.md`
 
 **Frontmatter:**
 ```yaml
@@ -200,9 +200,9 @@ hide-from-slash-command-tool: "true"
 "${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run.sh" $ARGUMENTS
 ```
 
-#### /babysitter-resume
+#### /babysitter:resume
 
-**File:** `babysitter-resume.md`
+**File:** `resume.md`
 
 **Frontmatter:**
 ```yaml
@@ -382,10 +382,10 @@ fi
 ### 4.1 Initialization Flow
 
 ```
-User runs /babysitter-run
+User runs /babysitter:run
          │
          ▼
-Command file parsed (babysitter-run.md)
+Command file parsed (run.md)
          │
          ▼
 Execute setup-babysitter-run.sh with $ARGUMENTS
@@ -1033,7 +1033,7 @@ rm "$BABYSITTER_STATE_FILE"
 
 **Command:**
 ```bash
-/babysitter-run Fix the authentication bug --max-iterations 10
+/babysitter:run Fix the authentication bug --max-iterations 10
 ```
 
 **Flow:**
@@ -1054,7 +1054,7 @@ rm "$BABYSITTER_STATE_FILE"
 
 **Command:**
 ```bash
-/babysitter-run Build a REST API for todos \
+/babysitter:run Build a REST API for todos \
   --completion-promise 'All tests passing' \
   --max-iterations 50
 ```
@@ -1077,7 +1077,7 @@ rm "$BABYSITTER_STATE_FILE"
 
 **Command:**
 ```bash
-/babysitter-run Improve code quality
+/babysitter:run Improve code quality
 ```
 
 **Flow:**
@@ -1095,7 +1095,7 @@ rm "$BABYSITTER_STATE_FILE"
 
 **Command:**
 ```bash
-/babysitter-resume run-20260120-example --max-iterations 20
+/babysitter:resume run-20260120-example --max-iterations 20
 ```
 
 **Flow:**
