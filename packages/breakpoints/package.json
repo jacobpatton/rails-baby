@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/babysitter-breakpoints",
-  "version": "0.0.37",
+  "version": "0.0.38",
   "private": false,
   "type": "commonjs",
   "bin": {
