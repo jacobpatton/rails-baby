@@ -40,11 +40,11 @@ Successfully verified and updated the babysitter plugin commands and hooks to re
 - ✅ References correct script: `setup-babysitter-run-resume.sh` (created in this update)
 - ✅ Explains resume workflow with run:status checks
 - ✅ Documents access to previous work (journal, state, files)
-- ✅ Includes completion promise requirements
+- ✅ Includes completion secret instructions (emitted only on completion)
 
 ---
 
-## 2. Setup Scripts (`plugins/babysitter/scripts/`)
+## 2. Setup Scripts (`plugins/babysitter/skills/babysit/scripts/`)
 
 ### ✅ setup-babysitter-run.sh
 **Status:** Verified - Well implemented
@@ -52,11 +52,11 @@ Successfully verified and updated the babysitter plugin commands and hooks to re
 **Features:**
 - ✅ Session isolation via CLAUDE_SESSION_ID
 - ✅ State file management (markdown with YAML frontmatter)
-- ✅ Argument parsing (--max-iterations, --completion-promise)
+- ✅ Argument parsing (--max-iterations, optional --run-id)
 - ✅ Comprehensive help text (--help flag)
 - ✅ Error handling and validation
 - ✅ Creates state file for stop hook to read
-- ✅ Displays iteration info and completion requirements
+- ✅ Displays iteration info and completion-secret requirements
 
 **State File Format:**
 ```yaml
@@ -64,7 +64,7 @@ Successfully verified and updated the babysitter plugin commands and hooks to re
 active: true
 iteration: 1
 max_iterations: <n>
-completion_promise: "<text>"
+run_id: "<run-id-or-empty>"
 started_at: "2026-01-20T..."
 ---
 
@@ -79,8 +79,8 @@ started_at: "2026-01-20T..."
 - ✅ Verifies run exists in .a5c/runs/<run-id>/
 - ✅ Uses CLI to check run status (run:status --json)
 - ✅ Prevents resuming completed runs
-- ✅ Supports --max-iterations and --completion-promise overrides
-- ✅ Creates same state file format as setup-babysitter-run.sh
+- ✅ Supports --max-iterations override
+- ✅ Creates same state file format as setup-babysitter-run.sh (no completion promise)
 - ✅ Comprehensive help text and error messages
 - ✅ Made executable (chmod +x)
 
@@ -163,7 +163,7 @@ fi
 - ✅ Parses markdown frontmatter (YAML)
 - ✅ Validates numeric fields before arithmetic
 - ✅ Checks max_iterations limit
-- ✅ Checks completion_promise (exact match with <promise> tags)
+- ✅ Checks completionSecret (exact match with <promise> tags)
 - ✅ Extracts last assistant message from transcript
 - ✅ Increments iteration counter
 - ✅ Feeds prompt back to continue loop
@@ -282,7 +282,7 @@ bash ./plugins/babysitter/skills/babysit/scripts/setup-babysitter-run.sh --help
 bash ./plugins/babysitter/skills/babysit/scripts/setup-babysitter-run.sh Test task --max-iterations 5
 
 # Test with completion promise
-bash ./plugins/babysitter/skills/babysit/scripts/setup-babysitter-run.sh Test --completion-promise 'DONE'
+bash ./plugins/babysitter/skills/babysit/scripts/setup-babysitter-run.sh Test --max-iterations 5
 ```
 
 **Test setup-babysitter-run-resume.sh:**

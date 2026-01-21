@@ -790,12 +790,12 @@ The in-session loop mechanism enables Claude to work continuously on a task with
 
 **Syntax:**
 ```bash
-/babysit <PROMPT> [--max-iterations <n>] [--completion-promise '<text>']
+/babysit <PROMPT> [--max-iterations <n>] [--run-id <id>]
 ```
 
 **Examples:**
 ```bash
-/babysit Build a REST API --max-iterations 20 --completion-promise 'DONE'
+/babysit Build a REST API --max-iterations 20
 /babysit Fix the auth bug --max-iterations 10
 /babysit Improve code quality  # Runs forever
 ```
@@ -803,7 +803,7 @@ The in-session loop mechanism enables Claude to work continuously on a task with
 **Arguments:**
 - `PROMPT` - Task description (multiple words, no quotes needed)
 - `--max-iterations <n>` - Maximum iterations (0 = unlimited, default)
-- `--completion-promise '<text>'` - Completion phrase (requires quotes for multi-word)
+- `--run-id <id>` - Optional run ID to store in state (if already known)
 - `--help` - Show help message
 
 **Behind the Scenes:**
@@ -818,7 +818,7 @@ The in-session loop mechanism enables Claude to work continuously on a task with
 
 **Syntax:**
 ```bash
-/babysitter:resume <run-id> [--max-iterations <n>] [--completion-promise '<text>']
+/babysitter:resume <run-id> [--max-iterations <n>]
 ```
 
 **Example:**
@@ -838,7 +838,8 @@ The in-session loop mechanism enables Claude to work continuously on a task with
 ┌────────────────────────────────────────┐
 │  User: /babysit Build API      │
 │         --max-iterations 20            │
-│         --completion-promise 'DONE'    │
+│         (completion secret emitted     │
+│          only when run completes)      │
 └─────────────────┬──────────────────────┘
                   │
                   ▼
@@ -848,7 +849,7 @@ The in-session loop mechanism enables Claude to work continuously on a task with
 │  ---                                   │
 │  iteration: 1                          │
 │  max_iterations: 20                    │
-│  completion_promise: "DONE"            │
+│  run_id: "<run-id>"                    │
 │  ---                                   │
 │  Build API                             │
 └─────────────────┬──────────────────────┘
@@ -905,7 +906,7 @@ The in-session loop mechanism enables Claude to work continuously on a task with
 active: true
 iteration: 3
 max_iterations: 20
-completion_promise: "DONE"
+run_id: "<run-id>"
 started_at: "2026-01-20T10:15:30Z"
 ---
 
@@ -919,7 +920,7 @@ Build a REST API for managing todos with the following features:
 - `active` - Always true when file exists
 - `iteration` - Current iteration number (starts at 1)
 - `max_iterations` - Maximum iterations (0 = unlimited)
-- `completion_promise` - Completion phrase or null
+- `run_id` - Run ID associated with this loop (may be empty until set)
 - `started_at` - ISO 8601 timestamp
 - `run_id` - Optional (for resume mode)
 
@@ -1049,7 +1050,7 @@ Result: Claude iterates up to 10 times, refining the fix each iteration.
 
 **Task with Promise:**
 ```bash
-/babysit Build REST API --completion-promise 'All tests passing' --max-iterations 50
+/babysit Build REST API --max-iterations 50
 ```
 
 Result: Claude works until all tests pass (or 50 iterations), outputs `<promise>All tests passing</promise>` to exit.
@@ -1061,7 +1062,7 @@ Result: Claude works until all tests pass (or 50 iterations), outputs `<promise>
 
 Result: Runs forever, continuously refining. No automatic exit.
 
-⚠️ **Warning:** Without `--max-iterations` or `--completion-promise`, the loop runs infinitely!
+⚠️ **Warning:** Without `--max-iterations`, the loop runs infinitely until the run completes!
 
 ### 7.10 Technical Documentation
 
@@ -1263,7 +1264,7 @@ done
 active: true
 iteration: 1
 max_iterations: 20
-completion_promise: "DONE"
+run_id: "<run-id>"
 started_at: "2026-01-20T10:15:30Z"
 ---
 

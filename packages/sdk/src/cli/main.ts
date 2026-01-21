@@ -599,18 +599,22 @@ async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
   const state = deriveRunState(lastLifecycleEvent?.type, pendingTotal);
   const lastSummary = formatLastEventSummary(lastEvent);
   if (parsed.json) {
+    const completionSecret = state === "completed" ? (metadata.completionSecret ?? null) : null;
     console.log(
       JSON.stringify({
         state,
         lastEvent: lastEvent ? serializeJournalEvent(lastEvent, runDir) : null,
         pendingByKind,
         metadata: formattedMetadata.jsonMetadata ?? null,
+        completionSecret,
       })
     );
     return 0;
   }
   const suffix = formattedMetadata.textParts.length ? ` ${formattedMetadata.textParts.join(" ")}` : "";
-  console.log(`[run:status] state=${state} last=${lastSummary}${suffix}`);
+  const completionSecret = state === "completed" ? metadata.completionSecret : undefined;
+  const secretSuffix = completionSecret ? ` completionSecret=${completionSecret}` : "";
+  console.log(`[run:status] state=${state} last=${lastSummary}${suffix}${secretSuffix}`);
   return 0;
 }
 
@@ -641,6 +645,9 @@ async function handleRunIterate(parsed: ParsedArgs): Promise<number> {
       const countInfo = result.count ? ` count=${result.count}` : "";
       const actionInfo = result.action ? ` action=${result.action}` : "";
       console.log(`[run:iterate] iteration=${result.iteration} status=${result.status}${actionInfo}${countInfo} reason=${result.reason}`);
+      if (result.status === "completed" && result.completionSecret) {
+        console.log(`[run:iterate] completionSecret=${result.completionSecret}`);
+      }
 
       if (result.status === "waiting" && result.until) {
         console.log(`[run:iterate] Waiting until: ${new Date(result.until).toISOString()}`);

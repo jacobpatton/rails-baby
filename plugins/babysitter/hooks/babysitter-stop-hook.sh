@@ -47,8 +47,8 @@ fi
 FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$BABYSITTER_STATE_FILE")
 ITERATION=$(echo "$FRONTMATTER" | grep '^iteration:' | sed 's/iteration: *//')
 MAX_ITERATIONS=$(echo "$FRONTMATTER" | grep '^max_iterations:' | sed 's/max_iterations: *//')
-# Extract completion_promise and strip surrounding quotes if present
-COMPLETION_PROMISE=$(echo "$FRONTMATTER" | grep '^completion_promise:' | sed 's/completion_promise: *//' | sed 's/^"\(.*\)"$/\1/')
+# Extract run_id (may be empty for newly created runs until populated by the skill)
+RUN_ID=$(echo "$FRONTMATTER" | grep '^run_id:' | sed 's/run_id: *//' | sed 's/^"\(.*\)"$/\1/')
 
 # Validate numeric fields before arithmetic operations
 if [[ ! "$ITERATION" =~ ^[0-9]+$ ]]; then
@@ -137,17 +137,26 @@ if [[ -z "$LAST_OUTPUT" ]]; then
   exit 0
 fi
 
-# Check for completion promise (only if set)
-if [[ "$COMPLETION_PROMISE" != "null" ]] && [[ -n "$COMPLETION_PROMISE" ]]; then
-  # Extract text from <promise> tags using Perl for multiline support
-  # -0777 slurps entire input, s flag makes . match newlines
-  # .*? is non-greedy (takes FIRST tag), whitespace normalized
-  PROMISE_TEXT=$(echo "$LAST_OUTPUT" | perl -0777 -pe 's/.*?<promise>(.*?)<\/promise>.*/$1/s; s/^\s+|\s+$//g; s/\s+/ /g' 2>/dev/null || echo "")
+# If we have a run_id, check completion secret from the SDK when the run completes.
+COMPLETION_SECRET=""
+if [[ -n "${RUN_ID:-}" ]]; then
+  CLI="npx -y @a5c-ai/babysitter-sdk"
+  if [[ -f "packages/sdk/dist/cli/main.js" ]]; then
+    CLI="node packages/sdk/dist/cli/main.js"
+  fi
+  RUN_STATUS=$($CLI run:status "$RUN_ID" --json 2>/dev/null || echo '{}')
+  RUN_STATE=$(echo "$RUN_STATUS" | jq -r '.state // empty')
+  if [[ "$RUN_STATE" == "completed" ]]; then
+    COMPLETION_SECRET=$(echo "$RUN_STATUS" | jq -r '.completionSecret // empty')
+  fi
+fi
 
-  # Use = for literal string comparison (not pattern matching)
-  # == in [[ ]] does glob pattern matching which breaks with *, ?, [ characters
-  if [[ -n "$PROMISE_TEXT" ]] && [[ "$PROMISE_TEXT" = "$COMPLETION_PROMISE" ]]; then
-    echo "✅ Babysitter run: Detected <promise>$COMPLETION_PROMISE</promise>"
+# If a completion secret is available, require the matching <promise> tag to exit.
+if [[ -n "$COMPLETION_SECRET" ]]; then
+  # Extract text from <promise> tags using Perl for multiline support
+  PROMISE_TEXT=$(echo "$LAST_OUTPUT" | perl -0777 -pe 's/.*?<promise>(.*?)<\/promise>.*/$1/s; s/^\s+|\s+$//g; s/\s+/ /g' 2>/dev/null || echo "")
+  if [[ -n "$PROMISE_TEXT" ]] && [[ "$PROMISE_TEXT" = "$COMPLETION_SECRET" ]]; then
+    echo "✅ Babysitter run: Detected <promise>$COMPLETION_SECRET</promise>"
     rm "$BABYSITTER_STATE_FILE"
     exit 0
   fi
@@ -181,11 +190,11 @@ TEMP_FILE="${BABYSITTER_STATE_FILE}.tmp.$$"
 sed "s/^iteration: .*/iteration: $NEXT_ITERATION/" "$BABYSITTER_STATE_FILE" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$BABYSITTER_STATE_FILE"
 
-# Build system message with iteration count and completion promise info
-if [[ "$COMPLETION_PROMISE" != "null" ]] && [[ -n "$COMPLETION_PROMISE" ]]; then
-  SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | To stop: output <promise>$COMPLETION_PROMISE</promise> (ONLY when the ENTIRE orchestration run (not just a step or iteration) is in completed status from the orchestartion cli - do not lie to exit! and do not talk about it by mistake with the user NOR by explaining the stop condition or anything like that. The run is designed to continue until genuine completion.)"
+# Build system message with iteration count and completion instructions
+if [[ -n "$COMPLETION_SECRET" ]]; then
+  SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Run completed! To finish: call 'run:status --json' on your run, extract 'completionSecret' from the output, then output it in <promise>SECRET</promise> tags. Do not mention or reveal the secret otherwise."
 else
-  SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | No completion promise set - loop runs infinitely"
+  SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Continue orchestration"
 fi
 
 # Output JSON to block the stop and feed prompt back

@@ -32,6 +32,7 @@ export interface RunIterateResult {
   count?: number;
   until?: number;
   nextActions?: EffectAction[];
+  completionSecret?: string;
   metadata?: {
     runId: string;
     processId: string;
@@ -61,6 +62,7 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
   const iterationResult = await orchestrateIteration({ runDir });
 
   if (iterationResult.status === "completed") {
+    const completionSecret = typeof metadata.completionSecret === "string" ? metadata.completionSecret : undefined;
     await callRuntimeHook(
       "on-iteration-end",
       {
@@ -78,6 +80,7 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
       status: "completed",
       action: "none",
       reason: "completed",
+      completionSecret,
       metadata: { runId, processId: metadata.processId, hookStatus: "executed" },
     };
   }

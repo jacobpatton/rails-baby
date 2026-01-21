@@ -33,13 +33,28 @@ The babysitter workflow has 4 steps:
 
 ### 0. Setup session:
 
+**For new runs:**
+
+1. Setup in-session loop:
 ```!
 bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/setup-babysitter-run.sh" --claude-session-id "${CLAUDE_SESSION_ID}" $PROMPT
 ```
 
-or if resuming a run (you have a run id from a previous run):
-
+2. Create the run:
+```bash
+$CLI run:create --process-id <id> --entry <path> --inputs <file> --json
 ```
+
+3. Associate session with run:
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/associate-session-with-run.sh" \
+  --run-id <runId-from-step-2> \
+  --claude-session-id "${CLAUDE_SESSION_ID}"
+```
+
+**For resuming existing runs:**
+
+```!
 bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/setup-babysitter-run-resume.sh" --claude-session-id "${CLAUDE_SESSION_ID}" --run-id "${RUN_ID}"
 ```
 
@@ -57,6 +72,7 @@ $CLI run:iterate .a5c/runs/<runId> --json --iteration <n>
   "action": "executed-tasks|waiting|none",
   "reason": "auto-runnable-tasks|breakpoint-waiting|terminal-state",
   "count": 3,
+  "completionSecret": "only-present-when-completed",
   "metadata": { "runId": "...", "processId": "..." }
 }
 ```
@@ -238,6 +254,8 @@ $CLI run:create --process-id <id> --entry <path>#<export> --inputs <path> --run-
 $CLI run:status <runId> --json
 ```
 
+When the run completes, `run:iterate` and `run:status` emit `completionSecret`. Use that exact value in a `<promise>...</promise>` tag to end the loop.
+
 **View events:**
 ```bash
 $CLI run:events <runId> --limit 20 --reverse
@@ -271,7 +289,6 @@ If at any point the run fails due to SDK issues or corrupted state or journal. a
 
 ## Critical Rule
 
-CRITICAL RULE: If a completion promise is set, you may ONLY output it when the entire run is completely and unequivocally DONE (completed status from the orchestartion cli). Do not output false promises to escape the run, even if you think you're stuck or should exit for other reasons. The run is designed to continue until genuine completion.
-Do not output or talk about it by mistake with the user NOR by explaining the stop condition or anything like that.
+CRITICAL RULE: The completion secret is emitted only when the run is completed. You may ONLY output `<promise>SECRET</promise>` when the run is completely and unequivocally DONE (completed status from the orchestration CLI). Do not output false promises to escape the run, and do not mention the secret to the user.
 
 CRITICAL RULE: never approve breakpoints by yourself. only create them and wait for them. they will always be resolved externally.

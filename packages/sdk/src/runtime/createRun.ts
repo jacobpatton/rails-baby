@@ -1,4 +1,5 @@
 import path from "path";
+import crypto from "crypto";
 import { createRunDir } from "../storage/createRunDir";
 import { appendEvent } from "../storage/journal";
 import { acquireRunLock, releaseRunLock } from "../storage/lock";
@@ -14,6 +15,13 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
   const runDir = getRunDir(options.runsDir, runId);
   const normalizedEntrypoint = normalizeEntrypoint(runDir, options.process.importPath, options.process.exportName);
   const requestId = options.request ?? options.process.processId ?? runId;
+  const providedSecret =
+    typeof options.metadata?.completionSecret === "string" ? options.metadata.completionSecret : undefined;
+  const completionSecret = providedSecret ?? crypto.randomBytes(16).toString("hex");
+  const extraMetadata = {
+    ...options.metadata,
+    completionSecret,
+  };
   const { metadata } = await createRunDir({
     runsRoot: options.runsDir,
     runId,
@@ -24,7 +32,7 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
     inputs: options.inputs,
     entrypoint: normalizedEntrypoint,
     processPath: normalizedEntrypoint.importPath,
-    extraMetadata: options.metadata,
+    extraMetadata,
   });
 
   let lockAcquired = false;

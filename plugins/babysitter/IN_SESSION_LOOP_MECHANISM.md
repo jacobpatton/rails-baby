@@ -84,7 +84,7 @@ The in-session loop mechanism allows Claude to work on a task continuously withi
 │  │  active: true                                           │ │
 │  │  iteration: 1                                           │ │
 │  │  max_iterations: 20                                     │ │
-│  │  completion_promise: "DONE"                             │ │
+│  │  run_id: "<run-id>"                                     │ │
 │  │  ---                                                    │ │
 │  │  Build a REST API                                       │ │
 │  └─────────────────────┬──────────────────────────────────┘ │
@@ -189,15 +189,15 @@ babysitter-stop-hook.sh → Reads state file
 ```yaml
 ---
 description: "Start babysitter run in current session"
-argument-hint: "PROMPT [--max-iterations N] [--completion-promise TEXT]"
-allowed-tools: ["Bash(${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run.sh:*)"]
+argument-hint: "PROMPT [--max-iterations N] [--run-id ID]"
+allowed-tools: ["Bash(${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/setup-babysitter-run.sh:*)"]
 hide-from-slash-command-tool: "true"
 ---
 ```
 
 **Execution:**
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run.sh" $ARGUMENTS
+bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/setup-babysitter-run.sh" $ARGUMENTS
 ```
 
 #### /babysitter:resume
@@ -208,27 +208,27 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run.sh" $ARGUMENTS
 ```yaml
 ---
 description: "Start babysitter run in current session"
-argument-hint: "PROMPT [--max-iterations N] [--completion-promise TEXT]"
-allowed-tools: ["Bash(${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run-resume.sh:*)", "Bash(${CLAUDE_PLUGIN_ROOT}/state/*:*)"]
+argument-hint: "PROMPT [--max-iterations N]"
+allowed-tools: ["Bash(${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/setup-babysitter-run-resume.sh:*)", "Bash(${CLAUDE_PLUGIN_ROOT}/state/*:*)"]
 hide-from-slash-command-tool: "true"
 ---
 ```
 
 **Execution:**
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run-resume.sh" $ARGUMENTS
+bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/setup-babysitter-run-resume.sh" $ARGUMENTS
 ```
 
 ### 3.2 Setup Scripts
 
-**Location:** `plugins/babysitter/scripts/`
+**Location:** `plugins/babysitter/skills/babysit/scripts/`
 
 #### setup-babysitter-run.sh
 
 **Purpose:** Initialize a new in-session loop
 
 **Responsibilities:**
-1. Parse command-line arguments (prompt, --max-iterations, --completion-promise)
+1. Parse command-line arguments (prompt, --max-iterations, optional --run-id)
 2. Validate inputs
 3. Check CLAUDE_SESSION_ID is available
 4. Create state file with YAML frontmatter and prompt
@@ -237,7 +237,7 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run-resume.sh" $ARGUMENTS
 **Arguments:**
 - `PROMPT...` - Task description (multiple words without quotes)
 - `--max-iterations <n>` - Maximum iterations (0 = unlimited)
-- `--completion-promise '<text>'` - Completion phrase (must be quoted)
+- `--run-id <id>` - Optional run ID to store in state (if already known)
 - `--help` - Show help message
 
 **State File Creation:**
@@ -247,7 +247,7 @@ cat > "$BABYSITTER_STATE_FILE" <<EOF
 active: true
 iteration: 1
 max_iterations: $MAX_ITERATIONS
-completion_promise: $COMPLETION_PROMISE_YAML
+run_id: "$RUN_ID"
 started_at: "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 ---
 
@@ -390,7 +390,7 @@ Command file parsed (run.md)
 Execute setup-babysitter-run.sh with $ARGUMENTS
          │
          ▼
-Parse arguments (prompt, --max-iterations, --completion-promise)
+Parse arguments (prompt, --max-iterations, optional --run-id)
          │
          ▼
 Validate inputs
@@ -405,7 +405,7 @@ Create state file: $CLAUDE_PLUGIN_ROOT/state/${SESSION_ID}.md
          │  active: true
          │  iteration: 1
          │  max_iterations: <n>
-         │  completion_promise: "<text>"
+        │  run_id: "<run-id>"
          │  started_at: "<timestamp>"
          │  ---
          │  <PROMPT>
@@ -445,7 +445,7 @@ Load state file: $STATE_DIR/${SESSION_ID}.md
 Parse YAML frontmatter:
   - iteration: 1
   - max_iterations: 20
-  - completion_promise: "DONE"
+  - run_id: "<run-id>"
          │
          ▼
 Check max iterations: 1 >= 20? NO
@@ -458,8 +458,8 @@ Extract last assistant message (JSONL format):
   grep '"role":"assistant"' | tail -1 | jq '.message.content'
          │
          ▼
-Check completion promise:
-  Does output contain <promise>DONE</promise>? NO
+Check completion secret (from run:status):
+  Does output contain <promise>SECRET</promise>? NO
          │
          ▼
 NOT COMPLETE - Continue loop:
@@ -491,7 +491,7 @@ Claude continues working (iteration 2)
 ### 4.3 Completion Flow
 
 ```
-Claude completes work and outputs: <promise>DONE</promise>
+Claude completes work and outputs: <promise>SECRET</promise>
          │
          ▼
 Claude tries to exit
@@ -503,7 +503,7 @@ Stop hook triggered
 Load state file
          │
          ▼
-Parse frontmatter: completion_promise: "DONE"
+Read run:status completionSecret
          │
          ▼
 Extract last assistant message
@@ -513,10 +513,10 @@ Check for <promise> tags:
   perl -0777 -pe 's/.*?<promise>(.*?)<\/promise>.*/$1/s'
          │
          ▼
-Extracted: "DONE"
+Extracted: "SECRET"
          │
          ▼
-Compare: "DONE" = "DONE"? YES
+Compare: "SECRET" = "SECRET"? YES
          │
          ▼
 COMPLETE - Allow exit:
@@ -544,9 +544,8 @@ Claude Code exits normally
 active: true
 iteration: <current-iteration-number>
 max_iterations: <max-iterations-or-0>
-completion_promise: "<promise-text-or-null>"
 started_at: "<ISO-8601-timestamp>"
-run_id: "<run-id-if-resume>"
+run_id: "<run-id-or-empty>"
 ---
 
 <PROMPT-TEXT>
@@ -558,8 +557,8 @@ run_id: "<run-id-if-resume>"
 active: true
 iteration: 3
 max_iterations: 20
-completion_promise: "DONE"
 started_at: "2026-01-20T10:15:30Z"
+run_id: "run-20260120-example"
 ---
 
 Build a REST API for managing todos with the following features:
@@ -601,7 +600,7 @@ FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$BABYSITTER_STATE_FILE")
 ```bash
 ITERATION=$(echo "$FRONTMATTER" | grep '^iteration:' | sed 's/iteration: *//')
 MAX_ITERATIONS=$(echo "$FRONTMATTER" | grep '^max_iterations:' | sed 's/max_iterations: *//')
-COMPLETION_PROMISE=$(echo "$FRONTMATTER" | grep '^completion_promise:' | sed 's/completion_promise: *//' | sed 's/^"\(.*\)"$/\1/')
+RUN_ID=$(echo "$FRONTMATTER" | grep '^run_id:' | sed 's/run_id: *//' | sed 's/^"\(.*\)"$/\1/')
 ```
 
 **Prompt Extraction:**
@@ -781,12 +780,10 @@ exit 0
 
 **Example:**
 ```
-User sets: --completion-promise 'All tests passing'
+Run completes; CLI emits completionSecret: "b1c2..."
 
 Claude outputs:
-The implementation is complete and all tests are now passing.
-
-<promise>All tests passing</promise>
+<promise>b1c2...</promise>
 ```
 
 ### 7.2 Promise Extraction
@@ -962,21 +959,21 @@ fi
 - No state leakage between sessions
 - Clean separation of concerns
 
-### 9.2 Completion Promise Security
+### 9.2 Completion Secret Security
 
 **Threat:** Malicious or accidental glob pattern exploitation
 
 **Example Attack:**
 ```bash
 # If using == (glob matching):
-completion_promise: "DONE"
+completion_secret: "DONE"
 claude_output: "<promise>D*</promise>"  # Would match!
 ```
 
 **Mitigation:**
 ```bash
 # Use = (literal string comparison, not ==)
-if [[ "$PROMISE_TEXT" = "$COMPLETION_PROMISE" ]]; then
+if [[ "$PROMISE_TEXT" = "$COMPLETION_SECRET" ]]; then
   # Only exact match
 fi
 ```
@@ -1049,12 +1046,11 @@ rm "$BABYSITTER_STATE_FILE"
 🛑 Babysitter run: Max iterations (10) reached.
 ```
 
-### 10.2 Task with Completion Promise
+### 10.2 Task with Completion Secret
 
 **Command:**
 ```bash
 /babysit Build a REST API for todos \
-  --completion-promise 'All tests passing' \
   --max-iterations 50
 ```
 
@@ -1064,12 +1060,13 @@ rm "$BABYSITTER_STATE_FILE"
 3. Iterations 11-15: Claude adds tests
 4. Iterations 16-20: Claude fixes test failures
 5. Iteration 21: All tests pass!
-6. Claude outputs: `<promise>All tests passing</promise>`
-7. Loop exits
+6. CLI emits completionSecret on completion
+7. Claude outputs: `<promise><completionSecret></promise>`
+8. Loop exits
 
 **Output:**
 ```
-✅ Babysitter run: Detected <promise>All tests passing</promise>
+✅ Babysitter run: Detected <promise><completionSecret></promise>
 ```
 
 ### 10.3 Infinite Loop (No Limits)
@@ -1087,7 +1084,7 @@ rm "$BABYSITTER_STATE_FILE"
 **Warning:**
 ```
 ⚠️  WARNING: This loop cannot be stopped manually! It will run infinitely
-    unless you set --max-iterations or --completion-promise.
+    unless you set --max-iterations or the run completes.
 ```
 
 ### 10.4 Resume Existing Run
@@ -1114,8 +1111,8 @@ rm "$BABYSITTER_STATE_FILE"
 active: true
 iteration: 5
 max_iterations: 20
-completion_promise: "DONE"
 started_at: "2026-01-20T10:15:30Z"
+run_id: "run-20260120-example"
 ---
 
 Build a REST API for managing todos with the following features:
@@ -1131,8 +1128,8 @@ Build a REST API for managing todos with the following features:
 active: true
 iteration: 42
 max_iterations: 0
-completion_promise: null
 started_at: "2026-01-20T09:00:00Z"
+run_id: ""
 ---
 
 Improve the codebase quality by refactoring and adding tests.
@@ -1145,7 +1142,6 @@ Improve the codebase quality by refactoring and adding tests.
 active: true
 iteration: 1
 max_iterations: 15
-completion_promise: "Implementation complete"
 started_at: "2026-01-20T14:30:00Z"
 run_id: "run-20260120-example"
 ---
