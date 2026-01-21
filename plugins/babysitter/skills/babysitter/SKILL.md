@@ -238,6 +238,10 @@ $CLI run:iterate <runId> --json --iteration <n>
 ```
 ---
 
+## Recovery from failure
+
+If at any point the run fails due to SDK issues or corrupted state or journal. analyze the error and the journal events. recover the state to the state and journal to the last known good state and adapt and try to continue the run.
+
 ## See Also
 - `process/tdd-quality-convergence.js` - TDD quality convergence example - read this before creating the code for a run (create the run using the CLI, then use this process as a reference)
 - `reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
