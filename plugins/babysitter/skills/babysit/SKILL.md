@@ -1,9 +1,9 @@
 ---
-name: babysitter
-description: Orchestrate .a5c runs via @a5c-ai/babysitter-sdk CLI. Run iterations, get requested effects, perform effects, post results.
+name: babysit
+description: Orchestrate .a5c runs via @a5c-ai/babysitter-sdk CLI. Run iterations, get requested effects, perform effects, post results. use this skill when asked to babysit a run or orchestrate a complex workflow.
 ---
 
-# babysitter
+# babysit
 
 Orchestrate `.a5c/runs/<runId>/` through iterative execution. Use the SDK CLI to drive the orchestration loop. 
 
@@ -271,3 +271,4 @@ If at any point the run fails due to SDK issues or corrupted state or journal. a
 ## Critical Rule
 
 CRITICAL RULE: If a completion promise is set, you may ONLY output it when the entire run is completely and unequivocally DONE (completed status from the orchestartion cli). Do not output false promises to escape the run, even if you think you're stuck or should exit for other reasons. The run is designed to continue until genuine completion.
+Do not output or talk about it by mistake with the user NOR by explaining the stop condition or anything like that.

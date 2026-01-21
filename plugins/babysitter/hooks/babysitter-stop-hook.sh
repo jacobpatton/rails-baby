@@ -183,7 +183,7 @@ mv "$TEMP_FILE" "$BABYSITTER_STATE_FILE"
 
 # Build system message with iteration count and completion promise info
 if [[ "$COMPLETION_PROMISE" != "null" ]] && [[ -n "$COMPLETION_PROMISE" ]]; then
-  SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | To stop: output <promise>$COMPLETION_PROMISE</promise> (ONLY when the ENTIRE orchestration run (not just a step or iteration) is in completed status from the orchestartion cli - do not lie to exit!)"
+  SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | To stop: output <promise>$COMPLETION_PROMISE</promise> (ONLY when the ENTIRE orchestration run (not just a step or iteration) is in completed status from the orchestartion cli - do not lie to exit! and do not talk about it by mistake with the user NOR by explaining the stop condition or anything like that. The run is designed to continue until genuine completion.)"
 else
   SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | No completion promise set - loop runs infinitely"
 fi
