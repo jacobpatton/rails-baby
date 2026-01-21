@@ -64,9 +64,9 @@ The in-session loop mechanism allows Claude to work on a task continuously withi
 │                    Claude Code Session                       │
 │                                                              │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │  User: /babysitter:run Build a REST API                │ │
+│  │  User: /babysit Build a REST API                │ │
 │  │         --max-iterations 20                             │ │
-│  │         --completion-promise 'DONE'                     │ │
+│  │                                                         │ │
 │  └─────────────────────┬──────────────────────────────────┘ │
 │                        │                                     │
 │                        ▼                                     │
@@ -181,7 +181,7 @@ babysitter-stop-hook.sh → Reads state file
 
 **Available Commands:**
 
-#### /babysitter:run
+#### /babysit
 
 **File:** `run.md`
 
@@ -381,7 +381,7 @@ fi
 ### 4.1 Initialization Flow
 
 ```
-User runs /babysitter:run
+User runs /babysit
          │
          ▼
 Command file parsed (run.md)
@@ -1032,7 +1032,7 @@ rm "$BABYSITTER_STATE_FILE"
 
 **Command:**
 ```bash
-/babysitter:run Fix the authentication bug --max-iterations 10
+/babysit Fix the authentication bug --max-iterations 10
 ```
 
 **Flow:**
@@ -1053,7 +1053,7 @@ rm "$BABYSITTER_STATE_FILE"
 
 **Command:**
 ```bash
-/babysitter:run Build a REST API for todos \
+/babysit Build a REST API for todos \
   --completion-promise 'All tests passing' \
   --max-iterations 50
 ```
@@ -1076,7 +1076,7 @@ rm "$BABYSITTER_STATE_FILE"
 
 **Command:**
 ```bash
-/babysitter:run Improve code quality
+/babysit Improve code quality
 ```
 
 **Flow:**
@@ -1094,7 +1094,7 @@ rm "$BABYSITTER_STATE_FILE"
 
 **Command:**
 ```bash
-/babysitter:resume run-20260120-example --max-iterations 20
+/babysit resume run-20260120-example --max-iterations 20
 ```
 
 **Flow:**

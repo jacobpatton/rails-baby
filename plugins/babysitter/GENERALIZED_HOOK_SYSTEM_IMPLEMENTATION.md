@@ -109,9 +109,9 @@ plugins/babysitter/
 ├── GENERALIZED_HOOK_SYSTEM_IMPLEMENTATION.md   ← NEW (this file)
 └── todos.md                                    ← Marked #4 complete
 
-.claude/skills/babysitter/SKILL.md              ← Added hook examples
-plugins/babysitter/skills/babysitter/SKILL.md   ← Synced
-packages/sdk/skills/babysitter/SKILL.md         ← Synced
+.claude/skills/babysit/SKILL.md              ← Added hook examples
+plugins/babysitter/skills/babysit/SKILL.md   ← Synced
+packages/sdk/skills/babysit/SKILL.md         ← Synced
 ```
 
 **Total:** 3 new docs + 4 updated files
@@ -502,7 +502,7 @@ The generalized hook system is **production ready** and provides comprehensive l
 
 - [HOOK_SYSTEM_V2_SUMMARY.md](./HOOK_SYSTEM_V2_SUMMARY.md) - Quick reference
 - [HOOKS.md](./HOOKS.md) - Complete hook documentation
-- [Babysitter Skill](../../.claude/skills/babysitter/SKILL.md) - Skill with hook examples
+- [Babysitter Skill](../../.claude/skills/babysit/SKILL.md) - Skill with hook examples
 - [SDK Hook Types](../../packages/sdk/src/hooks/types.ts) - TypeScript definitions
 
 ---

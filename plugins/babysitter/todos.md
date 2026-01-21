@@ -12,7 +12,7 @@
 ✅ ralph.js (simple ralph wiggum loops that iterates until DONE is emmited) - see .a5c/processes/methodologies/ralph.js
 ✅ plan-and-execute.js - see .a5c/processes/methodologies/plan-and-execute.js
 ✅ devin.js (plan, code, debug, and deploy) - see .a5c/processes/methodologies/devin.js
-✅ tdd.js - see .claude/skills/babysitter/process/tdd-quality-convergence.js
+✅ tdd.js - see .claude/skills/babysit/process/tdd-quality-convergence.js
 ✅ score-gated-iterative-convergence.js - see tdd-quality-convergence.js (combines TDD + quality convergence)
 self-assessment.js
 state-machine-orchestration.js

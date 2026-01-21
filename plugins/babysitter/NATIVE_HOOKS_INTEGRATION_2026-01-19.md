@@ -54,12 +54,12 @@ Created `packages/sdk/src/runtime/hooks/runtime.ts`:
 - Documented all automatic hook triggers
 - Added hook discovery and example
 
-**Updated `plugins/babysitter/skills/babysitter/reference/HOOKS.md`:**
+**Updated `plugins/babysitter/skills/babysit/reference/HOOKS.md`:**
 - Updated to v2.1 "Runtime Integration"
 - Added detailed SDK integration section
 - Documented error handling and implementation details
 
-**Updated `plugins/babysitter/skills/babysitter/SKILL.md`:**
+**Updated `plugins/babysitter/skills/babysit/SKILL.md`:**
 - Added distinction between automatic vs manual hooks
 - Clarified which hooks are SDK-triggered vs process-level
 
@@ -96,8 +96,8 @@ Verified hook logging:
 
 ### Documentation (3 files)
 - `packages/sdk/sdk.md`
-- `plugins/babysitter/skills/babysitter/reference/HOOKS.md`
-- `plugins/babysitter/skills/babysitter/SKILL.md`
+- `plugins/babysitter/skills/babysit/reference/HOOKS.md`
+- `plugins/babysitter/skills/babysit/SKILL.md`
 
 ## Impact
 

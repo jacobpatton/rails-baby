@@ -276,13 +276,13 @@ Both are hook-driven, but serve different use cases.
 **Test setup-babysitter-run.sh:**
 ```bash
 # Test help
-bash ./plugins/babysitter/scripts/setup-babysitter-run.sh --help
+bash ./plugins/babysitter/skills/babysit/scripts/setup-babysitter-run.sh --help
 
 # Test with prompt
-bash ./plugins/babysitter/scripts/setup-babysitter-run.sh Test task --max-iterations 5
+bash ./plugins/babysitter/skills/babysit/scripts/setup-babysitter-run.sh Test task --max-iterations 5
 
 # Test with completion promise
-bash ./plugins/babysitter/scripts/setup-babysitter-run.sh Test --completion-promise 'DONE'
+bash ./plugins/babysitter/skills/babysit/scripts/setup-babysitter-run.sh Test --completion-promise 'DONE'
 ```
 
 **Test setup-babysitter-run-resume.sh:**

@@ -27,3 +27,4 @@ _ci_artifacts/**
 e2e-tests/fixtures/todo-app/**
 **/.a5c/runs/**
 packages/sdk/test-fixtures/cli/.a5c/logs/hooks.log
+e2e-tests/fixtures/todo-app-nextjs/

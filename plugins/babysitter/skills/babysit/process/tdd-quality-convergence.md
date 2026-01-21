@@ -248,7 +248,7 @@ CLI="npx -y @a5c-ai/babysitter-sdk"
 # Create run
 $CLI run:create \
   --process-id babysitter/tdd-quality-convergence \
-  --entry .claude/skills/babysitter/process/tdd-quality-convergence.js#process \
+  --entry .claude/skills/babysit/process/tdd-quality-convergence.js#process \
   --inputs inputs.json
 
 # Run orchestration
@@ -291,6 +291,6 @@ $CLI run:continue .a5c/runs/<runId> --auto-node-tasks --auto-node-max 10
 
 ## See Also
 
-- `plugins/babysitter/skills/babysitter/SKILL.md` - Core orchestration workflow
-- `plugins/babysitter/skills/babysitter/reference/ADVANCED_PATTERNS.md` - Pattern 5 (Agent), Pattern 6 (Skill), Pattern 7 (Iterative Convergence)
+- `plugins/babysitter/skills/babysit/SKILL.md` - Core orchestration workflow
+- `plugins/babysitter/skills/babysit/reference/ADVANCED_PATTERNS.md` - Pattern 5 (Agent), Pattern 6 (Skill), Pattern 7 (Iterative Convergence)
 - `packages/sdk/sdk.md` - SDK API reference

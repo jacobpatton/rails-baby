@@ -23,7 +23,7 @@
   "skills": [
     {
       "name": "babysitter",
-      "file": "skills/babysitter/SKILL.md"
+      "file": "skills/babysit/SKILL.md"
     },
     {
       "name": "babysitter-breakpoint",

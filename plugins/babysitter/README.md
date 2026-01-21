@@ -165,8 +165,8 @@ mkdir -p ~/.config/babysitter/hooks/on-breakpoint
 # Create a run with example process
 $CLI run:create \
   --process-id babysitter/tdd-quality-convergence \
-  --entry .claude/skills/babysitter/process/tdd-quality-convergence.js#process \
-  --inputs .claude/skills/babysitter/process/examples/tdd-quality-convergence-example.json
+  --entry .claude/skills/babysit/process/tdd-quality-convergence.js#process \
+  --inputs .claude/skills/babysit/process/examples/tdd-quality-convergence-example.json
 ```
 
 ### 3. Drive Orchestration
@@ -200,10 +200,10 @@ Use Claude Code commands for specific actions:
 
 ```bash
 # Create a new babysitter run
-/babysitter:run "Implement user authentication"
+/babysit "Implement user authentication"
 
 # Resume an existing run
-/babysitter:resume run-20260120-auth
+/babysit resume run-20260120-auth
 ```
 
 **Check Available Skills**
@@ -763,12 +763,12 @@ while (quality < targetQuality && iteration < maxIterations) {
 
 - **[BABYSITTER_PLUGIN_SPECIFICATION.md](./BABYSITTER_PLUGIN_SPECIFICATION.md)** - Complete specification (architecture, components, API)
 - **[HOOKS.md](./HOOKS.md)** - Hook system guide (types, development, examples)
-- **[skills/babysitter/SKILL.md](./skills/babysitter/SKILL.md)** - Main orchestration skill instructions
-- **[skills/babysitter/reference/ADVANCED_PATTERNS.md](./skills/babysitter/reference/ADVANCED_PATTERNS.md)** - Advanced patterns (agents, skills, convergence)
+- **[skills/babysit/SKILL.md](./skills/babysit/SKILL.md)** - Main orchestration skill instructions
+- **[skills/babysit/reference/ADVANCED_PATTERNS.md](./skills/babysit/reference/ADVANCED_PATTERNS.md)** - Advanced patterns (agents, skills, convergence)
 
 ### Process Documentation
 
-- **[tdd-quality-convergence.md](./.claude/skills/babysitter/process/tdd-quality-convergence.md)** - Comprehensive TDD example with agent scoring
+- **[tdd-quality-convergence.md](./.claude/skills/babysit/process/tdd-quality-convergence.md)** - Comprehensive TDD example with agent scoring
 - **[PACKAGING_PROCESSES_WITH_SKILLS.md](./PACKAGING_PROCESSES_WITH_SKILLS.md)** - How to package processes with skills
 
 ### SDK Documentation
@@ -781,7 +781,7 @@ while (quality < targetQuality && iteration < maxIterations) {
 
 ### TDD Quality Convergence
 
-**Location:** `.claude/skills/babysitter/process/tdd-quality-convergence.js`
+**Location:** `.claude/skills/babysit/process/tdd-quality-convergence.js`
 
 Demonstrates:
 - Agent-based planning
@@ -796,8 +796,8 @@ Demonstrates:
 ```bash
 $CLI run:create \
   --process-id babysitter/tdd-quality-convergence \
-  --entry .claude/skills/babysitter/process/tdd-quality-convergence.js#process \
-  --inputs .claude/skills/babysitter/process/examples/tdd-quality-convergence-example.json
+  --entry .claude/skills/babysit/process/tdd-quality-convergence.js#process \
+  --inputs .claude/skills/babysit/process/examples/tdd-quality-convergence-example.json
 ```
 
 ---
@@ -921,9 +921,9 @@ See main project LICENSE.
 
 - [Plugin Specification](./BABYSITTER_PLUGIN_SPECIFICATION.md)
 - [Hooks Guide](./HOOKS.md)
-- [Advanced Patterns](./skills/babysitter/reference/ADVANCED_PATTERNS.md)
+- [Advanced Patterns](./skills/babysit/reference/ADVANCED_PATTERNS.md)
 - [SDK API Reference](../../packages/sdk/sdk.md)
-- [TDD Example Process](./.claude/skills/babysitter/process/tdd-quality-convergence.js)
+- [TDD Example Process](./.claude/skills/babysit/process/tdd-quality-convergence.js)
 - [Process Packaging Guide](./PACKAGING_PROCESSES_WITH_SKILLS.md)
 
 ---

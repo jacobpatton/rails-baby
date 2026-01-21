@@ -117,7 +117,7 @@ Babysitter supports two primary interaction modes:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  User: /babysitter:run <PROMPT> --max-iterations <n>        │
+│  User: /babysit <PROMPT> --max-iterations <n>        │
 └─────────────────────┬────────────────────────────────────────┘
                       │
                       ▼
@@ -299,7 +299,7 @@ npx -y @a5c-ai/babysitter-sdk
 - Main orchestration skill
 - Loops `run:iterate` until completion
 - Handles run lifecycle
-- Location: `plugins/babysitter/skills/babysitter/`
+- Location: `plugins/babysitter/skills/babysit/`
 
 **babysitter-breakpoint:**
 - **DEPRECATED** (integrated into main skill)
@@ -311,17 +311,17 @@ npx -y @a5c-ai/babysitter-sdk
 
 **Available Commands:**
 
-**/babysitter:run**
+**/babysit**
 - Start babysitter run in current session
 - Uses stop hook to prevent exit
 - Loops until completion promise or max iterations
-- Location: `plugins/babysitter/commands/run.md`
+- Location: `plugins/babysit/SKILL.md`
 
-**/babysitter:resume**
+**/babysit resume**
 - Resume existing babysitter run
 - Checks run status via CLI
 - Continues from current state
-- Location: `plugins/babysitter/commands/babysitter-resume.md`
+- Location: `plugins/babysit/SKILL.md`
 
 ### 3.6 Breakpoints Package
 
@@ -686,7 +686,7 @@ babysitter task:post run-20260120-example effect-abc123 --status ok --json
 
 ### 6.1 Babysitter Skill
 
-**Location:** `plugins/babysitter/skills/babysitter/SKILL.md`
+**Location:** `plugins/babysitter/skills/babysit/SKILL.md`
 
 **Purpose:** Main orchestration skill for managing runs
 
@@ -737,7 +737,7 @@ Claude: [Invokes babysitter skill automatically]
 CLI="npx -y @a5c-ai/babysitter-sdk"
 ```
 
-**Skill Instructions:** See `plugins/babysitter/skills/babysitter/SKILL.md` for complete instructions.
+**Skill Instructions:** See `plugins/babysitter/skills/babysit/SKILL.md` for complete instructions.
 
 ### 6.2 Workflow Modes
 
@@ -768,7 +768,7 @@ CLI="npx -y @a5c-ai/babysitter-sdk"
 The in-session loop mechanism enables Claude to work continuously on a task within a single session through a self-referential loop. Instead of Claude finishing and exiting, the system intercepts exit attempts and feeds the same prompt back, creating an iterative improvement cycle.
 
 **Key Components:**
-- `/babysitter:run` and `/babysitter:resume` slash commands
+- `/babysit` skill and slash command
 - `setup-babysitter-run.sh` - Creates loop state
 - `babysitter-session-start-hook.sh` - Persists session ID
 - `babysitter-stop-hook.sh` - Intercepts exit and continues loop
@@ -784,20 +784,20 @@ The in-session loop mechanism enables Claude to work continuously on a task with
 
 ### 7.2 Slash Commands
 
-#### /babysitter:run
+#### /babysit
 
 **Purpose:** Start a new in-session loop
 
 **Syntax:**
 ```bash
-/babysitter:run <PROMPT> [--max-iterations <n>] [--completion-promise '<text>']
+/babysit <PROMPT> [--max-iterations <n>] [--completion-promise '<text>']
 ```
 
 **Examples:**
 ```bash
-/babysitter:run Build a REST API --max-iterations 20 --completion-promise 'DONE'
-/babysitter:run Fix the auth bug --max-iterations 10
-/babysitter:run Improve code quality  # Runs forever
+/babysit Build a REST API --max-iterations 20 --completion-promise 'DONE'
+/babysit Fix the auth bug --max-iterations 10
+/babysit Improve code quality  # Runs forever
 ```
 
 **Arguments:**
@@ -826,7 +826,7 @@ The in-session loop mechanism enables Claude to work continuously on a task with
 /babysitter:resume run-20260120-example --max-iterations 15
 ```
 
-**Differences from /babysitter:run:**
+**Differences from /babysit:**
 - Takes run ID instead of prompt
 - Validates run exists via `run:status`
 - Prevents resuming completed runs
@@ -836,7 +836,7 @@ The in-session loop mechanism enables Claude to work continuously on a task with
 
 ```
 ┌────────────────────────────────────────┐
-│  User: /babysitter:run Build API      │
+│  User: /babysit Build API      │
 │         --max-iterations 20            │
 │         --completion-promise 'DONE'    │
 └─────────────────┬──────────────────────┘
@@ -1042,21 +1042,21 @@ Output:
 
 **Simple Task:**
 ```bash
-/babysitter:run Fix authentication bug --max-iterations 10
+/babysit Fix authentication bug --max-iterations 10
 ```
 
 Result: Claude iterates up to 10 times, refining the fix each iteration.
 
 **Task with Promise:**
 ```bash
-/babysitter:run Build REST API --completion-promise 'All tests passing' --max-iterations 50
+/babysit Build REST API --completion-promise 'All tests passing' --max-iterations 50
 ```
 
 Result: Claude works until all tests pass (or 50 iterations), outputs `<promise>All tests passing</promise>` to exit.
 
 **Infinite Loop (Caution!):**
 ```bash
-/babysitter:run Improve code quality
+/babysit Improve code quality
 ```
 
 Result: Runs forever, continuously refining. No automatic exit.
@@ -1084,15 +1084,15 @@ See: **`IN_SESSION_LOOP_MECHANISM.md`**
 ```
 plugins/babysitter/
 ├── skills/
-│   └── babysitter/
+│   └── babysit/
 │       ├── SKILL.md                 # Main skill instructions
+│       ├── scripts/
+│       │   ├── setup-babysitter-run.sh     # /babysit setup
+│       │   └── setup-babysitter-run-resume.sh  # /babysit resume setup
 │       └── reference/
 │           ├── HOOKS.md            # Hook system documentation
 │           ├── ORCHESTRATION_GUIDE.md
 │           └── ADVANCED_PATTERNS.md
-├── commands/
-│   ├── run.md          # /babysitter:run command
-│   └── resume.md       # /babysitter:resume command
 ├── hooks/
 │   ├── hooks.json                 # Hook registration (SessionStart, Stop)
 │   ├── hook-dispatcher.sh         # Hook discovery & execution
@@ -1115,9 +1115,6 @@ plugins/babysitter/
 │   ├── pre-branch/
 │   ├── post-planning/
 │   └── on-score/
-├── scripts/
-│   ├── setup-run.sh     # /babysitter:run setup
-│   └── setup-resume.sh  # /babysitter:resume setup
 ├── state/                          # In-session loop state (created at runtime)
 │   └── ${SESSION_ID}.md           # State file per session
 ├── agents/
@@ -1245,9 +1242,9 @@ done
 
 ### 9.2 In-Session Loop (Commands)
 
-**Using /babysitter:run command (in-session loop):**
+**Using /babysit command (in-session loop):**
 
-1. User sends `/babysitter:run Build a REST API --completion-promise 'DONE'`
+1. User sends `/babysit Build a REST API`
 2. `setup-babysitter-run.sh` creates state file
 3. `babysitter-session-start-hook.sh` sets CLAUDE_SESSION_ID
 4. User works on task interactively
@@ -1779,8 +1776,8 @@ cat .a5c/runs/run-20260120-example/state/state.json | jq .
 
 **Documentation:**
 - SDK: `packages/sdk/sdk.md`
-- Hooks: `plugins/babysitter/skills/babysitter/reference/HOOKS.md`
-- Skills: `plugins/babysitter/skills/babysitter/SKILL.md`
+- Hooks: `plugins/babysitter/skills/babysit/reference/HOOKS.md`
+- Skills: `plugins/babysitter/skills/babysit/SKILL.md`
 - Breakpoints: `packages/breakpoints/README.md`
 
 **CLI Help:**

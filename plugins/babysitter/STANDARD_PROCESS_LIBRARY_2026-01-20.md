@@ -347,7 +347,7 @@ Comprehensive documentation including:
 
 ### Connections
 
-1. **TDD Quality Convergence** (.claude/skills/babysitter/process/)
+1. **TDD Quality Convergence** (.claude/skills/babysit/process/)
    - Advanced example showing all patterns
    - Can be used as reference
    - Packaged with skill

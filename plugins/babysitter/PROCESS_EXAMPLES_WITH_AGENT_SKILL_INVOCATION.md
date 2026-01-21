@@ -68,7 +68,7 @@ export const skillTask = defineTask('analyzer-skill', (args, taskCtx) => ({
 
 ### Overview
 
-**File:** `.claude/skills/babysitter/process/tdd-quality-convergence.js` (700+ lines)
+**File:** `.claude/skills/babysit/process/tdd-quality-convergence.js` (700+ lines)
 
 **Demonstrates:**
 1. ✅ Agent-based planning (`kind: "agent"`)
@@ -305,7 +305,7 @@ Each breakpoint includes:
 
 ## Files Created
 
-1. `.claude/skills/babysitter/process/tdd-quality-convergence.js` (700+ lines)
+1. `.claude/skills/babysit/process/tdd-quality-convergence.js` (700+ lines)
    - Complete advanced process implementation
    - 3 agent tasks
    - 8 node tasks (tests, implementation, quality checks)
@@ -313,14 +313,14 @@ Each breakpoint includes:
    - Quality convergence loop
    - Multiple breakpoints
 
-2. `.claude/skills/babysitter/process/tdd-quality-convergence.md` (320+ lines)
+2. `.claude/skills/babysit/process/tdd-quality-convergence.md` (320+ lines)
    - Comprehensive documentation
    - Process flow diagram
    - Agent task details
    - Convergence example
    - Usage instructions
 
-3. `.claude/skills/babysitter/process/examples/tdd-quality-convergence-example.json`
+3. `.claude/skills/babysit/process/examples/tdd-quality-convergence-example.json`
    - Example input with realistic feature requirements
 
 ---
@@ -457,8 +457,8 @@ CLI="npx -y @a5c-ai/babysitter-sdk"
 # Create run
 $CLI run:create \
   --process-id babysitter/tdd-quality-convergence \
-  --entry .claude/skills/babysitter/process/tdd-quality-convergence.js#process \
-  --inputs .claude/skills/babysitter/process/examples/tdd-quality-convergence-example.json
+  --entry .claude/skills/babysit/process/tdd-quality-convergence.js#process \
+  --inputs .claude/skills/babysit/process/examples/tdd-quality-convergence-example.json
 
 # Run orchestration
 $CLI run:continue .a5c/runs/<runId> --auto-node-tasks --auto-node-max 10
@@ -508,7 +508,7 @@ $CLI run:continue .a5c/runs/<runId> --auto-node-tasks --auto-node-max 10
    - Realistic workflow
 
 3. **Bundled with skill:**
-   - Located in `.claude/skills/babysitter/process/`
+   - Located in `.claude/skills/babysit/process/`
    - Packaged with skill
    - Ready to use
 

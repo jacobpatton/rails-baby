@@ -1,9 +1,6 @@
 ---
 name: babysitter
 description: Orchestrate .a5c runs via @a5c-ai/babysitter-sdk CLI. Run iterations, get requested effects, perform effects, post results.
-tools: ["Write", "Read", "Task", "Bash"]
-model: opus
-color: blue
 ---
 
 # babysitter
@@ -36,13 +33,13 @@ The babysitter workflow has 4 steps:
 ### 0. Setup session:
 
 ```!
-bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run.sh" --claude-session-id "${CLAUDE_SESSION_ID}" $PROMPT
+bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/setup-babysitter-run.sh" --claude-session-id "${CLAUDE_SESSION_ID}" $PROMPT
 ```
 
 or if resuming a run:
 
 ```!
-bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run-resume.sh" --claude-session-id "${CLAUDE_SESSION_ID}" --run-id "${RUN_ID}"
+bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/setup-babysitter-run-resume.sh" --claude-session-id "${CLAUDE_SESSION_ID}" --run-id "${RUN_ID}"
 ```
 
 ### 1. Run Iteration
@@ -269,3 +266,8 @@ If at any point the run fails due to SDK issues or corrupted state or journal. a
 - `process/tdd-quality-convergence.js` - TDD quality convergence example - read this before creating the code for a run (create the run using the CLI, then use this process as a reference)
 - `reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
 - `packages/sdk/sdk.md` - SDK API reference
+
+
+## Critical Rule
+
+CRITICAL RULE: If a completion promise is set, you may ONLY output it when the entire run is completely and unequivocally DONE (completed status from the orchestartion cli). Do not output false promises to escape the run, even if you think you're stuck or should exit for other reasons. The run is designed to continue until genuine completion.

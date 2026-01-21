@@ -18,7 +18,7 @@ while [[ $# -gt 0 ]]; do
 Babysitter - self-referential, event-sourced  development orchestration
 
 USAGE:
-  /babysitter:run [PROMPT...] [OPTIONS]
+  /babysit [PROMPT...] [OPTIONS]
 
 ARGUMENTS:
   PROMPT...    Initial prompt to start the loop (can be multiple words without quotes)
@@ -41,10 +41,10 @@ DESCRIPTION:
   - Learning how Babysitter works
 
 EXAMPLES:
-  /babysitter:run Build a todo API --completion-promise 'DONE' --max-iterations 20
-  /babysitter:run --max-iterations 10 Fix the auth bug
-  /babysitter:run Refactor cache layer  (runs forever)
-  /babysitter:run --completion-promise 'TASK COMPLETE' Create a REST API
+  /babysit Build a todo API --completion-promise 'DONE' --max-iterations 20
+  /babysit --max-iterations 10 Fix the auth bug
+  /babysit Refactor cache layer  (runs forever)
+  /babysit --completion-promise 'TASK COMPLETE' Create a REST API
 
 STOPPING:
   Only by reaching --max-iterations or detecting --completion-promise
@@ -128,11 +128,11 @@ if [[ -z "$PROMPT" ]]; then
   echo "   Babysitter needs a task description to work on." >&2
   echo "" >&2
   echo "   Examples:" >&2
-  echo "     /babysitter:run Build a REST API for todos" >&2
-  echo "     /babysitter:run Fix the auth bug --max-iterations 20" >&2
-  echo "     /babysitter:run --completion-promise 'DONE' Refactor code" >&2
+  echo "     /babysit Build a REST API for todos" >&2
+  echo "     /babysit Fix the auth bug --max-iterations 20" >&2
+  echo "     /babysit --completion-promise 'DONE' Refactor code" >&2
   echo "" >&2
-  echo "   For all options: /babysitter:run --help" >&2
+  echo "   For all options: /babysit --help" >&2
   exit 1
 fi
 
@@ -184,8 +184,8 @@ Completion promise: $(if [[ "$COMPLETION_PROMISE" != "null" ]]; then echo "${COM
 
 The stop hook is now active. When you try to exit, the SAME PROMPT will be
 fed back to you.
-Before anything else, use the Babysitter Skill. (read "\${CLAUDE_PLUGIN_ROOT}/skills/babysitter/SKILL.md" - the babysitter/SKILL.md file)
-You must use the skill to iterate (use the cli, execute requrested effects, post them back to the cli, and continue the loop until the run is completed).
+Before anything else, use the Babysitter Skill. (read "\${CLAUDE_PLUGIN_ROOT}/skills/babysit/SKILL.md" - the babysitter/SKILL.md file)
+You must use the skill to iterate (use the cli, execute requested effects, post them back to the cli, and continue the loop until the run is completed).
 do not perform any tasks directly, only use the skill to orchestrate the run.
 To monitor: head -10 "$BABYSITTER_STATE_FILE"
 

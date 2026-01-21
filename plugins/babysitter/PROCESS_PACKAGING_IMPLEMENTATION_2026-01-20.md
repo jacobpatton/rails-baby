@@ -42,12 +42,12 @@ Successfully implemented the ability to package reusable processes alongside ski
 **Process:** `simple-build-and-test`
 
 **Files Created:**
-1. `.claude/skills/babysitter/process/simple-build-and-test.js` (126 lines)
+1. `.claude/skills/babysit/process/simple-build-and-test.js` (126 lines)
    - Complete working process implementation
    - Demonstrates build → test → quality gate → breakpoint flow
    - Shows all key patterns: tasks, breakpoints, quality gates, structured output
 
-2. `.claude/skills/babysitter/process/simple-build-and-test.md` (365 lines)
+2. `.claude/skills/babysit/process/simple-build-and-test.md` (365 lines)
    - Comprehensive documentation
    - Input/output specifications
    - Usage examples
@@ -57,7 +57,7 @@ Successfully implemented the ability to package reusable processes alongside ski
    - Troubleshooting guide
    - Integration examples
 
-3. `.claude/skills/babysitter/process/examples/simple-build-and-test-example.json`
+3. `.claude/skills/babysit/process/examples/simple-build-and-test-example.json`
    - Example input file for the process
 
 **Process Features:**
@@ -70,7 +70,7 @@ Successfully implemented the ability to package reusable processes alongside ski
 
 ### 3. Updated Skill Instructions
 
-**File:** `plugins/babysitter/skills/babysitter/SKILL.md`
+**File:** `plugins/babysitter/skills/babysit/SKILL.md`
 
 **New Section:** 3.7. Packaged Processes with Skills (108 lines)
 
@@ -96,7 +96,7 @@ Successfully implemented the ability to package reusable processes alongside ski
 ### Directory Structure Created
 
 ```
-.claude/skills/babysitter/
+.claude/skills/babysit/
 ├── SKILL.md                                      [UPDATED]
 ├── reference/
 │   └── ...
@@ -159,8 +159,8 @@ find .claude/skills -path "*/process/*.js" -type f 2>/dev/null
 # Use a skill-packaged process
 babysitter run:create \
   --process-id babysitter/simple-build-and-test \
-  --entry .claude/skills/babysitter/process/simple-build-and-test.js#process \
-  --inputs .claude/skills/babysitter/process/examples/simple-build-and-test-example.json \
+  --entry .claude/skills/babysit/process/simple-build-and-test.js#process \
+  --inputs .claude/skills/babysit/process/examples/simple-build-and-test-example.json \
   --run-id "run-$(date -u +%Y%m%d-%H%M%S)-build-test"
 ```
 
@@ -168,13 +168,13 @@ babysitter run:create \
 
 ```javascript
 // From another process
-import { process as buildAndTest } from '.claude/skills/babysitter/process/simple-build-and-test.js';
+import { process as buildAndTest } from '.claude/skills/babysit/process/simple-build-and-test.js';
 
 export async function deploymentProcess(inputs, ctx) {
   const result = await ctx.task({
     kind: 'node',
     node: {
-      entry: '.claude/skills/babysitter/process/simple-build-and-test.js',
+      entry: '.claude/skills/babysit/process/simple-build-and-test.js',
       exportName: 'process'
     }
   }, { buildCommand: 'npm run build', minCoverage: 90 });
@@ -334,13 +334,13 @@ The babysitter skill now:
 
 ```bash
 $ find .claude/skills -path "*/process/*.js" -type f
-.claude/skills/babysitter/process/simple-build-and-test.js
+.claude/skills/babysit/process/simple-build-and-test.js
 ```
 
 ### Process Documentation
 
 ```bash
-$ cat .claude/skills/babysitter/process/simple-build-and-test.md | head -20
+$ cat .claude/skills/babysit/process/simple-build-and-test.md | head -20
 # Simple Build and Test Process
 
 A simple build and test workflow with quality gates and breakpoints for approval.
@@ -389,10 +389,10 @@ This process demonstrates the basic babysitter workflow pattern:
 
 **Created/Updated Files:**
 1. `plugins/babysitter/PACKAGING_PROCESSES_WITH_SKILLS.md` - Complete guide
-2. `plugins/babysitter/skills/babysitter/SKILL.md` - Updated with section 3.7
-3. `.claude/skills/babysitter/process/simple-build-and-test.js` - Example implementation
-4. `.claude/skills/babysitter/process/simple-build-and-test.md` - Example docs
-5. `.claude/skills/babysitter/process/examples/simple-build-and-test-example.json` - Example inputs
+2. `plugins/babysitter/skills/babysit/SKILL.md` - Updated with section 3.7
+3. `.claude/skills/babysit/process/simple-build-and-test.js` - Example implementation
+4. `.claude/skills/babysit/process/simple-build-and-test.md` - Example docs
+5. `.claude/skills/babysit/process/examples/simple-build-and-test-example.json` - Example inputs
 6. `plugins/babysitter/PROCESS_PACKAGING_IMPLEMENTATION_2026-01-20.md` - This file
 
 **Referenced Documentation:**

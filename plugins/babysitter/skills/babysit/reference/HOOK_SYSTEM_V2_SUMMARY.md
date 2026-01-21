@@ -297,7 +297,7 @@ chmod +x .a5c/hooks/on-run-complete/notify.sh
 - [HOOKS.md](./HOOKS.md) - Complete hook system documentation
 - [Hook Implementation](./HOOK_IMPLEMENTATION_2026-01-19.md) - Original on-breakpoint implementation
 - [Architecture Simplification](./ARCHITECTURE_SIMPLIFICATION_2026-01-19.md) - Skill consolidation
-- [Babysitter Skill](../../.claude/skills/babysitter/SKILL.md) - Skill instructions with hook examples
+- [Babysitter Skill](../../.claude/skills/babysit/SKILL.md) - Skill instructions with hook examples
 
 ---
 
