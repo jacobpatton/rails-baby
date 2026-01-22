@@ -155,11 +155,9 @@ if [[ -f "$BABYSITTER_STATE_FILE" ]]; then
   EXISTING_RUN_ID=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$BABYSITTER_STATE_FILE" | grep '^run_id:' | sed 's/run_id: *//' | sed 's/^"\(.*\)"$/\1/')
   if [[ -n "${EXISTING_RUN_ID:-}" ]]; then
     echo "❌ Error: This session is already associated with a run (${EXISTING_RUN_ID})" >&2
-    echo "   Stop the current babysitter run or use a new session before starting another." >&2
     exit 1
   fi
-  echo "❌ Error: A babysitter run is already active for this session." >&2
-  echo "   Stop the current run or use a new session before starting another." >&2
+  echo "❌ Error: A babysitter run is already active for this session, but with no associated run ID." >&2
   exit 1
 fi
 
