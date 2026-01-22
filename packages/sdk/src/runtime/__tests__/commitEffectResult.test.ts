@@ -9,6 +9,7 @@ import { buildTaskContext, createTestRun } from "./testHelpers";
 import { EffectRequestedError, RunFailedError } from "../exceptions";
 import { buildEffectIndex } from "../replay/effectIndex";
 import { globalTaskRegistry } from "../../tasks/registry";
+import { createRunDir } from "../../storage/createRunDir";
 
 let tmpRoot: string;
 
@@ -41,7 +42,7 @@ describe("commitEffectResult", () => {
         effectId: effect.effectId,
         result: { status: "ok", value: { doubled: 4 } },
       })
-    ).resolves.toBeUndefined();
+    ).resolves.toMatchObject({ resultRef: expect.any(String) });
     const resolvedRecord = globalTaskRegistry.get(effect.effectId);
     expect(resolvedRecord?.status).toBe("resolved_ok");
     expect(typeof resolvedRecord?.resolvedAt).toBe("string");
@@ -57,9 +58,15 @@ describe("commitEffectResult", () => {
 
   test("rejects commits for unknown effect ids and emits rejection metrics", async () => {
     const loggerEntries: Array<Record<string, unknown>> = [];
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "missing-run",
+      request: "missing-effect",
+      processPath: "./process.js",
+    });
     await expect(
       commitEffectResult({
-        runDir: path.join(tmpRoot, "missing-run"),
+        runDir,
         effectId: "01ABC",
         logger: (entry) => loggerEntries.push(entry),
         result: { status: "ok", value: {} },
@@ -95,7 +102,7 @@ describe("commitEffectResult", () => {
         logger: (entry) => metrics.push(entry),
         result: { status: "ok", value: { doubled: 2 } },
       })
-    ).resolves.toBeUndefined();
+    ).resolves.toMatchObject({ resultRef: expect.any(String) });
 
     expect(metrics[0]).toMatchObject({
       metric: "commit.effect",
@@ -146,7 +153,7 @@ describe("commitEffectResult", () => {
           stderr: "err-value",
         },
       })
-    ).resolves.toBeUndefined();
+    ).resolves.toMatchObject({ resultRef: expect.any(String) });
 
     const stdoutPath = path.join(effect.runDir, "tasks", effect.effectId, "stdout.log");
     const stderrPath = path.join(effect.runDir, "tasks", effect.effectId, "stderr.log");

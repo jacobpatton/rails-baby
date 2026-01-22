@@ -87,13 +87,13 @@ The Babysitter SDK CLI is used for orchestration:
 
 ```bash
 # Install globally (recommended)
-npm install -g @a5c-ai/babysitter-sdk
+npm install -g @a5c-ai/babysitter-sdk@latest
 
 # Or use npx (no installation required)
-npx -y @a5c-ai/babysitter-sdk --version
+npx -y @a5c-ai/babysitter-sdk@latest --version
 
 # Set up CLI alias for convenience
-echo 'alias babysitter="npx -y @a5c-ai/babysitter-sdk"' >> ~/.bashrc
+echo 'alias babysitter="npx -y @a5c-ai/babysitter-sdk@latest"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -107,7 +107,7 @@ source ~/.bashrc
 # You should see "babysitter" in the list
 
 # Verify SDK CLI
-npx -y @a5c-ai/babysitter-sdk --version
+npx -y @a5c-ai/babysitter-sdk@latest --version
 
 # Test the babysitter skill
 # In Claude Code, ask:
@@ -622,7 +622,7 @@ After executing the effect externally (or inside a hook), `task:post`:
 ## 🔧 CLI Quick Reference
 
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 
 # Create run
 $CLI run:create \
@@ -808,10 +808,10 @@ $CLI run:create \
 
 ```bash
 # Install globally (optional)
-npm install -g @a5c-ai/babysitter-sdk
+npm install -g @a5c-ai/babysitter-sdk@latest
 
 # Or use npx
-npx -y @a5c-ai/babysitter-sdk --version
+npx -y @a5c-ai/babysitter-sdk@latest --version
 ```
 
 ### Run stuck in "waiting"

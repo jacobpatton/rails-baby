@@ -130,10 +130,7 @@ if [[ ! -d "$RUN_DIR" ]]; then
 fi
 
 # Get run status using CLI
-CLI="npx -y @a5c-ai/babysitter-sdk"
-if [[ -f "packages/sdk/dist/cli/main.js" ]]; then
-  CLI="node packages/sdk/dist/cli/main.js"
-fi
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 
 RUN_STATUS=$($CLI run:status "$RUN_ID" --json 2>/dev/null || echo '{}')
 STATE="unknown"

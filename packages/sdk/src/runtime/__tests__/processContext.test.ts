@@ -210,7 +210,16 @@ describe("ProcessContext parallel helpers", () => {
     ).rejects.toSatisfy((error) => {
       expect(error).toBeInstanceOf(ParallelPendingError);
       const parallelError = error as ParallelPendingError;
-      expect(parallelError.batch.actions).toEqual([actionA, actionB, actionC]);
+      expect(parallelError.batch.actions.map((action) => action.effectId)).toEqual([
+        actionA.effectId,
+        actionB.effectId,
+        actionC.effectId,
+      ]);
+      const groupIds = new Set(
+        parallelError.batch.actions.map((action) => action.schedulerHints?.parallelGroupId)
+      );
+      expect(groupIds.size).toBe(1);
+      expect(Array.from(groupIds)[0]).toBeDefined();
       expect(parallelError.batch.summaries[0]).toMatchObject({
         effectId: actionA.effectId,
         labels: actionA.labels,
@@ -241,7 +250,15 @@ describe("ProcessContext parallel helpers", () => {
     ).rejects.toSatisfy((error) => {
       expect(error).toBeInstanceOf(ParallelPendingError);
       const parallelError = error as ParallelPendingError;
-      expect(parallelError.batch.actions).toEqual([actionA, actionB]);
+      expect(parallelError.batch.actions.map((action) => action.effectId)).toEqual([
+        actionA.effectId,
+        actionB.effectId,
+      ]);
+      const groupIds = new Set(
+        parallelError.batch.actions.map((action) => action.schedulerHints?.parallelGroupId)
+      );
+      expect(groupIds.size).toBe(1);
+      expect(Array.from(groupIds)[0]).toBeDefined();
       expect(parallelError.details).toMatchObject({
         payload: { effects: parallelError.batch.summaries },
       });

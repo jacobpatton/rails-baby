@@ -8,11 +8,13 @@ set -euo pipefail
 
 # Read hook input from stdin (advanced stop hook API)
 HOOK_INPUT=$(cat)
-
+echo "✅ Babysitter run: Hook input: $HOOK_INPUT" > /tmp/babysitter-stop-hook.log
 # Extract session_id from hook input
 SESSION_ID=$(echo "$HOOK_INPUT" | jq -r '.session_id // empty')
 if [[ -z "$SESSION_ID" ]]; then
   # No session ID available - allow exit
+  echo "⚠️  Babysitter run: No session ID available" >> /tmp/babysitter-stop-hook.log
+  echo "   Hook input: $HOOK_INPUT" >> /tmp/babysitter-stop-hook.log
   exit 0
 fi
 
@@ -29,10 +31,10 @@ fi
 
 # Determine state directory (plugin-relative for session isolation)
 if [[ -n "${CLAUDE_PLUGIN_ROOT:-}" ]]; then
-  STATE_DIR="$CLAUDE_PLUGIN_ROOT/state"
+  STATE_DIR="$CLAUDE_PLUGIN_ROOT/skills/babysit/state"
 else
   # Fallback: derive from script location (hooks/stop-hook.sh -> plugin root)
-  STATE_DIR="$(dirname "$(dirname "$0")")/state"
+  STATE_DIR="$(dirname "$(dirname "$0")")/skills/babysit/state"
 fi
 
 # Check if babysitter-run is active for THIS session
@@ -40,6 +42,9 @@ BABYSITTER_STATE_FILE="$STATE_DIR/${SESSION_ID}.md"
 
 if [[ ! -f "$BABYSITTER_STATE_FILE" ]]; then
   # No active loop - allow exit
+  echo "⚠️  Babysitter run: No active loop" >> /tmp/babysitter-stop-hook.log
+  echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
+  echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
   exit 0
 fi
 
@@ -59,6 +64,9 @@ if [[ ! "$ITERATION" =~ ^[0-9]+$ ]]; then
   echo "   This usually means the state file was manually edited or corrupted." >&2
   echo "   Babysitter run is stopping. Run /babysitter:babysit again to start fresh." >&2
   rm "$BABYSITTER_STATE_FILE"
+  echo "⚠️  Babysitter run: Max iterations not a valid number" >> /tmp/babysitter-stop-hook.log
+  echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
+  echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
   exit 0
 fi
 
@@ -77,6 +85,9 @@ fi
 if [[ $MAX_ITERATIONS -gt 0 ]] && [[ $ITERATION -ge $MAX_ITERATIONS ]]; then
   echo "🛑 Babysitter run: Max iterations ($MAX_ITERATIONS) reached."
   rm "$BABYSITTER_STATE_FILE"
+  echo "⚠️  Babysitter run: Transcript file not found" >> /tmp/babysitter-stop-hook.log
+  echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
+  echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
   exit 0
 fi
 
@@ -100,6 +111,9 @@ if ! grep -q '"role":"assistant"' "$TRANSCRIPT_PATH"; then
   echo "   This is unusual and may indicate a transcript format issue" >&2
   echo "   Babysitter run is stopping." >&2
   rm "$BABYSITTER_STATE_FILE"
+  echo "⚠️  Babysitter run: Failed to extract last assistant message" >> /tmp/babysitter-stop-hook.log
+  echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
+  echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
   exit 0
 fi
 
@@ -127,6 +141,9 @@ if [[ $? -ne 0 ]]; then
   echo "   This may indicate a transcript format issue" >&2
   echo "   Babysitter run is stopping." >&2
   rm "$BABYSITTER_STATE_FILE"
+  echo "⚠️  Babysitter run: Failed to parse assistant message JSON" >> /tmp/babysitter-stop-hook.log
+  echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
+  echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
   exit 0
 fi
 
@@ -134,6 +151,9 @@ if [[ -z "$LAST_OUTPUT" ]]; then
   echo "⚠️  Babysitter run: Assistant message contained no text content" >&2
   echo "   Babysitter run is stopping." >&2
   rm "$BABYSITTER_STATE_FILE"
+  echo "⚠️  Babysitter run: Assistant message contained no text content" >> /tmp/babysitter-stop-hook.log
+  echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
+  echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
   exit 0
 fi
 
@@ -142,16 +162,17 @@ COMPLETION_SECRET=""
 RUN_STATE=""
 PENDING_KINDS=""
 if [[ -n "${RUN_ID:-}" ]]; then
-  CLI="npx -y @a5c-ai/babysitter-sdk"
-  if [[ -f "packages/sdk/dist/cli/main.js" ]]; then
-    CLI="node packages/sdk/dist/cli/main.js"
-  fi
+  CLI="npx -y @a5c-ai/babysitter-sdk@latest"
   RUN_STATUS=$($CLI run:status "$RUN_ID" --json 2>/dev/null || echo '{}')
   RUN_STATE=$(echo "$RUN_STATUS" | jq -r '.state // empty')
   PENDING_KINDS=$(echo "$RUN_STATUS" | jq -r '.pendingByKind | keys | join(", ") // empty' 2>/dev/null || echo "")
+  echo "✅ Babysitter run: Run state: $RUN_STATE" >> /tmp/babysitter-stop-hook.log
   if [[ "$RUN_STATE" == "completed" ]]; then
     COMPLETION_SECRET=$(echo "$RUN_STATUS" | jq -r '.completionSecret // empty')
+    echo "✅ Babysitter run: Completion secret: $COMPLETION_SECRET" >> /tmp/babysitter-stop-hook.log
   fi
+  echo "✅ Babysitter run: Pending kinds: $PENDING_KINDS" >> /tmp/babysitter-stop-hook.log
+  echo "✅ Babysitter run: Run status: $RUN_STATUS" >> /tmp/babysitter-stop-hook.log
 fi
 
 # If a completion secret is available, require the matching <promise> tag to exit.
@@ -161,6 +182,9 @@ if [[ -n "$COMPLETION_SECRET" ]]; then
   if [[ -n "$PROMISE_TEXT" ]] && [[ "$PROMISE_TEXT" = "$COMPLETION_SECRET" ]]; then
     echo "✅ Babysitter run: Detected <promise>$COMPLETION_SECRET</promise>"
     rm "$BABYSITTER_STATE_FILE"
+    echo "✅ Babysitter run: Detected <promise>$COMPLETION_SECRET</promise>" >> /tmp/babysitter-stop-hook.log
+    echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
+    echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
     exit 0
   fi
 fi
@@ -184,6 +208,9 @@ if [[ -z "$PROMPT_TEXT" ]]; then
   echo "" >&2
   echo "   Babysitter run is stopping. Run /babysitter:babysit again to start fresh." >&2
   rm "$BABYSITTER_STATE_FILE"
+  echo "⚠️  Babysitter run: State file corrupted or incomplete" >> /tmp/babysitter-stop-hook.log
+  echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
+  echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
   exit 0
 fi
 
@@ -192,6 +219,9 @@ fi
 TEMP_FILE="${BABYSITTER_STATE_FILE}.tmp.$$"
 sed "s/^iteration: .*/iteration: $NEXT_ITERATION/" "$BABYSITTER_STATE_FILE" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$BABYSITTER_STATE_FILE"
+echo "✅ Babysitter run: Updated iteration to $NEXT_ITERATION" >> /tmp/babysitter-stop-hook.log
+echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
+echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
 
 # Build system message with iteration count and status info
 if [[ -n "$COMPLETION_SECRET" ]]; then
@@ -202,6 +232,9 @@ else
   SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Continue orchestration (run:iterate)"
 fi
 
+echo "✅ Babysitter run: Outputting JSON to block the stop and feed prompt back" >> /tmp/babysitter-stop-hook.log
+echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
+echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
 # Output JSON to block the stop and feed prompt back
 # The "reason" field contains the prompt that will be sent back to Claude
 jq -n \
@@ -213,6 +246,9 @@ jq -n \
     "reason": $prompt,
     "systemMessage": $msg
   }'
-
+echo "✅ Babysitter run: Output JSON: $JSON_OUTPUT" >> /tmp/babysitter-stop-hook.log
+echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
+echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
+echo "✅ Babysitter run: Exiting 0 for successful hook execution" >> /tmp/babysitter-stop-hook.log
 # Exit 0 for successful hook execution
 exit 0

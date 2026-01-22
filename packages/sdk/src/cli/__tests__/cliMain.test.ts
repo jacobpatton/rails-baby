@@ -79,7 +79,7 @@ describe("CLI main entry", () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-123")]));
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:post", "runs/demo", "ef-123", "--status", "ok"]);
+    const exitCode = await cli.run(["task:post", "runs/demo", "ef-123", "--status", "ok", "--runs-dir", "."]);
 
     expect(exitCode).toBe(0);
     expect(commitEffectResultMock).toHaveBeenCalledWith(
@@ -101,7 +101,17 @@ describe("CLI main entry", () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-123")]));
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:post", "runs/demo", "ef-123", "--status", "ok", "--dry-run", "--json"]);
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-123",
+      "--status",
+      "ok",
+      "--dry-run",
+      "--json",
+      "--runs-dir",
+      ".",
+    ]);
 
     expect(exitCode).toBe(0);
     expect(commitEffectResultMock).not.toHaveBeenCalled();
@@ -114,7 +124,7 @@ describe("CLI main entry", () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([]));
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:post", "runs/demo", "ef-missing", "--status", "ok"]);
+    const exitCode = await cli.run(["task:post", "runs/demo", "ef-missing", "--status", "ok", "--runs-dir", "."]);
 
     expect(exitCode).toBe(1);
     expect(commitEffectResultMock).not.toHaveBeenCalled();
@@ -134,7 +144,7 @@ describe("CLI main entry", () => {
     });
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:post", "runs/demo", "ef-err", "--status", "error"]);
+    const exitCode = await cli.run(["task:post", "runs/demo", "ef-err", "--status", "error", "--runs-dir", "."]);
 
     expect(exitCode).toBe(1);
     expect(logSpy).toHaveBeenCalledWith(

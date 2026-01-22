@@ -51,7 +51,7 @@ describe("CLI task commands", () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([effectRecord("ef-1"), effectRecord("ef-2", { status: "requested" })]));
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:list", "runs/demo"]);
+    const exitCode = await cli.run(["task:list", "runs/demo", "--runs-dir", "."]);
 
     expect(exitCode).toBe(0);
     expectLogContaining(logSpy, "[task:list] total=2");
@@ -75,7 +75,7 @@ describe("CLI task commands", () => {
     );
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:list", "runs/demo", "--pending", "--json"]);
+    const exitCode = await cli.run(["task:list", "runs/demo", "--pending", "--json", "--runs-dir", "."]);
 
     expect(exitCode).toBe(0);
     const payload = readLastJson(logSpy);
@@ -97,7 +97,7 @@ describe("CLI task commands", () => {
     );
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:list", "runs/demo", "--kind", "breakpoint"]);
+    const exitCode = await cli.run(["task:list", "runs/demo", "--kind", "breakpoint", "--runs-dir", "."]);
 
     expect(exitCode).toBe(0);
     expectLogContaining(logSpy, "[task:list] total=1");
@@ -118,7 +118,7 @@ describe("CLI task commands", () => {
     );
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:list", "runs/demo", "--json"]);
+    const exitCode = await cli.run(["task:list", "runs/demo", "--json", "--runs-dir", "."]);
 
     expect(exitCode).toBe(0);
     const payload = readLastJson(logSpy);
@@ -136,7 +136,7 @@ describe("CLI task commands", () => {
     readTaskResultMock.mockResolvedValue({ schemaVersion: "v1", status: "ok" });
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:show", "runs/demo", "ef-123"]);
+    const exitCode = await cli.run(["task:show", "runs/demo", "ef-123", "--runs-dir", "."]);
 
     expect(exitCode).toBe(0);
     expectLogContaining(logSpy, "[task:show] ef-123 [node resolved_ok]");
@@ -153,7 +153,7 @@ describe("CLI task commands", () => {
     process.env.BABYSITTER_ALLOW_SECRET_LOGS = "1";
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:show", "runs/demo", "ef-json", "--json", "--verbose"]);
+    const exitCode = await cli.run(["task:show", "runs/demo", "ef-json", "--json", "--verbose", "--runs-dir", "."]);
 
     expect(exitCode).toBe(0);
     const payload = readLastJson(logSpy);
@@ -169,7 +169,7 @@ describe("CLI task commands", () => {
     readTaskResultMock.mockResolvedValue({ schemaVersion: "v1", status: "ok" });
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:show", "runs/demo", "ef-json-secret", "--json", "--verbose"]);
+    const exitCode = await cli.run(["task:show", "runs/demo", "ef-json-secret", "--json", "--verbose", "--runs-dir", "."]);
 
     expect(exitCode).toBe(0);
     const payload = readLastJson(logSpy);
@@ -185,7 +185,7 @@ describe("CLI task commands", () => {
     process.env.BABYSITTER_ALLOW_SECRET_LOGS = "true";
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:show", "runs/demo", "ef-json-secret", "--json", "--verbose"]);
+    const exitCode = await cli.run(["task:show", "runs/demo", "ef-json-secret", "--json", "--verbose", "--runs-dir", "."]);
 
     expect(exitCode).toBe(0);
     const payload = readLastJson(logSpy);
@@ -200,7 +200,7 @@ describe("CLI task commands", () => {
     statSpy.mockResolvedValue({ size: 2 * 1024 * 1024 } as unknown as Stats);
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:show", "runs/demo", "ef-large", "--json"]);
+    const exitCode = await cli.run(["task:show", "runs/demo", "ef-large", "--json", "--runs-dir", "."]);
 
     expect(exitCode).toBe(0);
     const payload = readLastJson(logSpy);
@@ -216,7 +216,7 @@ describe("CLI task commands", () => {
     statSpy.mockRejectedValue(Object.assign(new Error("missing"), { code: "ENOENT" as const }));
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:show", "runs/demo", "ef-missing-json", "--json"]);
+    const exitCode = await cli.run(["task:show", "runs/demo", "ef-missing-json", "--json", "--runs-dir", "."]);
 
     expect(exitCode).toBe(0);
     const payload = readLastJson(logSpy);
@@ -230,7 +230,7 @@ describe("CLI task commands", () => {
     readTaskResultMock.mockResolvedValue(undefined);
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:show", "runs/demo", "ef-missing"]);
+    const exitCode = await cli.run(["task:show", "runs/demo", "ef-missing", "--runs-dir", "."]);
 
     expect(exitCode).toBe(0);
     expectLogContaining(logSpy, "result: (not yet written)");
@@ -240,7 +240,7 @@ describe("CLI task commands", () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([]));
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:show", "runs/demo", "missing"]);
+    const exitCode = await cli.run(["task:show", "runs/demo", "missing", "--runs-dir", "."]);
 
     expect(exitCode).toBe(1);
     expectLogContaining(errorSpy, "effect missing not found");

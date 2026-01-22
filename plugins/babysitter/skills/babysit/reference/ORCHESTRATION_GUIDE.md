@@ -52,7 +52,7 @@ The babysitter orchestration system is now **fully hook-driven**. The skill simp
 ### Usage
 
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 $CLI run:iterate <runDir> [--json] [--verbose] [--iteration <n>]
 ```
 
@@ -94,7 +94,7 @@ $CLI run:iterate <runDir> [--json] [--verbose] [--iteration <n>]
 ### Basic Loop
 
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 RUN_DIR=".a5c/runs/<runId>"
 ITERATION=0
 
@@ -131,7 +131,7 @@ done
 ### Advanced Loop with Error Handling
 
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 RUN_DIR=".a5c/runs/<runId>"
 ITERATION=0
 MAX_ITERATIONS=100
@@ -264,7 +264,7 @@ When orchestrating a run:
 
 ```typescript
 async function orchestrateRun(runId: string) {
-  const CLI = "npx -y @a5c-ai/babysitter-sdk";
+  const CLI = "npx -y @a5c-ai/babysitter-sdk@latest";
   const runDir = `.a5c/runs/${runId}`;
   let iteration = 0;
 

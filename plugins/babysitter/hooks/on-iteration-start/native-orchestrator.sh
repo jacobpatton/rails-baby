@@ -18,12 +18,7 @@ RUN_ID=$(echo "$PAYLOAD" | jq -r '.runId')
 ITERATION=$(echo "$PAYLOAD" | jq -r '.iteration')
 TIMESTAMP=$(echo "$PAYLOAD" | jq -r '.timestamp')
 
-# Use local CLI if available, otherwise npx
-if [ -f "packages/sdk/dist/cli/main.js" ]; then
-  CLI=(node packages/sdk/dist/cli/main.js)
-else
-  CLI=(npx -y @a5c-ai/babysitter-sdk)
-fi
+CLI=(npx -y @a5c-ai/babysitter-sdk@latest)
 
 echo "[native-orchestrator] Analyzing run state for iteration $ITERATION" >&2
 

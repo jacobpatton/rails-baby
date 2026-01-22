@@ -36,7 +36,13 @@
       "Bash(bash:*)",
       "Bash(xargs cat:*)",
       "Bash(wc:*)",
-      "Bash(plugins/babysitter/hooks/babysitter-session-start-hook.sh)"
+      "Bash(plugins/babysitter/hooks/babysitter-session-start-hook.sh)",
+      "WebSearch",
+      "WebFetch(domain:*)",
+      "WebFetch(url:*)",
+      "Bash(babysitter run:status:*)",
+      "Bash(babysitter run:iterate:*)",
+      "Bash(babysitter run:events:*)"
     ]
   }
 }

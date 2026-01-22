@@ -13,12 +13,7 @@ ITERATION=$(echo "$PAYLOAD" | jq -r '.iteration')
 STATUS=$(echo "$PAYLOAD" | jq -r '.status')
 TIMESTAMP=$(echo "$PAYLOAD" | jq -r '.timestamp')
 
-# Use local CLI if available, otherwise npx
-if [ -f "packages/sdk/dist/cli/main.js" ]; then
-  CLI=(node packages/sdk/dist/cli/main.js)
-else
-  CLI=(npx -y @a5c-ai/babysitter-sdk)
-fi
+CLI=(npx -y @a5c-ai/babysitter-sdk@latest)
 
 echo "[native-finalization] Iteration $ITERATION ended with status: $STATUS" >&2
 

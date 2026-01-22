@@ -34,7 +34,10 @@ describe("batching helpers", () => {
 
     const batch = buildParallelBatch([actionA, actionB, actionA, actionC, actionB]);
 
-    expect(batch.actions).toEqual([actionA, actionB, actionC]);
+    expect(batch.actions.map((action) => action.effectId)).toEqual(["01A", "01B", "01C"]);
+    const groupIds = new Set(batch.actions.map((action) => action.schedulerHints?.parallelGroupId));
+    expect(groupIds.size).toBe(1);
+    expect(Array.from(groupIds)[0]).toBeDefined();
     expect(batch.summaries.map((summary) => summary.effectId)).toEqual(["01A", "01B", "01C"]);
   });
 

@@ -88,7 +88,7 @@ Users should now use `run:iterate` which relies on hooks for execution:
 
 **Example orchestration loop:**
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 ITERATION=0
 
 while true; do

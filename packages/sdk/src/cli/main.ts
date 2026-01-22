@@ -15,6 +15,7 @@ import { loadJournal } from "../storage/journal";
 import { readRunMetadata } from "../storage/runFiles";
 import type { JournalEvent, RunMetadata, StoredTaskResult } from "../storage/types";
 import { runIterate } from "./commands/runIterate";
+import { resolveCompletionSecret } from "./completionSecret";
 
 const USAGE = `Usage:
   babysitter run:create --process-id <id> --entry <path#export> [--runs-dir <dir>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--json] [--dry-run]
@@ -599,7 +600,7 @@ async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
   const state = deriveRunState(lastLifecycleEvent?.type, pendingTotal);
   const lastSummary = formatLastEventSummary(lastEvent);
   if (parsed.json) {
-    const completionSecret = state === "completed" ? (metadata.completionSecret ?? null) : null;
+    const completionSecret = state === "completed" ? resolveCompletionSecret(metadata) : null;
     console.log(
       JSON.stringify({
         state,
@@ -612,7 +613,7 @@ async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
     return 0;
   }
   const suffix = formattedMetadata.textParts.length ? ` ${formattedMetadata.textParts.join(" ")}` : "";
-  const completionSecret = state === "completed" ? metadata.completionSecret : undefined;
+  const completionSecret = state === "completed" ? resolveCompletionSecret(metadata) : undefined;
   const secretSuffix = completionSecret ? ` completionSecret=${completionSecret}` : "";
   console.log(`[run:status] state=${state} last=${lastSummary}${suffix}${secretSuffix}`);
   return 0;

@@ -24,10 +24,13 @@ import { callRuntimeHook } from "./hooks/runtime";
 
 type ProcessFunction = (inputs: unknown, ctx: any, extra?: unknown) => unknown | Promise<unknown>;
 // Use an indirect dynamic import so TypeScript does not downlevel to require() in CommonJS builds.
-const dynamicImportModule = new Function(
-  "specifier",
-  "return import(specifier);"
-) as (specifier: string) => Promise<Record<string, unknown>>;
+// Vitest executes modules inside a VM context that requires direct import() support.
+const dynamicImportModule: (specifier: string) => Promise<Record<string, unknown>> = (() => {
+  if (process.env.VITEST) {
+    return (specifier) => import(specifier);
+  }
+  return new Function("specifier", "return import(specifier);") as (specifier: string) => Promise<Record<string, unknown>>;
+})();
 
 export async function orchestrateIteration(options: OrchestrateOptions): Promise<IterationResult> {
   return await withRunLock(options.runDir, "runtime:orchestrateIteration", async () => {

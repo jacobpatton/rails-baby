@@ -216,7 +216,7 @@ Agent → Skill → CLI → Hooks → Tasks → Journal → State
 ```bash
 npm install -g @a5c-ai/babysitter-sdk
 # or
-npx -y @a5c-ai/babysitter-sdk
+npx -y @a5c-ai/babysitter-sdk@latest
 ```
 
 **Core Intrinsics:**
@@ -734,7 +734,7 @@ Claude: [Invokes babysitter skill automatically]
 
 **Via CLI alias:**
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 ```
 
 **Skill Instructions:** See `plugins/babysitter/skills/babysit/SKILL.md` for complete instructions.
@@ -1217,7 +1217,7 @@ plugins/babysitter/
 **External Loop (Skill/Agent):**
 
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 ITERATION=0
 
 while true; do
@@ -1676,10 +1676,10 @@ npm run start:worker
 **Solution:**
 ```bash
 # Install globally
-npm install -g @a5c-ai/babysitter-sdk
+npm install -g @a5c-ai/babysitter-sdk@latest
 
 # Or use npx
-npx -y @a5c-ai/babysitter-sdk --version
+npx -y @a5c-ai/babysitter-sdk@latest --version
 ```
 
 **Issue:** Hook not executing

@@ -401,7 +401,7 @@ Still to implement:
 ### Using Core Process
 
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 
 # Create run with build-and-test
 $CLI run:create \

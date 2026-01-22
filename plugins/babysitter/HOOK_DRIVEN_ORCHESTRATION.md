@@ -144,11 +144,11 @@ RUN_ID=$(echo "$PAYLOAD" | jq -r '.runId')
 RUN_DIR=".a5c/runs/$RUN_ID"
 
 # Just run the first pending task
-FIRST_TASK=$(npx -y @a5c-ai/babysitter-sdk task:list "$RUN_DIR" --pending --json | \
+FIRST_TASK=$(npx -y @a5c-ai/babysitter-sdk@latest task:list "$RUN_DIR" --pending --json | \
   jq -r '.[0].effectId // empty')
 
 if [ -n "$FIRST_TASK" ]; then
-  npx -y @a5c-ai/babysitter-sdk task:post "$RUN_DIR" "$FIRST_TASK" --status ok
+  npx -y @a5c-ai/babysitter-sdk@latest task:post "$RUN_DIR" "$FIRST_TASK" --status ok
   echo '{"action":"executed-tasks","count":1,"tasks":["'$FIRST_TASK'"]}'
 else
   echo '{"action":"none","reason":"no-tasks"}'
@@ -170,13 +170,13 @@ RUN_ID=$(echo "$PAYLOAD" | jq -r '.runId')
 RUN_DIR=".a5c/runs/$RUN_DIR"
 
 # Get up to 5 pending tasks
-TASKS=$(npx -y @a5c-ai/babysitter-sdk task:list "$RUN_DIR" --pending --json | \
+TASKS=$(npx -y @a5c-ai/babysitter-sdk@latest task:list "$RUN_DIR" --pending --json | \
   jq -r '.[0:5] | .[].effectId')
 
 # Run in parallel
 PIDS=()
 for task in $TASKS; do
-  npx -y @a5c-ai/babysitter-sdk task:post "$RUN_DIR" "$task" --status ok &
+  npx -y @a5c-ai/babysitter-sdk@latest task:post "$RUN_DIR" "$task" --status ok &
   PIDS+=($!)
 done
 
@@ -204,11 +204,11 @@ RUN_ID=$(echo "$PAYLOAD" | jq -r '.runId')
 RUN_DIR=".a5c/runs/$RUN_ID"
 
 # Get all pending tasks and sort by priority metadata
-HIGH_PRIORITY=$(npx -y @a5c-ai/babysitter-sdk task:list "$RUN_DIR" --pending --json | \
+HIGH_PRIORITY=$(npx -y @a5c-ai/babysitter-sdk@latest task:list "$RUN_DIR" --pending --json | \
   jq -r 'sort_by(.metadata.priority // 0) | reverse | .[0].effectId')
 
 if [ -n "$HIGH_PRIORITY" ] && [ "$HIGH_PRIORITY" != "null" ]; then
-  npx -y @a5c-ai/babysitter-sdk task:post "$RUN_DIR" "$HIGH_PRIORITY" --status ok
+  npx -y @a5c-ai/babysitter-sdk@latest task:post "$RUN_DIR" "$HIGH_PRIORITY" --status ok
   echo '{"action":"executed-tasks","count":1,"tasks":["'$HIGH_PRIORITY'"],"priority":true}'
 else
   echo '{"action":"none","reason":"no-high-priority-tasks"}'
@@ -245,11 +245,11 @@ if [ -f "$RATE_LIMIT_FILE" ]; then
 fi
 
 # Execute one task
-TASK=$(npx -y @a5c-ai/babysitter-sdk task:list "$RUN_DIR" --pending --json | \
+TASK=$(npx -y @a5c-ai/babysitter-sdk@latest task:list "$RUN_DIR" --pending --json | \
   jq -r '.[0].effectId // empty')
 
 if [ -n "$TASK" ]; then
-  npx -y @a5c-ai/babysitter-sdk task:post "$RUN_DIR" "$TASK" --status ok
+  npx -y @a5c-ai/babysitter-sdk@latest task:post "$RUN_DIR" "$TASK" --status ok
   date +%s > "$RATE_LIMIT_FILE"
   echo '{"action":"executed-tasks","count":1,"tasks":["'$TASK'"]}'
 else

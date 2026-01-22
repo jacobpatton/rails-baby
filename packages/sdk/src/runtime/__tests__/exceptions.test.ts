@@ -124,6 +124,9 @@ describe("typed exceptions", () => {
                 "group",
               ],
               "requestedAt": "2026-01-01T00:00:00Z",
+              "schedulerHints": {
+                "parallelGroupId": "cf7ea07e7ed0a9c2",
+              },
               "stepId": "S000001",
               "taskDef": {
                 "kind": "node",
@@ -143,6 +146,9 @@ describe("typed exceptions", () => {
                 "group",
               ],
               "requestedAt": "2026-01-01T00:00:00Z",
+              "schedulerHints": {
+                "parallelGroupId": "cf7ea07e7ed0a9c2",
+              },
               "stepId": "S000002",
               "taskDef": {
                 "kind": "node",

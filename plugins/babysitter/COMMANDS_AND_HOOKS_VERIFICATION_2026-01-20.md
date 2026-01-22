@@ -86,11 +86,7 @@ started_at: "2026-01-20T..."
 
 **CLI Integration:**
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk"
-if [[ -f "packages/sdk/dist/cli/main.js" ]]; then
-  CLI="node packages/sdk/dist/cli/main.js"
-fi
-
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 RUN_STATUS=$($CLI run:status "$RUN_ID" --json 2>/dev/null || echo '{}')
 STATE=$(echo "$RUN_STATUS" | jq -r '.state // "unknown"')
 ```

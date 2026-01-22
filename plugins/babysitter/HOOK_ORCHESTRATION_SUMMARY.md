@@ -130,11 +130,11 @@ PAYLOAD=$(cat)
 RUN_ID=$(echo "$PAYLOAD" | jq -r '.runId')
 
 # Execute just ONE task per iteration
-TASK=$(npx -y @a5c-ai/babysitter-sdk task:list ".a5c/runs/$RUN_ID" \
+TASK=$(npx -y @a5c-ai/babysitter-sdk@latest task:list ".a5c/runs/$RUN_ID" \
   --pending --json | jq -r '.[0].effectId // empty')
 
 if [ -n "$TASK" ]; then
-  npx -y @a5c-ai/babysitter-sdk task:post ".a5c/runs/$RUN_ID" "$TASK" --status ok
+  npx -y @a5c-ai/babysitter-sdk@latest task:post ".a5c/runs/$RUN_ID" "$TASK" --status ok
   echo '{"action":"executed-tasks","count":1,"tasks":["'$TASK'"]}'
 else
   echo '{"action":"none","reason":"no-tasks"}'
@@ -155,12 +155,12 @@ PAYLOAD=$(cat)
 RUN_ID=$(echo "$PAYLOAD" | jq -r '.runId')
 
 # Get up to 5 tasks
-TASKS=$(npx -y @a5c-ai/babysitter-sdk task:list ".a5c/runs/$RUN_ID" \
+TASKS=$(npx -y @a5c-ai/babysitter-sdk@latest task:list ".a5c/runs/$RUN_ID" \
   --pending --json | jq -r '.[0:5] | .[].effectId')
 
 # Execute ALL in parallel
 for task in $TASKS; do
-  npx -y @a5c-ai/babysitter-sdk task:post ".a5c/runs/$RUN_ID" "$task" --status ok &
+  npx -y @a5c-ai/babysitter-sdk@latest task:post ".a5c/runs/$RUN_ID" "$task" --status ok &
 done
 
 wait  # Wait for all tasks
@@ -251,7 +251,7 @@ echo '{"action":"executed-tasks","count":'$(echo "$TASKS" | wc -l)'}'
 
 ```bash
 # Create a test run
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 $CLI run:create --process-id test/hook \
   --entry /tmp/test-process.js#testProcess \
   --run-id test-hook-$(date +%s)

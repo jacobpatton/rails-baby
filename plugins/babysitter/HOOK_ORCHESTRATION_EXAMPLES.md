@@ -24,7 +24,7 @@ The native orchestrator implements standard SDK orchestration via hooks.
 ### Create a Test Run
 
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 
 # Create a test process with 3 tasks
 cat > /tmp/test-process.js << 'EOF'
@@ -100,7 +100,7 @@ PAYLOAD=$(cat)
 RUN_ID=$(echo "$PAYLOAD" | jq -r '.runId')
 RUN_DIR=".a5c/runs/$RUN_ID"
 
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 
 echo "[sequential] Executing one task at a time for run $RUN_ID" >&2
 
@@ -155,7 +155,7 @@ PAYLOAD=$(cat)
 RUN_ID=$(echo "$PAYLOAD" | jq -r '.runId')
 RUN_DIR=".a5c/runs/$RUN_ID"
 
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 BATCH_SIZE=5
 
 echo "[parallel] Executing up to $BATCH_SIZE tasks in parallel for run $RUN_ID" >&2
@@ -269,7 +269,7 @@ PAYLOAD=$(cat)
 RUN_ID=$(echo "$PAYLOAD" | jq -r '.runId')
 RUN_DIR=".a5c/runs/$RUN_ID"
 
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 
 echo "[priority] Finding highest priority task for run $RUN_ID" >&2
 
@@ -397,7 +397,7 @@ RUN_DIR=".a5c/runs/$RUN_ID"
 RATE_LIMIT_FILE="$RUN_DIR/.rate-limit"
 MIN_INTERVAL=5  # Minimum 5 seconds between executions
 
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 
 echo "[rate-limit] Checking rate limit for run $RUN_ID" >&2
 

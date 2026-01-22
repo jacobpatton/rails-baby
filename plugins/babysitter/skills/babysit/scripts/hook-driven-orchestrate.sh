@@ -51,12 +51,7 @@ echo "[hook-orchestrator] Starting hook-driven orchestration for run: $RUN_ID" >
 echo "[hook-orchestrator] Max iterations: $MAX_ITERATIONS" >&2
 echo "[hook-orchestrator] Working directory: $PROJECT_ROOT" >&2
 
-# Use local CLI if available
-if [ -f "$PROJECT_ROOT/packages/sdk/dist/cli/main.js" ]; then
-  CLI="node $PROJECT_ROOT/packages/sdk/dist/cli/main.js"
-else
-  CLI="npx -y @a5c-ai/babysitter-sdk"
-fi
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 
 # Main orchestration loop - driven by hooks
 while [ $CURRENT_ITERATION -lt $MAX_ITERATIONS ]; do

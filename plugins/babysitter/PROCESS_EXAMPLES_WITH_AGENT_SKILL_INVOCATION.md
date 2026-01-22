@@ -452,7 +452,7 @@ Fixed Pattern 6 (Skill-Based Execution) to show correct structure:
 ## Usage
 
 ```bash
-CLI="npx -y @a5c-ai/babysitter-sdk"
+CLI="npx -y @a5c-ai/babysitter-sdk@latest"
 
 # Create run
 $CLI run:create \
