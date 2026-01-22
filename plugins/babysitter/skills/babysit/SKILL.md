@@ -13,12 +13,12 @@ IMPORTANT: Never build a wrapper, python or helper scripts to orchestrate the ru
 make sure you have the latest version of the cli:
 
 ```bash
-npm i -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk @a5c-ai/babysitter-breakpoints
+npm i -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
 ```
 
 then use the CLI alias: CLI="babysitter"
 
-**Alternatively, use the CLI alias:** `CLI="npx -y @a5c-ai/babysitter-sdk"`
+**Alternatively, use the CLI alias:** `CLI="npx -y @a5c-ai/babysitter-sdk@latest"`
 
 ---
 

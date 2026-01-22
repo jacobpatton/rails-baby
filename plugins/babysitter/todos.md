@@ -8,22 +8,22 @@
 - [x] populate the plugins/babysitter/commands/ and files with the adapted instructions and verify setup-babysitter-run and the on-stop hooks are implemented correctly. ✅ Completed 2026-01-20 - Created setup-babysitter-run-resume.sh, updated command docs with architecture sections, verified all hooks. See COMMANDS_AND_HOOKS_VERIFICATION_2026-01-20.md
 - [x] write a spec for babysitter plugin ✅ Completed 2026-01-20 - Created comprehensive BABYSITTER_PLUGIN_SPECIFICATION.md covering architecture, components, hooks, CLI, workflows, API reference, and best practices for Version 4.0
 - [x] README.md for the babysitter plugin ✅ Completed 2026-01-20 - Created comprehensive README.md with quick start, core concepts, usage examples, CLI reference, advanced features, documentation links, troubleshooting, and contribution guidelines
-- [ ] research each of these methodologies and techniques and create an example process for each of them:
+- [x] research each of these methodologies and techniques and create an example process for each of them:
 ✅ ralph.js (simple ralph wiggum loops that iterates until DONE is emmited) - see plugins/babysitter/skills/babysit/process/methodologies/ralph.js
 ✅ plan-and-execute.js - see plugins/babysitter/skills/babysit/process/methodologies/plan-and-execute.js
 ✅ devin.js (plan, code, debug, and deploy) - see plugins/babysitter/skills/babysit/process/methodologies/devin.js
 ✅ tdd.js - see plugins/babysitter/skills/babysit/process/tdd-quality-convergence.js
 ✅ score-gated-iterative-convergence.js - see tdd-quality-convergence.js (combines TDD + quality convergence)
-self-assessment.js
+✅ self-assessment.js - see plugins/babysitter/skills/babysit/process/methodologies/self-assessment.js
 ✅ state-machine-orchestration.js
-consensus-and-voting-mechanisms.js
-base44.js
-adversarial-spec-debates.js ( adversarial spec debates between two or more LLMs or even other coding agents )
-graph-of-thoughts.js
-evolutionary.js
-build-realtime-remediation.js ( pulls ci state and remediates it )
-agile.js ( agile development loop with springs, release cycles and product->develop->qa->release iterations )
-top-down.js
-bottom-up.js
+✅ consensus-and-voting-mechanisms.js - see plugins/babysitter/skills/babysit/process/methodologies/consensus-and-voting-mechanisms.js
+✅ base44.js - see plugins/babysitter/skills/babysit/process/methodologies/base44.js (Base44-inspired conversational development)
+✅ adversarial-spec-debates.js ( adversarial spec debates between two or more LLMs or even other coding agents ) - see plugins/babysitter/skills/babysit/process/methodologies/adversarial-spec-debates.js
+✅ graph-of-thoughts.js - see plugins/babysitter/skills/babysit/process/methodologies/graph-of-thoughts.js
+✅ evolutionary.js - see plugins/babysitter/skills/babysit/process/methodologies/evolutionary.js
+✅ build-realtime-remediation.js ( pulls ci state and remediates it ) - see plugins/babysitter/skills/babysit/process/methodologies/build-realtime-remediation.js
+✅ agile.js ( agile development loop with springs, release cycles and product->develop->qa->release iterations ) - see plugins/babysitter/skills/babysit/process/methodologies/agile.js
+✅ top-down.js - see plugins/babysitter/skills/babysit/process/methodologies/top-down.js
+✅ bottom-up.js - see plugins/babysitter/skills/babysit/process/methodologies/bottom-up.js
 - [x] make it so the completion promise is a secret embedded in the sdk and the agent does not know it until the run is completed. and the scripts should be updated to compare to the secret completion promise. and instructions should be updated to pass the secret from the cli when the run is completed. the sdk should emit the secret completion promise when the run is completed (on iterate and status commands)
 - [x] improve main readme to not include cli usage. just install and user-guide for common use case and practical examples, processes, methodologies, etc. (only through the slash command (skill), not the babysitter sdk+cli)
