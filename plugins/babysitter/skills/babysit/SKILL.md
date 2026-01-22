@@ -320,7 +320,7 @@ $CLI run:iterate <runId> --json --iteration <n>
 If at any point the run fails due to SDK issues or corrupted state or journal. analyze the error and the journal events. recover the state to the state and journal to the last known good state and adapt and try to continue the run.
 
 ## See Also
-- `process/tdd-quality-convergence.js` - TDD quality convergence example - read this before creating the code for a run (create the run using the CLI, then use this process as a reference)
+- `process/tdd-quality-convergence.js` - TDD quality convergence example - read and look for relevant processes and methodolies before creating the code process for a new run (create the run using the CLI, then use these process as a reference)
 - `reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
 - `packages/sdk/sdk.md` - SDK API reference
 
@@ -331,3 +331,5 @@ CRITICAL RULE: The completion secret is emitted only when the run is completed. 
 CRITICAL RULE: never approve breakpoints by yourself. only create them and wait for them. they will always be resolved externally.
 
 CRITICAL RULE: if a breakpoint is still waiting. monitor it for approval until it is resolved. do not return prompt to the user. just wait for the breakpoint to be resolved.
+
+CRITICAL RULE: when creating processes, search for available skills and subagents before thinking about the exact orchestration. prefer processes that close the widest loop in the quality gates (for example e2e tests with a full browser or emulator/vm if it a mobile or desktop app) AND gates that make sure the work is accurate against the user request (all the specs is covered and no extra stuff was added unless permitted by the intent of the user).

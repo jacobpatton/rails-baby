@@ -160,7 +160,7 @@ PROMPT="Resume Babysitter run: $RUN_ID
 Process: $PROCESS_ID
 Current state: $STATE
 
-Continue orchestration using run:iterate loop."
+Continue orchestration using run:iterate, task:post, etc. or fix the run if it's broken/failed/unknown."
 
 # Create state file for stop hook (markdown with YAML frontmatter)
 mkdir -p "$STATE_DIR"

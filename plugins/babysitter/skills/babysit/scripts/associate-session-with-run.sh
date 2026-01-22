@@ -87,7 +87,6 @@ fi
 EXISTING_RUN_ID=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$STATE_FILE" | grep '^run_id:' | sed 's/run_id: *//' | sed 's/^"\(.*\)"$/\1/')
 if [[ -n "${EXISTING_RUN_ID:-}" ]]; then
   echo "❌ Error: This session is already associated with run: $EXISTING_RUN_ID" >&2
-  echo "   Stop the current babysitter run or use a new session before associating another." >&2
   exit 1
 fi
 
