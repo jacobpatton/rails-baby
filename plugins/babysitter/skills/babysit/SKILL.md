@@ -31,7 +31,13 @@ The babysitter workflow has 4 steps:
 3. **Perform effects** - Execute the requested tasks
 4. **Post results** - Tasks auto-record results to journal
 
-### 0. Setup session:
+### 1. Create or find the process for the run
+
+Interactive phase (before setting the in-session loop) for understanding the intent and perspecitve to approach the process building after researching the repo, short research online if needed, short research in the repo, additional instructions, intent and library (skills, subagents, processes, methodologies, etc.) / guide for methodology building. (clarifications regarding the intent, requirements, goal, scope, etc.)
+
+the library is at plugins/babysitter/skills/babysit/process/specializations/ and plugins/babysitter/skills/babysit/process/methodologies/
+
+### 2. Setup session:
 
 **For new runs:**
 
@@ -58,7 +64,7 @@ bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/associate-session-with-run.sh
 bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/setup-babysitter-run-resume.sh" --claude-session-id "${CLAUDE_SESSION_ID}" --run-id RUN_ID"
 ```
 
-### 1. Run Iteration
+### 3. Run Iteration
 
 ```bash
 $CLI run:iterate .a5c/runs/<runId> --json --iteration <n>
@@ -84,7 +90,7 @@ $CLI run:iterate .a5c/runs/<runId> --json --iteration <n>
 - `"failed"` - Run failed with error
 - `"none"` - No pending effects
 
-### 2. Get Effects
+### 4. Get Effects
 
 ```bash
 $CLI task:list .a5c/runs/<runId> --pending --json
@@ -104,7 +110,7 @@ $CLI task:list .a5c/runs/<runId> --pending --json
 }
 ```
 
-### 3. Perform Effects
+### 5. Perform Effects
 
 Run the effect externally to the SDK (by you, your hook, or another worker). After execution (by delegation to an agent or skill), post the outcome summary into the run by calling `task:post`, which:
 - Writes the committed result to `tasks/<effectId>/result.json`
@@ -124,7 +130,7 @@ npx @a5c-ai/babysitter-breakpoints breakpoint create --tag <tag> --question "<qu
 
  to create the breakpoint and get the answer from the user. breakpoint are meant for human approval through the breakpoint tool. NEVER prompt directly and never release or approve a breakpoint yourself. put you may need to post the result of the breakpoint to the run by calling `task:post`
 
-### 4. Results Posting
+### 6. Results Posting
 
 **IMPORTANT**: Do NOT write `result.json` directly. The SDK owns that file.
 
@@ -175,7 +181,11 @@ $CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.js
 
 ---
 
-### 5. repeat orchestration loop by calling run:iterate
+### 7. repeat the orchestration loop as needed.
+
+Repeat orchestration loop by calling run:iterate or doing the next right thing.
+
+In case you don't follow this step, you will be called by the stop-hook and you will be asked to repeat the orchestration loop or exit the loop by posting the completion secret.
 
 ## Task Kinds
 
