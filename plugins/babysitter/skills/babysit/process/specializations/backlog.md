@@ -41,45 +41,54 @@ Engineering Specializations (give a proper name to each specialization):
 
 Science Specializations (give a proper name to each specialization): each in process/specializations/domains/science/[specialization-name-slugified]/
 
-[ ] General Purpose Scientific Discovery, Engineering, and Problem Solving - Methodical Creative Thinking. Thinking Patterns for Scientific Discovery, Thinking and discovery patterns.
-[ ] Quantum Computing, Quantum Algorithms, Quantum Hardware, Quantum Software
-[ ] Bioinformatics, Genomics, Proteomics
-[ ] Nanotechnology
-[ ] Materials Science
-[ ] Aerospace Engineering
-[ ] Automotive Engineering
-[ ] Mechanical Engineering
-[ ] Electrical Engineering
-[ ] Chemical Engineering
-[ ] Biomedical Engineering
-[ ] Environmental Engineering
-[ ] Industrial Engineering
-[ ] Computer Science
-[ ] Mathematics
-[ ] Physics
-[ ] Civil Engineering
+[x] General Purpose Scientific Discovery, Engineering, and Problem Solving - Methodical Creative Thinking. Thinking Patterns for Scientific Discovery, Thinking and discovery patterns.
+[x] Quantum Computing, Quantum Algorithms, Quantum Hardware, Quantum Software
+[x] Bioinformatics, Genomics, Proteomics
+[x] Nanotechnology
+[x] Materials Science
+[x] Aerospace Engineering
+[x] Automotive Engineering
+[x] Mechanical Engineering
+[x] Electrical Engineering
+[x] Chemical Engineering
+[x] Biomedical Engineering
+[x] Environmental Engineering
+[x] Industrial Engineering
+[x] Computer Science
+[x] Mathematics
+[x] Physics
+[x] Civil Engineering
 
 Business and Finance Specializations (give a proper name to each specialization): each in process/specializations/domains/business/[specialization-name-slugified]/
 
-[ ] Business
-[ ] Finance, Accounting, Economics
-[ ] Marketing
-[ ] Sales
-[ ] Legal
-[ ] Human Resources
-[ ] Customer Service, Support, Customer Success, Customer Experience
-[ ] General Purpose Project Management, Leadership, etc.
-[ ] Supply Chain Management
-[ ] Logistics, Transportation, Shipping, Freight, Warehousing, Inventory Management
+[x] Business
+[x] Finance, Accounting, Economics
+[x] Marketing
+[x] Sales
+[x] Legal
+[x] Human Resources
+[x] Customer Service, Support, Customer Success, Customer Experience
+[x] General Purpose Project Management, Leadership, etc.
+[x] Supply Chain Management
+[x] Logistics, Transportation, Shipping, Freight, Warehousing, Inventory Management
+[ ] VCs, investments and Due Diligence processes (processes for evaluating and selecting investments, due diligence, valuation, monitoring and tracking, allocation, risk management, portfolio management, deal flow management, deal structuring, etc.)
+[ ] Enterpreneurship and Startup Processes (presentations, pitch decks, business plans, market research, funding, investor relations, etc.)
+[ ] Business Strategy
+[ ] Operations
+[ ] Business Analysis and Consulting
+[ ] Intelligence, Decision Support and Decision Making
+[ ] Knowledge Management
+[ ] Advertising, Social Media, Content Marketing,  Influencer Marketing, etc.
+[ ] Public Relations, etc.
 
 Social Sciences and Humanities Specializations (give a proper name to each specialization): each in process/specializations/domains/social-sciences-humanities/[specialization-name-slugified]/
 
-[ ] Healthcare, Medical, Healthcare Management, Medical Management
-[ ] Education, Teaching, Learning, Learning Management System, Learning Management System
-[ ] Social Sciences
-[ ] Humanities and anthropology
-[ ] Philosophy, Theology
-[ ] Arts and culture
+[x] Healthcare, Medical, Healthcare Management, Medical Management
+[x] Education, Teaching, Learning, Learning Management System, Learning Management System
+[x] Social Sciences
+[x] Humanities and anthropology
+[x] Philosophy, Theology
+[x] Arts and culture
 
 ## Phase 1: Research, Readme and References
 
