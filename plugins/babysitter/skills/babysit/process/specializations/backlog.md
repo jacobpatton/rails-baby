@@ -27,7 +27,7 @@ Software and R&D Specializations (give a proper name to each specialization) - i
     # plugins/babysitter/skills/babysit/process/specializations/qa-testing-automation/
 [x] Documentation, Technical Writing, Technical Communication, Specifications, Standards
     # plugins/babysitter/skills/babysit/process/specializations/technical-documentation/
-[ ] Meta Specialization: plugins/babysitter/skills/babysit/process/specializations/meta/ - for domain, specialization, processes, skills and agents creation. (mostly from the instructions in this file, file names and locations, the process below as composable sub processes and skills, etc.) - all detailed with all the relevant information and references, and examples if available.
+[x] Meta Specialization: plugins/babysitter/skills/babysit/process/specializations/meta/ - for domain, specialization, processes, skills and agents creation. (mostly from the instructions in this file, file names and locations, the process below as composable sub processes and skills, etc.) - all detailed with all the relevant information and references, and examples if available.
 
 Engineering Specializations (give a proper name to each specialization): (not under domains directory)
 
