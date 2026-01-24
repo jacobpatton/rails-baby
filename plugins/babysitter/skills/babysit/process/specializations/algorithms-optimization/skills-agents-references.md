@@ -834,6 +834,11 @@ This document catalogs community-created Claude skills, agents, plugins, MCPs, a
 | SK-ALGO-024 | Integrate | Rich resources available |
 | SK-ALGO-025 | Integrate | Multiple AI interview tools exist |
 
+### Existing Skills:
+
+Manim Skill:
+
+https://github.com/adithya-s-k/manim_skill/tree/main
 ---
 
 ## Next Steps
