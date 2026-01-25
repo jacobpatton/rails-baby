@@ -183,8 +183,10 @@ export async function process(inputs, ctx) {
 export const thesisAnalysisTask = defineTask('thesis-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Thesis Analysis and Clarification',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'dialectical-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Dialectical Philosopher specializing in thesis clarification',
       task: 'Analyze and clarify the thesis for dialectical examination',
@@ -233,8 +235,10 @@ export const thesisAnalysisTask = defineTask('thesis-analysis', (args, taskCtx) 
 export const antithesisGenerationTask = defineTask('antithesis-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Antithesis Generation',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'dialectical-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Critical Philosopher specializing in opposition generation',
       task: 'Generate and develop antitheses to the thesis',
@@ -291,8 +295,10 @@ export const antithesisGenerationTask = defineTask('antithesis-generation', (arg
 export const contradictionMappingTask = defineTask('contradiction-mapping', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Contradiction Mapping',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'dialectical-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Dialectical Analyst specializing in contradiction identification',
       task: 'Map and analyze contradictions between thesis and antitheses',
@@ -351,8 +357,10 @@ export const contradictionMappingTask = defineTask('contradiction-mapping', (arg
 export const socraticExaminationTask = defineTask('socratic-examination', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Socratic Examination',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'dialectical-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Socratic Philosopher specializing in elenctic inquiry',
       task: 'Conduct Socratic examination of thesis and antitheses',
@@ -403,8 +411,10 @@ export const socraticExaminationTask = defineTask('socratic-examination', (args,
 export const mediationSublationTask = defineTask('mediation-sublation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Mediation and Sublation Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'dialectical-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Hegelian Dialectician specializing in Aufhebung',
       task: 'Identify mediations and possibilities for sublation',
@@ -463,8 +473,10 @@ export const mediationSublationTask = defineTask('mediation-sublation', (args, t
 export const synthesisConstructionTask = defineTask('synthesis-construction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Synthesis Construction',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'dialectical-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Dialectical Synthesist',
       task: 'Construct synthesis from thesis, antithesis, and mediations',
@@ -519,8 +531,10 @@ export const synthesisConstructionTask = defineTask('synthesis-construction', (a
 export const synthesisValidationTask = defineTask('synthesis-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Synthesis Validation',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'dialectical-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Critical Evaluator of dialectical synthesis',
       task: 'Validate the synthesis against original tensions',
@@ -576,8 +590,10 @@ export const synthesisValidationTask = defineTask('synthesis-validation', (args,
 export const higherOrderContradictionsTask = defineTask('higher-order-contradictions', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Higher-Order Contradictions',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'dialectical-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Dialectical Philosopher examining meta-level tensions',
       task: 'Identify higher-order contradictions with synthesis',
@@ -633,8 +649,10 @@ export const higherOrderContradictionsTask = defineTask('higher-order-contradict
 export const dialecticalProgressTask = defineTask('dialectical-progress', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Dialectical Progress Assessment',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'dialectical-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Dialectical Progress Evaluator',
       task: 'Assess the progress made through dialectical reasoning',
@@ -693,8 +711,10 @@ export const dialecticalProgressTask = defineTask('dialectical-progress', (args,
 export const resolutionSynthesisTask = defineTask('resolution-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Resolution and Recommendations',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'dialectical-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Dialectical Resolution Expert',
       task: 'Synthesize all analyses and provide final resolutions',

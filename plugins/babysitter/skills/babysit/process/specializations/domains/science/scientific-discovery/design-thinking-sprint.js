@@ -315,8 +315,10 @@ export async function process(inputs, ctx) {
 export const empathizeTask = defineTask('empathize', (args, taskCtx) => ({
   kind: 'agent',
   title: 'EMPATHIZE - Understand users',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'innovation-facilitator',
+    skills: ['hypothesis-generator', 'analogy-mapper', 'triz-inventive-solver'],
     prompt: {
       role: 'User researcher and empathy specialist',
       task: 'Conduct user research to deeply understand user needs, behaviors, and motivations',
@@ -369,8 +371,10 @@ export const empathizeTask = defineTask('empathize', (args, taskCtx) => ({
 export const journeyMappingTask = defineTask('journey-mapping', (args, taskCtx) => ({
   kind: 'agent',
   title: 'EMPATHIZE - Map user journeys',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'innovation-facilitator',
+    skills: ['hypothesis-generator', 'analogy-mapper', 'triz-inventive-solver'],
     prompt: {
       role: 'Journey mapping specialist',
       task: 'Create detailed user journey maps showing touchpoints, emotions, and opportunities',
@@ -423,8 +427,10 @@ export const journeyMappingTask = defineTask('journey-mapping', (args, taskCtx) 
 export const defineTask = defineTask('define', (args, taskCtx) => ({
   kind: 'agent',
   title: 'DEFINE - Frame the problem',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'innovation-facilitator',
+    skills: ['hypothesis-generator', 'analogy-mapper', 'triz-inventive-solver'],
     prompt: {
       role: 'Problem framing specialist',
       task: 'Synthesize insights into a clear problem statement and point of view',
@@ -477,8 +483,10 @@ export const defineTask = defineTask('define', (args, taskCtx) => ({
 export const ideateTask = defineTask('ideate', (args, taskCtx) => ({
   kind: 'agent',
   title: 'IDEATE - Generate ideas',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'innovation-facilitator',
+    skills: ['hypothesis-generator', 'analogy-mapper', 'triz-inventive-solver'],
     prompt: {
       role: 'Ideation facilitator',
       task: 'Generate a wide range of creative solutions using divergent thinking',
@@ -533,8 +541,10 @@ export const ideateTask = defineTask('ideate', (args, taskCtx) => ({
 export const ideaSelectionTask = defineTask('idea-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'IDEATE - Select best ideas',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'innovation-facilitator',
+    skills: ['hypothesis-generator', 'analogy-mapper', 'triz-inventive-solver'],
     prompt: {
       role: 'Idea evaluation specialist',
       task: 'Evaluate and select the most promising ideas using convergent thinking',
@@ -590,8 +600,10 @@ export const ideaSelectionTask = defineTask('idea-selection', (args, taskCtx) =>
 export const prototypeTask = defineTask('prototype', (args, taskCtx) => ({
   kind: 'agent',
   title: 'PROTOTYPE - Develop concept',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'innovation-facilitator',
+    skills: ['hypothesis-generator', 'analogy-mapper', 'triz-inventive-solver'],
     prompt: {
       role: 'Prototyping specialist',
       task: 'Create a prototype to test the selected concept with users',
@@ -643,8 +655,10 @@ export const prototypeTask = defineTask('prototype', (args, taskCtx) => ({
 export const storyboardingTask = defineTask('storyboarding', (args, taskCtx) => ({
   kind: 'agent',
   title: 'PROTOTYPE - Create storyboard',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'innovation-facilitator',
+    skills: ['hypothesis-generator', 'analogy-mapper', 'triz-inventive-solver'],
     prompt: {
       role: 'Storyboard creator',
       task: 'Create a storyboard showing how users interact with the prototype',
@@ -696,8 +710,10 @@ export const storyboardingTask = defineTask('storyboarding', (args, taskCtx) => 
 export const testPlanningTask = defineTask('test-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'TEST - Plan user tests',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'innovation-facilitator',
+    skills: ['hypothesis-generator', 'analogy-mapper', 'triz-inventive-solver'],
     prompt: {
       role: 'User testing planner',
       task: 'Plan user testing sessions to validate the prototype',
@@ -742,8 +758,10 @@ export const testPlanningTask = defineTask('test-planning', (args, taskCtx) => (
 export const userTestingTask = defineTask('user-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'TEST - Conduct user tests',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'innovation-facilitator',
+    skills: ['hypothesis-generator', 'analogy-mapper', 'triz-inventive-solver'],
     prompt: {
       role: 'User testing facilitator',
       task: 'Facilitate user testing sessions and capture feedback',
@@ -798,8 +816,10 @@ export const userTestingTask = defineTask('user-testing', (args, taskCtx) => ({
 export const testAnalysisTask = defineTask('test-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'TEST - Analyze results',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'innovation-facilitator',
+    skills: ['hypothesis-generator', 'analogy-mapper', 'triz-inventive-solver'],
     prompt: {
       role: 'Test analysis specialist',
       task: 'Analyze test results and determine prototype validation',
@@ -844,8 +864,10 @@ export const testAnalysisTask = defineTask('test-analysis', (args, taskCtx) => (
 export const iterationPlanTask = defineTask('iteration-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'ITERATE - Plan refinements',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'innovation-facilitator',
+    skills: ['hypothesis-generator', 'analogy-mapper', 'triz-inventive-solver'],
     prompt: {
       role: 'Iteration planning specialist',
       task: 'Create plan for iterating on the prototype based on test results',
@@ -889,8 +911,10 @@ export const iterationPlanTask = defineTask('iteration-plan', (args, taskCtx) =>
 export const sprintQualityScoringTask = defineTask('sprint-quality-scoring', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Score sprint quality',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'innovation-facilitator',
+    skills: ['hypothesis-generator', 'analogy-mapper', 'triz-inventive-solver'],
     prompt: {
       role: 'Design sprint quality auditor',
       task: 'Assess the quality and completeness of the design sprint',

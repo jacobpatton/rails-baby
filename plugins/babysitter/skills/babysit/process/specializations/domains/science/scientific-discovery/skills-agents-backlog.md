@@ -1272,3 +1272,72 @@ These skills and agents could be shared with other specializations:
 - Integration with reference managers should be prioritized for academic workflows
 - Support for multiple output formats (LaTeX, Word, HTML) should be standard
 - Version control integration should be built into all documentation skills
+
+---
+
+## Phase 7: Process Integration Checklist
+
+### Completed Process Files
+
+#### Formal and Mathematical Reasoning
+- [x] deductive-reasoning.js - Updated with assumption-auditor agent, formal-logic-reasoner, hypothesis-generator skills
+- [x] mathematical-proof-reasoning.js - Updated with formal-logic-reasoner, hypothesis-generator skills
+- [x] constructive-intuitionistic-reasoning.js - Updated with formal-logic-reasoner skills
+- [x] equational-algebraic-reasoning.js - Updated with formal-logic-reasoner skills
+- [x] model-theoretic-semantic-reasoning.js - Updated with formal-logic-reasoner skills
+- [x] constraint-satisfiability-reasoning.js - Updated with formal-logic-reasoner skills
+- [x] type-theoretic-reasoning.js - Updated with formal-logic-reasoner skills
+- [x] counterexample-guided-reasoning.js - Updated with formal-logic-reasoner skills
+
+#### Ampliative Reasoning
+- [x] inductive-reasoning.js - Updated with hypothesis-architect agent, hypothesis-generator, statistical-test-selector skills
+- [x] abductive-reasoning.js - Updated with hypothesis-architect agent, hypothesis-generator, causal-inference-engine, formal-logic-reasoner skills
+- [x] analogical-reasoning.js - Updated with analogical-reasoner agent, analogy-mapper, semantic-scholar-search, hypothesis-generator skills
+- [x] bayesian-probabilistic-reasoning.js - Updated with bayesian-analyst agent, bayesian-inference-engine, statistical-test-selector, scientific-figure-generator skills
+- [x] statistical-reasoning.js - Updated with statistical-consultant agent, statistical-test-selector, regression-analyzer, power-analysis-calculator skills
+- [x] likelihood-based-reasoning.js - Updated with bayesian-inference-engine skills
+- [x] case-based-reasoning.js - Updated with analogy-mapper skills
+- [x] explanation-based-learning.js - Updated with hypothesis-generator skills
+
+#### Causal Reasoning
+- [x] causal-inference.js - Updated with causal-reasoning-analyst agent, causal-inference-engine, statistical-test-selector, checklist-validator skills
+- [x] causal-discovery.js - Updated with causal-inference-engine, bayesian-inference-engine skills
+- [x] counterfactual-reasoning.js - Updated with causal-inference-engine, formal-logic-reasoner skills
+- [x] causal-loop-diagram-development.js - Updated with systems-dynamics-modeler, causal-inference-engine skills
+- [x] causal-inference-observational.js - Updated with causal-inference-engine, statistical-test-selector skills
+
+#### Systems Thinking
+- [x] systems-thinking.js - Updated with systems-thinker agent, systems-dynamics-modeler, causal-inference-engine, network-visualizer skills
+
+#### Diagnostic and Root Cause Analysis
+- [x] five-whys-analysis.js - Updated with root-cause-analyst agent, causal-inference-engine, systems-dynamics-modeler skills
+- [x] diagnostic-reasoning.js - Updated with causal-inference-engine, bayesian-inference-engine skills
+
+#### Hypothesis and Experimental Design
+- [x] hypothesis-formulation-testing.js - Updated with hypothesis-architect agent, hypothesis-generator, power-analysis-calculator, protocol-builder skills
+
+#### Creative Problem Solving
+- [x] triz-contradiction-resolution.js - Updated with innovation-facilitator agent, triz-contradiction-solver, analogy-mapper skills
+- [x] lateral-thinking-idea-generation.js - Updated with triz-contradiction-solver, analogy-mapper, hypothesis-generator skills
+- [x] analogical-cross-domain-transfer.js - Updated with analogical-reasoner agent, analogy-mapper, hypothesis-generator, semantic-scholar-search skills
+
+#### Decision and Game Theory
+- [x] decision-theoretic-reasoning.js - Updated with decision-theorist agent, bayesian-inference-engine skills
+- [x] multi-criteria-decision-analysis.js - Updated with decision-theorist agent, bayesian-inference-engine skills
+- [x] game-theoretic-strategic-reasoning.js - Updated with bayesian-inference-engine, formal-logic-reasoner skills
+- [x] negotiation-coalition-reasoning.js - Updated with bayesian-inference-engine skills
+- [x] theory-of-mind-reasoning.js - Updated with bayesian-inference-engine skills
+
+#### Quality Assurance and Meta-Cognitive
+- [x] cognitive-bias-mitigation.js - Updated with bias-detective agent, checklist-validator, peer-review-simulator skills
+- [x] calibration-epistemic-humility.js - Updated with bayesian-inference-engine, statistical-test-selector skills
+- [x] analysis-competing-hypotheses.js - Updated with hypothesis-architect agent, bayesian-inference-engine, formal-logic-reasoner skills
+- [x] adversarial-red-team-reasoning.js - Updated with red-team-analyst agent, peer-review-simulator, hypothesis-generator skills
+- [x] clinical-operational-troubleshooting.js - Updated with causal-inference-engine, bayesian-inference-engine skills
+
+### Integration Notes
+- All process files now use the standardized pattern with `skills: [...]` array inside agent objects
+- Agent objects include domain-specific agent names (hypothesis-architect, causal-reasoning-analyst, statistical-consultant, systems-thinker, etc.)
+- Agent objects include skills arrays for multi-skill capability
+- Process-to-Skills/Agents mapping table used as reference for integration
+- Old `skill: { name: '...' }` task-level pattern has been removed from all files

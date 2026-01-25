@@ -157,8 +157,10 @@ export async function process(inputs, ctx) {
 export const analyzeRequirementsTask = defineTask('engineering-requirements-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Requirements Analysis',
+  skill: { name: 'triz-inventive-solver' },
   agent: {
-    name: 'general-purpose',
+    name: 'design-engineer',
+    skills: ['triz-inventive-solver', 'hypothesis-generator', 'systems-dynamics-modeler'],
     prompt: {
       role: 'Systems engineer and requirements analyst',
       task: 'Analyze and prioritize design requirements',
@@ -194,8 +196,10 @@ export const analyzeRequirementsTask = defineTask('engineering-requirements-anal
 export const analyzeConstraintsTask = defineTask('engineering-constraint-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Constraint Analysis',
+  skill: { name: 'triz-inventive-solver' },
   agent: {
-    name: 'general-purpose',
+    name: 'design-engineer',
+    skills: ['triz-inventive-solver', 'hypothesis-generator', 'systems-dynamics-modeler'],
     prompt: {
       role: 'Engineering constraints and feasibility specialist',
       task: 'Analyze design constraints and their implications',
@@ -232,8 +236,10 @@ export const analyzeConstraintsTask = defineTask('engineering-constraint-analysi
 export const developFunctionStructureTask = defineTask('engineering-function-structure', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Function Structure Development',
+  skill: { name: 'triz-inventive-solver' },
   agent: {
-    name: 'general-purpose',
+    name: 'design-engineer',
+    skills: ['triz-inventive-solver', 'hypothesis-generator', 'systems-dynamics-modeler'],
     prompt: {
       role: 'Functional analysis and system decomposition specialist',
       task: 'Develop function structure through systematic decomposition',
@@ -270,8 +276,10 @@ export const developFunctionStructureTask = defineTask('engineering-function-str
 export const generateConceptsTask = defineTask('engineering-concept-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Concept Generation',
+  skill: { name: 'triz-inventive-solver' },
   agent: {
-    name: 'general-purpose',
+    name: 'design-engineer',
+    skills: ['triz-inventive-solver', 'hypothesis-generator', 'systems-dynamics-modeler'],
     prompt: {
       role: 'Creative engineering and TRIZ specialist',
       task: 'Generate diverse design concepts using systematic methods',
@@ -307,8 +315,10 @@ export const generateConceptsTask = defineTask('engineering-concept-generation',
 export const evaluateConceptsTask = defineTask('engineering-concept-evaluation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Concept Evaluation',
+  skill: { name: 'triz-inventive-solver' },
   agent: {
-    name: 'general-purpose',
+    name: 'design-engineer',
+    skills: ['triz-inventive-solver', 'hypothesis-generator', 'systems-dynamics-modeler'],
     prompt: {
       role: 'Design evaluation and decision-making specialist',
       task: 'Evaluate and select best design concept',
@@ -346,8 +356,10 @@ export const evaluateConceptsTask = defineTask('engineering-concept-evaluation',
 export const developEmbodimentTask = defineTask('engineering-embodiment-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Embodiment Design',
+  skill: { name: 'triz-inventive-solver' },
   agent: {
-    name: 'general-purpose',
+    name: 'design-engineer',
+    skills: ['triz-inventive-solver', 'hypothesis-generator', 'systems-dynamics-modeler'],
     prompt: {
       role: 'Mechanical design and embodiment specialist',
       task: 'Develop preliminary layout and form design',
@@ -384,8 +396,10 @@ export const developEmbodimentTask = defineTask('engineering-embodiment-design',
 export const developDetailDesignTask = defineTask('engineering-detail-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Detail Design',
+  skill: { name: 'triz-inventive-solver' },
   agent: {
-    name: 'general-purpose',
+    name: 'design-engineer',
+    skills: ['triz-inventive-solver', 'hypothesis-generator', 'systems-dynamics-modeler'],
     prompt: {
       role: 'Detail design and specification specialist',
       task: 'Develop detailed specifications and documentation',
@@ -423,8 +437,10 @@ export const developDetailDesignTask = defineTask('engineering-detail-design', (
 export const analyzeTradeoffsTask = defineTask('engineering-tradeoff-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Tradeoff Analysis',
+  skill: { name: 'triz-inventive-solver' },
   agent: {
-    name: 'general-purpose',
+    name: 'design-engineer',
+    skills: ['triz-inventive-solver', 'hypothesis-generator', 'systems-dynamics-modeler'],
     prompt: {
       role: 'Systems optimization and tradeoff analysis specialist',
       task: 'Analyze design tradeoffs and optimization opportunities',
@@ -461,8 +477,10 @@ export const analyzeTradeoffsTask = defineTask('engineering-tradeoff-analysis', 
 export const analyzeDesignRisksTask = defineTask('engineering-risk-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Risk and FMEA Analysis',
+  skill: { name: 'triz-inventive-solver' },
   agent: {
-    name: 'general-purpose',
+    name: 'design-engineer',
+    skills: ['triz-inventive-solver', 'hypothesis-generator', 'systems-dynamics-modeler'],
     prompt: {
       role: 'Reliability engineer and FMEA specialist',
       task: 'Analyze design risks and failure modes',
@@ -501,8 +519,10 @@ export const analyzeDesignRisksTask = defineTask('engineering-risk-analysis', (a
 export const planValidationTask = defineTask('engineering-validation-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Validation Planning',
+  skill: { name: 'triz-inventive-solver' },
   agent: {
-    name: 'general-purpose',
+    name: 'design-engineer',
+    skills: ['triz-inventive-solver', 'hypothesis-generator', 'systems-dynamics-modeler'],
     prompt: {
       role: 'Test engineering and validation specialist',
       task: 'Develop comprehensive validation and test plan',

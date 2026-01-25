@@ -163,8 +163,10 @@ export async function process(inputs, ctx) {
 export const analyzeReasoningStructureTask = defineTask('debiasing-structure-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Reasoning Structure Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'bias-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Reasoning analysis specialist',
       task: 'Analyze the structure of the reasoning for bias vulnerability',
@@ -202,8 +204,10 @@ export const analyzeReasoningStructureTask = defineTask('debiasing-structure-ana
 export const assessBiasVulnerabilityTask = defineTask('debiasing-vulnerability-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Bias Vulnerability Assessment',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'bias-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Bias vulnerability specialist',
       task: 'Assess vulnerability to cognitive biases',
@@ -239,8 +243,10 @@ export const assessBiasVulnerabilityTask = defineTask('debiasing-vulnerability-a
 export const checkConfirmationBiasTask = defineTask('debiasing-confirmation-check', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Confirmation Bias Check',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'bias-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Confirmation bias detection specialist',
       task: 'Check for confirmation bias in the reasoning',
@@ -277,8 +283,10 @@ export const checkConfirmationBiasTask = defineTask('debiasing-confirmation-chec
 export const checkAvailabilityBiasTask = defineTask('debiasing-availability-check', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Availability Bias Check',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'bias-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Availability bias detection specialist',
       task: 'Check for availability heuristic bias',
@@ -316,8 +324,10 @@ export const checkAvailabilityBiasTask = defineTask('debiasing-availability-chec
 export const checkAnchoringBiasTask = defineTask('debiasing-anchoring-check', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Anchoring Bias Check',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'bias-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Anchoring bias detection specialist',
       task: 'Check for anchoring bias',
@@ -356,8 +366,10 @@ export const checkAnchoringBiasTask = defineTask('debiasing-anchoring-check', (a
 export const checkOverconfidenceTask = defineTask('debiasing-overconfidence-check', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Overconfidence Check',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'bias-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Overconfidence detection specialist',
       task: 'Check for overconfidence bias',
@@ -396,8 +408,10 @@ export const checkOverconfidenceTask = defineTask('debiasing-overconfidence-chec
 export const checkMotivatedReasoningTask = defineTask('debiasing-motivated-reasoning-check', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Motivated Reasoning Check',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'bias-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Motivated reasoning detection specialist',
       task: 'Check for motivated reasoning',
@@ -436,8 +450,10 @@ export const checkMotivatedReasoningTask = defineTask('debiasing-motivated-reaso
 export const checkGroupThinkTask = defineTask('debiasing-groupthink-check', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Group Think Check',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'bias-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Groupthink detection specialist',
       task: 'Check for groupthink bias',
@@ -476,8 +492,10 @@ export const checkGroupThinkTask = defineTask('debiasing-groupthink-check', (arg
 export const developCorrectionStrategiesTask = defineTask('debiasing-correction-strategies', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Correction Strategy Development',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'bias-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Debiasing strategy specialist',
       task: 'Develop strategies to correct identified biases',
@@ -513,8 +531,10 @@ export const developCorrectionStrategiesTask = defineTask('debiasing-correction-
 export const performDebiasedAnalysisTask = defineTask('debiasing-reanalysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Debiased Re-analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'bias-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Debiased analysis specialist',
       task: 'Perform debiased re-analysis of the reasoning',
@@ -552,8 +572,10 @@ export const performDebiasedAnalysisTask = defineTask('debiasing-reanalysis', (a
 export const runEpistemicHygieneChecklistTask = defineTask('debiasing-hygiene-checklist', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 11: Epistemic Hygiene Checklist',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'bias-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Epistemic hygiene specialist',
       task: 'Run epistemic hygiene checklist',
@@ -589,8 +611,10 @@ export const runEpistemicHygieneChecklistTask = defineTask('debiasing-hygiene-ch
 export const generateRecommendationsTask = defineTask('debiasing-recommendations', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 12: Recommendations',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'bias-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Epistemic improvement specialist',
       task: 'Generate recommendations for improved reasoning',

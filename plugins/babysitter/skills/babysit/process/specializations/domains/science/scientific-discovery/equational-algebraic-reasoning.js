@@ -11,7 +11,6 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 const analyzeTask = defineTask('equational-algebraic-reasoning-analyze', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Equational Algebraic Reasoning Analysis',
-  skill: { name: 'formal-logic-reasoner' },
   agent: {
     name: 'assumption-auditor',
     skills: ['formal-logic-reasoner', 'symbolic-computation-engine'],

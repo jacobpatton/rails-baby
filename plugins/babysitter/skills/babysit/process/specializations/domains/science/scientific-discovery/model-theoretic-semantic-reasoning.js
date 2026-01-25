@@ -11,7 +11,6 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 const analyzeTask = defineTask('model-theoretic-semantic-reasoning-analyze', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Model-Theoretic Semantic Reasoning Analysis',
-  skill: { name: 'formal-logic-reasoner' },
   agent: {
     name: 'assumption-auditor',
     skills: ['formal-logic-reasoner', 'hypothesis-generator'],

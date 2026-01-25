@@ -184,8 +184,10 @@ export async function process(inputs, ctx) {
 export const situationActionAnalysisTask = defineTask('situation-action-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Situation and Action Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'deontic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Deontic Situation Analyst',
       task: 'Analyze the situation and actions for deontic evaluation',
@@ -239,8 +241,10 @@ export const situationActionAnalysisTask = defineTask('situation-action-analysis
 export const normExtractionTask = defineTask('norm-extraction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Norm Identification and Extraction',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'deontic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Norm Extraction Expert',
       task: 'Identify and extract applicable norms',
@@ -298,8 +302,10 @@ export const normExtractionTask = defineTask('norm-extraction', (args, taskCtx) 
 export const obligationAnalysisTask = defineTask('obligation-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Obligation Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'deontic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Obligation Analysis Expert',
       task: 'Analyze obligations arising from norms',
@@ -357,8 +363,10 @@ export const obligationAnalysisTask = defineTask('obligation-analysis', (args, t
 export const permissionAnalysisTask = defineTask('permission-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Permission Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'deontic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Permission Analysis Expert',
       task: 'Analyze permissions arising from norms',
@@ -417,8 +425,10 @@ export const permissionAnalysisTask = defineTask('permission-analysis', (args, t
 export const prohibitionAnalysisTask = defineTask('prohibition-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Prohibition Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'deontic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Prohibition Analysis Expert',
       task: 'Analyze prohibitions arising from norms',
@@ -476,8 +486,10 @@ export const prohibitionAnalysisTask = defineTask('prohibition-analysis', (args,
 export const normConflictTask = defineTask('norm-conflict', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Norm Conflict Detection',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'deontic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Norm Conflict Analyst',
       task: 'Detect and analyze conflicts between norms',
@@ -534,8 +546,10 @@ export const normConflictTask = defineTask('norm-conflict', (args, taskCtx) => (
 export const deonticConsequenceTask = defineTask('deontic-consequence', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Deontic Consequence Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'deontic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Deontic Consequence Analyst',
       task: 'Analyze consequences of deontic status',
@@ -592,8 +606,10 @@ export const deonticConsequenceTask = defineTask('deontic-consequence', (args, t
 export const agentDeonticStatusTask = defineTask('agent-deontic-status', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Agent-Specific Deontic Status',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'deontic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Agent Deontic Status Analyst',
       task: 'Determine deontic status for each agent',
@@ -651,8 +667,10 @@ export const agentDeonticStatusTask = defineTask('agent-deontic-status', (args, 
 export const complianceAssessmentTask = defineTask('compliance-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Compliance Assessment',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'deontic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Compliance Assessment Expert',
       task: 'Assess compliance status and risks',
@@ -699,8 +717,10 @@ export const complianceAssessmentTask = defineTask('compliance-assessment', (arg
 export const deonticSynthesisTask = defineTask('deontic-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Deontic Synthesis and Recommendations',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'deontic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Deontic Analysis Synthesist',
       task: 'Synthesize deontic analysis and provide recommendations',
