@@ -4,6 +4,8 @@
  * clinical documentation through concurrent review, provider education, and query processes.
  * @inputs { organizationName: string, scope?: string, focusAreas?: array, currentMetrics?: object }
  * @outputs { success: boolean, cdiProgram: object, queryProcess: object, metrics: object, artifacts: array }
+ * @recommendedSkills SK-HC-011 (clinical-documentation-query), SK-HC-004 (medical-coding-audit), SK-HC-002 (quality-metrics-measurement)
+ * @recommendedAgents AG-HC-008 (documentation-integrity-specialist), AG-HC-003 (revenue-integrity-analyst)
  *
  * @example
  * const result = await orchestrate('specializations/domains/social-sciences-humanities/healthcare/clinical-documentation-improvement', {

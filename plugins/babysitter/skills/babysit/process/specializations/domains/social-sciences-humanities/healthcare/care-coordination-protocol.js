@@ -4,6 +4,8 @@
  * information among all participants to achieve safer and more effective care through transitions and handoffs.
  * @inputs { patientPopulation: string, careSettings?: array, currentChallenges?: array, existingProtocols?: array }
  * @outputs { success: boolean, protocol: object, communicationPlan: object, handoffTools: array, artifacts: array }
+ * @recommendedSkills SK-HC-001 (clinical-workflow-analysis), SK-HC-008 (care-transition-coordination)
+ * @recommendedAgents AG-HC-006 (care-management-coordinator), AG-HC-005 (clinical-informatics-specialist)
  *
  * @example
  * const result = await orchestrate('specializations/domains/social-sciences-humanities/healthcare/care-coordination-protocol', {

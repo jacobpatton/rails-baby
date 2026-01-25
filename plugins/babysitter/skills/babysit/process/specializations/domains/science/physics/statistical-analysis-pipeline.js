@@ -12,7 +12,8 @@ const analyzeTask = defineTask('statistical-analysis-pipeline-analyze', (args, t
   kind: 'agent',
   title: 'Statistical Analysis Pipeline Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'statistical-analyst',
+    skills: ['root-data-analyzer', 'iminuit-statistical-fitter', 'scikit-hep-analysis'],
     prompt: {
       role: 'Physicist specializing in statistical data analysis and hypothesis testing',
       task: 'Develop a robust statistical analysis pipeline for the given physics measurement',

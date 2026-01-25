@@ -216,8 +216,9 @@ export async function process(inputs, ctx) {
 export const resourceCharacterizationTask = defineTask('resource-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Resource Characterization - ${args.projectName}`,
+  skill: { name: 'renewable-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'renewable-integration-expert',
     prompt: {
       role: 'Renewable Energy Resource Analyst',
       task: 'Characterize renewable resource and generation profile',
@@ -271,8 +272,9 @@ export const resourceCharacterizationTask = defineTask('resource-characterizatio
 export const inverterModelingTask = defineTask('inverter-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Inverter Modeling - ${args.projectName}`,
+  skill: { name: 'renewable-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'renewable-integration-expert',
     prompt: {
       role: 'Power Electronics Engineer specializing in grid-tied inverters',
       task: 'Model inverter/converter control characteristics',
@@ -327,8 +329,9 @@ export const inverterModelingTask = defineTask('inverter-modeling', (args, taskC
 export const steadyStateAnalysisTask = defineTask('steady-state-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Steady-State Impact Analysis - ${args.projectName}`,
+  skill: { name: 'renewable-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'renewable-integration-expert',
     prompt: {
       role: 'Power Systems Engineer specializing in interconnection studies',
       task: 'Perform steady-state impact analysis for renewable interconnection',
@@ -393,8 +396,9 @@ export const steadyStateAnalysisTask = defineTask('steady-state-analysis', (args
 export const powerQualityAnalysisTask = defineTask('power-quality-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Power Quality Analysis - ${args.projectName}`,
+  skill: { name: 'renewable-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'renewable-integration-expert',
     prompt: {
       role: 'Power Quality Engineer',
       task: 'Analyze voltage regulation and power quality impacts',
@@ -446,8 +450,9 @@ export const powerQualityAnalysisTask = defineTask('power-quality-analysis', (ar
 export const faultRideThroughStudyTask = defineTask('fault-ride-through', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Fault Ride-Through Study - ${args.projectName}`,
+  skill: { name: 'renewable-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'renewable-integration-expert',
     prompt: {
       role: 'Grid Integration Engineer specializing in fault ride-through',
       task: 'Study fault ride-through capabilities and compliance',
@@ -511,8 +516,9 @@ export const faultRideThroughStudyTask = defineTask('fault-ride-through', (args,
 export const stabilityAssessmentTask = defineTask('stability-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Stability Assessment - ${args.projectName}`,
+  skill: { name: 'renewable-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'renewable-integration-expert',
     prompt: {
       role: 'Power System Stability Engineer',
       task: 'Assess grid stability and frequency response with renewable integration',
@@ -574,8 +580,9 @@ export const stabilityAssessmentTask = defineTask('stability-assessment', (args,
 export const protectionControlDesignTask = defineTask('protection-control-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Protection and Control Design - ${args.projectName}`,
+  skill: { name: 'renewable-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'renewable-integration-expert',
     prompt: {
       role: 'Protection and Control Engineer for renewable integration',
       task: 'Design protection and control modifications for interconnection',
@@ -641,8 +648,9 @@ export const protectionControlDesignTask = defineTask('protection-control-design
 export const complianceDocumentationTask = defineTask('compliance-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Compliance Documentation - ${args.projectName}`,
+  skill: { name: 'renewable-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'renewable-integration-expert',
     prompt: {
       role: 'Grid Interconnection Compliance Specialist',
       task: 'Document compliance with interconnection standards',

@@ -177,8 +177,9 @@ export async function process(inputs, ctx) {
 export const processBoundaryDefinitionTask = defineTask('process-boundary-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define process boundaries and battery limits',
+  skill: { name: 'pfd-pid-generator' },
   agent: {
-    name: 'process-design-engineer',
+    name: 'process-development-engineer',
     prompt: {
       role: 'senior process engineer',
       task: 'Define process boundaries, battery limits, and scope for PFD development',
@@ -226,8 +227,9 @@ export const processBoundaryDefinitionTask = defineTask('process-boundary-defini
 export const materialBalanceTask = defineTask('material-balance', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop material balance',
+  skill: { name: 'material-balance-calculator' },
   agent: {
-    name: 'process-engineer',
+    name: 'process-development-engineer',
     prompt: {
       role: 'process engineer',
       task: 'Develop comprehensive material balance for the process',
@@ -276,8 +278,9 @@ export const materialBalanceTask = defineTask('material-balance', (args, taskCtx
 export const energyBalanceTask = defineTask('energy-balance', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop energy balance',
+  skill: { name: 'aspen-plus-simulator' },
   agent: {
-    name: 'process-engineer',
+    name: 'process-development-engineer',
     prompt: {
       role: 'process engineer',
       task: 'Develop comprehensive energy balance for the process',
@@ -326,6 +329,7 @@ export const energyBalanceTask = defineTask('energy-balance', (args, taskCtx) =>
 export const equipmentIdentificationTask = defineTask('equipment-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify and size major equipment',
+  skill: { name: 'equipment-sizing-calculator' },
   agent: {
     name: 'equipment-engineer',
     prompt: {
@@ -380,8 +384,9 @@ export const equipmentIdentificationTask = defineTask('equipment-identification'
 export const streamTableTask = defineTask('stream-table', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Create stream tables',
+  skill: { name: 'aspen-plus-simulator' },
   agent: {
-    name: 'process-engineer',
+    name: 'process-development-engineer',
     prompt: {
       role: 'process engineer',
       task: 'Create comprehensive stream tables for all process streams',
@@ -420,8 +425,9 @@ export const streamTableTask = defineTask('stream-table', (args, taskCtx) => ({
 export const operatingConditionsTask = defineTask('operating-conditions', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Specify operating conditions and control points',
+  skill: { name: 'control-strategy-designer' },
   agent: {
-    name: 'process-control-engineer',
+    name: 'control-systems-engineer',
     prompt: {
       role: 'process control engineer',
       task: 'Specify operating conditions and key control points',
@@ -461,8 +467,9 @@ export const operatingConditionsTask = defineTask('operating-conditions', (args,
 export const pfdDrawingTask = defineTask('pfd-drawing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate PFD drawing',
+  skill: { name: 'pfd-pid-generator' },
   agent: {
-    name: 'pfd-drafter',
+    name: 'process-integration-coordinator',
     prompt: {
       role: 'process design drafter',
       task: 'Generate comprehensive Process Flow Diagram',
@@ -510,8 +517,9 @@ export const pfdDrawingTask = defineTask('pfd-drawing', (args, taskCtx) => ({
 export const designBasisDocumentationTask = defineTask('design-basis-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Document design basis and assumptions',
+  skill: { name: 'process-economics-estimator' },
   agent: {
-    name: 'documentation-engineer',
+    name: 'process-development-engineer',
     prompt: {
       role: 'process documentation engineer',
       task: 'Create comprehensive design basis document',

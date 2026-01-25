@@ -4,6 +4,8 @@
  * coding through education, audit programs, and documentation improvement.
  * @inputs { organizationName: string, codingScope?: string, focusAreas?: array, currentMetrics?: object }
  * @outputs { success: boolean, complianceProgram: object, auditProgram: object, educationPlan: object, artifacts: array }
+ * @recommendedSkills SK-HC-004 (medical-coding-audit), SK-HC-003 (regulatory-compliance-assessment), SK-HC-011 (clinical-documentation-query)
+ * @recommendedAgents AG-HC-003 (revenue-integrity-analyst), AG-HC-008 (documentation-integrity-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -187,8 +187,9 @@ export async function process(inputs, ctx) {
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Requirements Definition - ${args.bmsName}`,
+  skill: { name: 'battery-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'battery-systems-engineer',
     prompt: {
       role: 'BMS Systems Engineer',
       task: 'Define battery management system requirements',
@@ -220,8 +221,9 @@ export const requirementsDefinitionTask = defineTask('requirements-definition', 
 export const cellMonitoringTask = defineTask('cell-monitoring', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Cell Monitoring Design - ${args.bmsName}`,
+  skill: { name: 'battery-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'battery-systems-engineer',
     prompt: {
       role: 'BMS Hardware Engineer',
       task: 'Design cell monitoring circuit',
@@ -258,8 +260,9 @@ export const cellMonitoringTask = defineTask('cell-monitoring', (args, taskCtx) 
 export const cellBalancingTask = defineTask('cell-balancing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Cell Balancing Design - ${args.bmsName}`,
+  skill: { name: 'battery-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'battery-systems-engineer',
     prompt: {
       role: 'BMS Balancing Engineer',
       task: 'Design cell balancing system',
@@ -296,8 +299,9 @@ export const cellBalancingTask = defineTask('cell-balancing', (args, taskCtx) =>
 export const stateEstimationTask = defineTask('state-estimation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: State Estimation - ${args.bmsName}`,
+  skill: { name: 'battery-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'battery-systems-engineer',
     prompt: {
       role: 'BMS Algorithm Engineer',
       task: 'Implement SOC/SOH state estimation',
@@ -334,8 +338,9 @@ export const stateEstimationTask = defineTask('state-estimation', (args, taskCtx
 export const thermalManagementTask = defineTask('thermal-management', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Thermal Management - ${args.bmsName}`,
+  skill: { name: 'battery-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'battery-systems-engineer',
     prompt: {
       role: 'Thermal Systems Engineer',
       task: 'Design thermal management interface',
@@ -372,8 +377,9 @@ export const thermalManagementTask = defineTask('thermal-management', (args, tas
 export const safetyProtectionTask = defineTask('safety-protection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Safety Protection - ${args.bmsName}`,
+  skill: { name: 'battery-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'battery-systems-engineer',
     prompt: {
       role: 'Battery Safety Engineer',
       task: 'Design safety protection system',
@@ -410,8 +416,9 @@ export const safetyProtectionTask = defineTask('safety-protection', (args, taskC
 export const firmwareDesignTask = defineTask('firmware-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Firmware Architecture - ${args.bmsName}`,
+  skill: { name: 'battery-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'battery-systems-engineer',
     prompt: {
       role: 'Embedded Systems Engineer',
       task: 'Develop BMS firmware architecture',
@@ -448,8 +455,9 @@ export const firmwareDesignTask = defineTask('firmware-design', (args, taskCtx) 
 export const designValidationTask = defineTask('design-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Design Validation - ${args.bmsName}`,
+  skill: { name: 'battery-modeling' },
   agent: {
-    name: 'general-purpose',
+    name: 'battery-systems-engineer',
     prompt: {
       role: 'BMS Validation Engineer',
       task: 'Validate BMS design',

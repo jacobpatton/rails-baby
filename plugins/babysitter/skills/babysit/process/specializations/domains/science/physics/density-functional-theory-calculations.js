@@ -12,7 +12,8 @@ const analyzeTask = defineTask('density-functional-theory-calculations-analyze',
   kind: 'agent',
   title: 'Density Functional Theory Calculations Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'dft-specialist',
+    skills: ['vasp-dft-calculator', 'quantum-espresso-runner', 'wannier90-tight-binding'],
     prompt: {
       role: 'Computational physicist specializing in density functional theory and electronic structure calculations',
       task: 'Perform DFT calculations to determine electronic structure and materials properties',

@@ -4,6 +4,8 @@
  * compliance with Medicare/Medicaid Conditions of Participation for healthcare facilities.
  * @inputs { organizationName: string, facilityType?: string, copScope?: array, currentCompliance?: object }
  * @outputs { success: boolean, complianceAssessment: object, remediationPlan: object, policies: array, artifacts: array }
+ * @recommendedSkills SK-HC-003 (regulatory-compliance-assessment), SK-HC-002 (quality-metrics-measurement), SK-HC-010 (accreditation-tracer-simulation)
+ * @recommendedAgents AG-HC-002 (compliance-readiness-manager), AG-HC-001 (quality-improvement-orchestrator)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

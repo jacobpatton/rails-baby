@@ -4,6 +4,8 @@
  * and implementing healthcare service line strategies aligned with organizational objectives.
  * @inputs { organizationName: string, serviceLine: string, planningHorizon?: number, marketData?: object }
  * @outputs { success: boolean, strategicPlan: object, financialProforma: object, implementationRoadmap: object, artifacts: array }
+ * @recommendedSkills SK-HC-009 (population-health-stratification), SK-HC-012 (workforce-demand-forecasting), SK-HC-013 (payer-contract-analysis)
+ * @recommendedAgents AG-HC-007 (operations-excellence-director), AG-HC-001 (quality-improvement-orchestrator)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -158,7 +158,8 @@ export const systemCharacterizationTask = defineTask('system-characterization', 
   kind: 'agent',
   title: `Phase 1: System Characterization - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'theoretical-model-developer',
+    skills: ['pyscf-quantum-chemistry', 'qiskit-quantum-simulator'],
     prompt: {
       role: 'Theoretical Physicist with expertise in symmetry analysis',
       task: 'Characterize the physical system for symmetry analysis',
@@ -225,7 +226,8 @@ export const continuousSymmetriesTask = defineTask('continuous-symmetries', (arg
   kind: 'agent',
   title: `Phase 2: Continuous Symmetry Identification - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'theoretical-model-developer',
+    skills: ['pyscf-quantum-chemistry', 'qiskit-quantum-simulator'],
     prompt: {
       role: 'Theoretical Physicist with expertise in Lie groups and continuous symmetries',
       task: 'Identify all continuous symmetries of the physical system',
@@ -301,7 +303,8 @@ export const discreteSymmetriesTask = defineTask('discrete-symmetries', (args, t
   kind: 'agent',
   title: `Phase 3: Discrete Symmetry Identification - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'theoretical-model-developer',
+    skills: ['pyscf-quantum-chemistry', 'qiskit-quantum-simulator'],
     prompt: {
       role: 'Theoretical Physicist with expertise in discrete symmetries',
       task: 'Identify all discrete symmetries of the physical system',
@@ -381,7 +384,8 @@ export const noetherAnalysisTask = defineTask('noether-analysis', (args, taskCtx
   kind: 'agent',
   title: `Phase 4: Noether Theorem Application - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'theoretical-model-developer',
+    skills: ['pyscf-quantum-chemistry', 'qiskit-quantum-simulator'],
     prompt: {
       role: 'Theoretical Physicist with expertise in Noether theorem and conservation laws',
       task: 'Apply Noether theorem to derive conserved quantities',
@@ -469,7 +473,8 @@ export const groupTheoryAnalysisTask = defineTask('group-theory-analysis', (args
   kind: 'agent',
   title: `Phase 5: Group Theory Analysis - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'theoretical-model-developer',
+    skills: ['pyscf-quantum-chemistry', 'qiskit-quantum-simulator'],
     prompt: {
       role: 'Mathematical Physicist with expertise in group theory and representation theory',
       task: 'Perform detailed group theory analysis of the symmetry structure',
@@ -574,7 +579,8 @@ export const stateClassificationTask = defineTask('state-classification', (args,
   kind: 'agent',
   title: `Phase 6: State Classification - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'theoretical-model-developer',
+    skills: ['pyscf-quantum-chemistry', 'qiskit-quantum-simulator'],
     prompt: {
       role: 'Theoretical Physicist with expertise in quantum mechanics and spectroscopy',
       task: 'Classify states by symmetry quantum numbers',
@@ -669,7 +675,8 @@ export const selectionRulesTask = defineTask('selection-rules', (args, taskCtx) 
   kind: 'agent',
   title: `Phase 7: Selection Rules Derivation - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'theoretical-model-developer',
+    skills: ['pyscf-quantum-chemistry', 'qiskit-quantum-simulator'],
     prompt: {
       role: 'Theoretical Physicist with expertise in transition amplitudes and spectroscopy',
       task: 'Derive selection rules from symmetry principles',
@@ -766,7 +773,8 @@ export const simplificationTask = defineTask('calculation-simplification', (args
   kind: 'agent',
   title: `Phase 8: Calculation Simplification - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'theoretical-model-developer',
+    skills: ['pyscf-quantum-chemistry', 'qiskit-quantum-simulator'],
     prompt: {
       role: 'Theoretical Physicist with expertise in computational techniques',
       task: 'Develop strategies to simplify calculations using symmetry',

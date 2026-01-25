@@ -12,7 +12,8 @@ const analyzeTask = defineTask('quantum-field-theory-calculations-analyze', (arg
   kind: 'agent',
   title: 'Quantum Field Theory Calculations',
   agent: {
-    name: 'general-purpose',
+    name: 'qft-calculator',
+    skills: ['madgraph-amplitude-calculator', 'pythia-event-generator'],
     prompt: {
       role: 'Theoretical physicist specializing in quantum field theory and particle physics calculations',
       task: 'Perform quantum field theory calculations for the given problem',

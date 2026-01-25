@@ -4,6 +4,8 @@
  * from charge capture through payment posting with denial management and appeals processes.
  * @inputs { organizationName: string, claimsScope?: string, payerMix?: object, currentMetrics?: object }
  * @outputs { success: boolean, workflowDesign: object, automationPlan: object, metrics: object, artifacts: array }
+ * @recommendedSkills SK-HC-007 (revenue-cycle-analytics), SK-HC-004 (medical-coding-audit), SK-HC-013 (payer-contract-analysis)
+ * @recommendedAgents AG-HC-003 (revenue-integrity-analyst), AG-HC-007 (operations-excellence-director)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

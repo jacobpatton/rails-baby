@@ -12,7 +12,8 @@ const analyzeTask = defineTask('high-performance-computing-workflow-analyze', (a
   kind: 'agent',
   title: 'High-Performance Computing Workflow Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'hpc-workflow-engineer',
+    skills: ['lammps-md-simulator', 'vasp-dft-calculator', 'paraview-scientific-visualizer'],
     prompt: {
       role: 'Computational physicist specializing in HPC optimization and parallel computing for physics',
       task: 'Develop and optimize a high-performance computing workflow for large-scale physics simulations',

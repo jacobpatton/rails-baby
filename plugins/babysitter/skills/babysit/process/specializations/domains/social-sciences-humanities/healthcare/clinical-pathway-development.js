@@ -4,6 +4,8 @@
  * goals for patients and provide sequenced interventions for specific diagnoses or procedures.
  * @inputs { condition: string, patientPopulation?: string, currentPractice?: object, evidenceBase?: array }
  * @outputs { success: boolean, pathway: object, orderSets: array, metrics: object, artifacts: array }
+ * @recommendedSkills SK-HC-001 (clinical-workflow-analysis), SK-HC-009 (population-health-stratification), SK-HC-014 (clinical-decision-support-rules)
+ * @recommendedAgents AG-HC-001 (quality-improvement-orchestrator), AG-HC-005 (clinical-informatics-specialist)
  *
  * @example
  * const result = await orchestrate('specializations/domains/social-sciences-humanities/healthcare/clinical-pathway-development', {

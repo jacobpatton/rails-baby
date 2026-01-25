@@ -4,6 +4,8 @@
  * events and near-misses in healthcare using systematic investigation to prevent recurrence.
  * @inputs { eventDescription: string, eventType?: string, severity?: string, patientHarm?: boolean }
  * @outputs { success: boolean, rootCauses: array, contributingFactors: array, actionPlan: object, artifacts: array }
+ * @recommendedSkills SK-HC-005 (patient-safety-event-analysis), SK-HC-002 (quality-metrics-measurement)
+ * @recommendedAgents AG-HC-004 (patient-safety-officer), AG-HC-001 (quality-improvement-orchestrator)
  *
  * @example
  * const result = await orchestrate('specializations/domains/social-sciences-humanities/healthcare/root-cause-analysis-healthcare', {

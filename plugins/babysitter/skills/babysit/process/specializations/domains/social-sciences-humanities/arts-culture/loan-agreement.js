@@ -3,6 +3,8 @@
  * @description Protocol for negotiating, documenting, and managing incoming and outgoing loans including condition reporting, insurance valuation, shipping coordination, and legal compliance
  * @inputs { loanType: string, artworkIds: array, lenderInfo: object, borrowerInfo: object, loanPeriod: object }
  * @outputs { success: boolean, loanAgreement: object, conditionReports: array, shippingPlan: object, artifacts: array }
+ * @recommendedSkills SK-AC-003 (collection-documentation), SK-AC-011 (risk-mitigation-planning)
+ * @recommendedAgents AG-AC-006 (registrar-agent), AG-AC-001 (curator-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

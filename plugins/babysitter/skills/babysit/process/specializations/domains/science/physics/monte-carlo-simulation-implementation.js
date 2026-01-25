@@ -12,7 +12,8 @@ const analyzeTask = defineTask('monte-carlo-simulation-implementation-analyze', 
   kind: 'agent',
   title: 'Monte Carlo Simulation Implementation Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'monte-carlo-specialist',
+    skills: ['monte-carlo-physics-simulator', 'geant4-detector-simulator'],
     prompt: {
       role: 'Computational physicist specializing in Monte Carlo methods and statistical simulations',
       task: 'Design and implement Monte Carlo simulation methods for the given physical problem',

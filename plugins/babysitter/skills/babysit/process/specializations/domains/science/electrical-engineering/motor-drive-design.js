@@ -176,8 +176,9 @@ export async function process(inputs, ctx) {
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Requirements Definition - ${args.driveName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Motor Drive Systems Engineer',
       task: 'Define motor and load requirements',
@@ -209,8 +210,9 @@ export const requirementsDefinitionTask = defineTask('requirements-definition', 
 export const topologySelectionTask = defineTask('topology-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Topology Selection - ${args.driveName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Power Electronics Engineer',
       task: 'Select drive topology',
@@ -240,8 +242,9 @@ export const topologySelectionTask = defineTask('topology-selection', (args, tas
 export const powerStageDesignTask = defineTask('power-stage-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Power Stage Design - ${args.driveName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Power Stage Design Engineer',
       task: 'Design power stage (inverter, gate drivers)',
@@ -278,8 +281,9 @@ export const powerStageDesignTask = defineTask('power-stage-design', (args, task
 export const controlMethodSelectionTask = defineTask('control-method-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Control Method Selection - ${args.driveName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Motor Control Specialist',
       task: 'Select control method (V/f, FOC, DTC)',
@@ -309,8 +313,9 @@ export const controlMethodSelectionTask = defineTask('control-method-selection',
 export const controlLoopImplementationTask = defineTask('control-loop-implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Control Loop Implementation - ${args.driveName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Motor Drive Control Engineer',
       task: 'Implement current and speed control loops',
@@ -348,8 +353,9 @@ export const controlLoopImplementationTask = defineTask('control-loop-implementa
 export const protectionDesignTask = defineTask('protection-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Protection Design - ${args.driveName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Drive Protection Engineer',
       task: 'Design protection features',
@@ -384,8 +390,9 @@ export const protectionDesignTask = defineTask('protection-design', (args, taskC
 export const performanceTestingTask = defineTask('performance-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Performance Testing - ${args.driveName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Drive Test Engineer',
       task: 'Test drive performance and efficiency',
@@ -422,8 +429,9 @@ export const performanceTestingTask = defineTask('performance-testing', (args, t
 export const loadValidationTask = defineTask('load-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Load Validation - ${args.driveName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Motor Drive Validation Engineer',
       task: 'Validate with motor and load testing',

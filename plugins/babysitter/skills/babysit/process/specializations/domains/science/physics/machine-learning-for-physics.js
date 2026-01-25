@@ -12,7 +12,8 @@ const analyzeTask = defineTask('machine-learning-for-physics-analyze', (args, ta
   kind: 'agent',
   title: 'Machine Learning for Physics Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'physics-ml-developer',
+    skills: ['tensorflow-physics-ml', 'scikit-hep-analysis'],
     prompt: {
       role: 'Physicist specializing in machine learning applications in physics research',
       task: 'Apply machine learning techniques to solve the given physics problem',

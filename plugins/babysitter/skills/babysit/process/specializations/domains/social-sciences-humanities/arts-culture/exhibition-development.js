@@ -3,6 +3,8 @@
  * @description Comprehensive workflow for planning, organizing, and installing exhibitions including concept development, artwork selection, loan coordination, installation design, and interpretive programming
  * @inputs { exhibitionTitle: string, theme: string, targetOpeningDate: string, budget: number, venueSpecs: object }
  * @outputs { success: boolean, exhibitionPlan: object, artworkList: array, installationDesign: object, artifacts: array }
+ * @recommendedSkills SK-AC-001 (curatorial-research), SK-AC-004 (exhibition-design), SK-AC-008 (interpretive-writing), SK-AC-003 (collection-documentation)
+ * @recommendedAgents AG-AC-001 (curator-agent), AG-AC-010 (exhibition-designer-agent), AG-AC-006 (registrar-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

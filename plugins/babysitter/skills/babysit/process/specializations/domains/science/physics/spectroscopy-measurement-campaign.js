@@ -12,7 +12,8 @@ const analyzeTask = defineTask('spectroscopy-measurement-campaign-analyze', (arg
   kind: 'agent',
   title: 'Spectroscopy Measurement Campaign Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'spectroscopy-analyst',
+    skills: ['spinw-magnetic-simulator', 'bluesky-data-collection'],
     prompt: {
       role: 'Condensed matter physicist specializing in spectroscopic techniques and materials characterization',
       task: 'Plan and execute a comprehensive spectroscopy measurement campaign',

@@ -12,7 +12,8 @@ const analyzeTask = defineTask('data-acquisition-system-development-analyze', (a
   kind: 'agent',
   title: 'Data Acquisition System Development Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'daq-engineer',
+    skills: ['labview-instrument-controller', 'epics-control-system', 'bluesky-data-collection'],
     prompt: {
       role: 'Experimental physicist specializing in data acquisition systems and detector electronics',
       task: 'Design and plan a data acquisition system for the given physics experiment',

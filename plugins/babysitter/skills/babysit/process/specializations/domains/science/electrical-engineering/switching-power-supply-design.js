@@ -185,8 +185,9 @@ export async function process(inputs, ctx) {
 export const specificationDefinitionTask = defineTask('specification-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Specification Definition - ${args.supplyName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Power Supply Design Engineer',
       task: 'Define power supply specifications',
@@ -239,8 +240,9 @@ export const specificationDefinitionTask = defineTask('specification-definition'
 export const topologySelectionTask = defineTask('topology-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Topology Selection - ${args.supplyName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Power Electronics Topology Specialist',
       task: 'Select optimal converter topology',
@@ -285,8 +287,9 @@ export const topologySelectionTask = defineTask('topology-selection', (args, tas
 export const magneticsDesignTask = defineTask('magnetics-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Magnetics Design - ${args.supplyName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Magnetics Design Engineer',
       task: 'Design magnetic components (inductors, transformers)',
@@ -347,8 +350,9 @@ export const magneticsDesignTask = defineTask('magnetics-design', (args, taskCtx
 export const semiconductorSelectionTask = defineTask('semiconductor-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Semiconductor Selection - ${args.supplyName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Power Semiconductor Selection Engineer',
       task: 'Select power semiconductors (MOSFETs, diodes)',
@@ -416,8 +420,9 @@ export const semiconductorSelectionTask = defineTask('semiconductor-selection', 
 export const controlLoopDesignTask = defineTask('control-loop-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Control Loop Design - ${args.supplyName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Power Supply Control Engineer',
       task: 'Design control loop and compensation',
@@ -472,8 +477,9 @@ export const controlLoopDesignTask = defineTask('control-loop-design', (args, ta
 export const performanceSimulationTask = defineTask('performance-simulation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Performance Simulation - ${args.supplyName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Power Supply Simulation Engineer',
       task: 'Simulate steady-state and transient performance',
@@ -529,8 +535,9 @@ export const performanceSimulationTask = defineTask('performance-simulation', (a
 export const pcbLayoutGuidelinesTask = defineTask('pcb-layout-guidelines', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: PCB Layout Guidelines - ${args.supplyName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Power Supply PCB Layout Engineer',
       task: 'Design PCB layout for thermal and EMI performance',
@@ -582,8 +589,9 @@ export const pcbLayoutGuidelinesTask = defineTask('pcb-layout-guidelines', (args
 export const testValidationTask = defineTask('test-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Test and Validation - ${args.supplyName}`,
+  skill: { name: 'power-electronics-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'power-electronics-engineer',
     prompt: {
       role: 'Power Supply Test Engineer',
       task: 'Test and validate power supply performance',

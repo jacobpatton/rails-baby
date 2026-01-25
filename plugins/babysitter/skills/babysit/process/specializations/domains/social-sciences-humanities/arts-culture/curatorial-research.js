@@ -3,6 +3,8 @@
  * @description Methodology for conducting art historical research, primary source analysis, provenance research, and scholarly interpretation to inform exhibitions and publications
  * @inputs { researchTopic: string, researchType: string, artworkIds: array, publicationIntent: boolean }
  * @outputs { success: boolean, researchFindings: object, bibliography: array, provenanceReport: object, artifacts: array }
+ * @recommendedSkills SK-AC-001 (curatorial-research), SK-AC-008 (interpretive-writing)
+ * @recommendedAgents AG-AC-001 (curator-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -199,8 +199,9 @@ export async function process(inputs, ctx) {
 export const projectSetupTask = defineTask('project-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Setup project and determine code requirements',
+  skill: { name: 'building-code-checker' },
   agent: {
-    name: 'structural-engineer',
+    name: 'structural-load-analyst',
     prompt: {
       role: 'senior structural engineer',
       task: 'Establish project parameters and applicable code requirements',
@@ -247,8 +248,9 @@ export const projectSetupTask = defineTask('project-setup', (args, taskCtx) => (
 export const deadLoadAnalysisTask = defineTask('dead-load-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate dead loads',
+  skill: { name: 'fea-structural-engine' },
   agent: {
-    name: 'structural-engineer',
+    name: 'structural-load-analyst',
     prompt: {
       role: 'structural engineer',
       task: 'Calculate dead loads for all structural elements',
@@ -295,8 +297,9 @@ export const deadLoadAnalysisTask = defineTask('dead-load-analysis', (args, task
 export const liveLoadAnalysisTask = defineTask('live-load-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate live loads',
+  skill: { name: 'load-combination-generator' },
   agent: {
-    name: 'structural-engineer',
+    name: 'structural-load-analyst',
     prompt: {
       role: 'structural engineer',
       task: 'Determine live loads per ASCE 7 Table 4.3-1',
@@ -342,8 +345,9 @@ export const liveLoadAnalysisTask = defineTask('live-load-analysis', (args, task
 export const windLoadAnalysisTask = defineTask('wind-load-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate wind loads per ASCE 7',
+  skill: { name: 'wind-load-calculator' },
   agent: {
-    name: 'structural-engineer',
+    name: 'structural-load-analyst',
     prompt: {
       role: 'wind engineering specialist',
       task: 'Determine wind loads using ASCE 7 procedures',
@@ -393,8 +397,9 @@ export const windLoadAnalysisTask = defineTask('wind-load-analysis', (args, task
 export const seismicLoadAnalysisTask = defineTask('seismic-load-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate seismic loads per ASCE 7',
+  skill: { name: 'seismic-hazard-analyzer' },
   agent: {
-    name: 'seismic-engineer',
+    name: 'seismic-design-specialist',
     prompt: {
       role: 'seismic engineering specialist',
       task: 'Determine seismic design parameters and forces per ASCE 7',
@@ -447,8 +452,9 @@ export const seismicLoadAnalysisTask = defineTask('seismic-load-analysis', (args
 export const snowRainLoadAnalysisTask = defineTask('snow-rain-load-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate snow and rain loads',
+  skill: { name: 'load-combination-generator' },
   agent: {
-    name: 'structural-engineer',
+    name: 'structural-load-analyst',
     prompt: {
       role: 'structural engineer',
       task: 'Determine snow and rain loads per ASCE 7',
@@ -498,8 +504,9 @@ export const snowRainLoadAnalysisTask = defineTask('snow-rain-load-analysis', (a
 export const loadCombinationsTask = defineTask('load-combinations', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop load combinations per ASCE 7',
+  skill: { name: 'load-combination-generator' },
   agent: {
-    name: 'structural-engineer',
+    name: 'building-code-analyst',
     prompt: {
       role: 'structural engineer',
       task: 'Develop LRFD and ASD load combinations',
@@ -550,8 +557,9 @@ export const loadCombinationsTask = defineTask('load-combinations', (args, taskC
 export const loadPathAnalysisTask = defineTask('load-path-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze load paths',
+  skill: { name: 'fea-structural-engine' },
   agent: {
-    name: 'structural-engineer',
+    name: 'structural-load-analyst',
     prompt: {
       role: 'structural engineer',
       task: 'Trace and document load paths through structure',
@@ -602,8 +610,9 @@ export const loadPathAnalysisTask = defineTask('load-path-analysis', (args, task
 export const loadReportTask = defineTask('load-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate comprehensive load summary report',
+  skill: { name: 'engineering-report-generator' },
   agent: {
-    name: 'technical-writer',
+    name: 'technical-report-writer',
     prompt: {
       role: 'structural engineer and technical writer',
       task: 'Generate comprehensive structural load analysis report',

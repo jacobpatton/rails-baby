@@ -180,8 +180,9 @@ export async function process(inputs, ctx) {
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Requirements Definition - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'motion-control-specialist',
     prompt: {
       role: 'Motion Control Systems Engineer',
       task: 'Define motion requirements and specifications',
@@ -232,8 +233,9 @@ export const requirementsDefinitionTask = defineTask('requirements-definition', 
 export const motorDriveSelectionTask = defineTask('motor-drive-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Motor/Drive Selection - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'motion-control-specialist',
     prompt: {
       role: 'Servo Systems Engineer',
       task: 'Select motor and drive system',
@@ -281,8 +283,9 @@ export const motorDriveSelectionTask = defineTask('motor-drive-selection', (args
 export const controlLoopDesignTask = defineTask('control-loop-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Control Loop Design - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'motion-control-specialist',
     prompt: {
       role: 'Servo Control Systems Engineer',
       task: 'Design velocity and position control loops',
@@ -335,8 +338,9 @@ export const controlLoopDesignTask = defineTask('control-loop-design', (args, ta
 export const trajectoryPlanningTask = defineTask('trajectory-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Trajectory Planning - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'motion-control-specialist',
     prompt: {
       role: 'Motion Planning Engineer',
       task: 'Implement trajectory generation algorithms',
@@ -389,8 +393,9 @@ export const trajectoryPlanningTask = defineTask('trajectory-planning', (args, t
 export const driveConfigurationTask = defineTask('drive-configuration', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Drive Configuration - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'motion-control-specialist',
     prompt: {
       role: 'Servo Drive Configuration Specialist',
       task: 'Configure servo drive parameters',
@@ -443,8 +448,9 @@ export const driveConfigurationTask = defineTask('drive-configuration', (args, t
 export const loopTuningTask = defineTask('loop-tuning', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Loop Tuning - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'motion-control-specialist',
     prompt: {
       role: 'Servo Tuning Specialist',
       task: 'Tune control loops for optimal response',
@@ -496,8 +502,9 @@ export const loopTuningTask = defineTask('loop-tuning', (args, taskCtx) => ({
 export const motionTestingTask = defineTask('motion-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Motion Testing - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'motion-control-specialist',
     prompt: {
       role: 'Motion Systems Test Engineer',
       task: 'Test motion profiles and accuracy',
@@ -550,8 +557,9 @@ export const motionTestingTask = defineTask('motion-testing', (args, taskCtx) =>
 export const loadValidationTask = defineTask('load-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Load Validation - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'motion-control-specialist',
     prompt: {
       role: 'Motion Systems Validation Engineer',
       task: 'Validate system performance under load',

@@ -12,7 +12,8 @@ const analyzeTask = defineTask('detector-calibration-characterization-analyze', 
   kind: 'agent',
   title: 'Detector Calibration and Characterization Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'detector-calibrator',
+    skills: ['root-data-analyzer', 'bluesky-data-collection', 'pymeasure-automation'],
     prompt: {
       role: 'Experimental physicist specializing in detector calibration and performance characterization',
       task: 'Design and implement comprehensive detector calibration and characterization procedures',

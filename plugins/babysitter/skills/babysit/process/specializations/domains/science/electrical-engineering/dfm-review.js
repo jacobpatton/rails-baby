@@ -197,8 +197,9 @@ export async function process(inputs, ctx) {
 export const componentReviewTask = defineTask('component-review', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Component Selection Review - ${args.projectName}`,
+  skill: { name: 'dfm-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'pcb-layout-engineer',
     prompt: {
       role: 'DFM Component Engineer',
       task: 'Review component selection for manufacturability',
@@ -234,8 +235,9 @@ export const componentReviewTask = defineTask('component-review', (args, taskCtx
 export const fabricationReviewTask = defineTask('fabrication-review', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: PCB Fabrication Review - ${args.projectName}`,
+  skill: { name: 'dfm-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'pcb-layout-engineer',
     prompt: {
       role: 'PCB Fabrication Engineer',
       task: 'Review PCB design for fabrication',
@@ -270,8 +272,9 @@ export const fabricationReviewTask = defineTask('fabrication-review', (args, tas
 export const assemblyReviewTask = defineTask('assembly-review', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Assembly Process Review - ${args.projectName}`,
+  skill: { name: 'dfm-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'pcb-layout-engineer',
     prompt: {
       role: 'Assembly Process Engineer',
       task: 'Review design for assembly (DFA)',
@@ -306,8 +309,9 @@ export const assemblyReviewTask = defineTask('assembly-review', (args, taskCtx) 
 export const solderThermalReviewTask = defineTask('solder-thermal-review', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Solder and Thermal Review - ${args.projectName}`,
+  skill: { name: 'dfm-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'pcb-layout-engineer',
     prompt: {
       role: 'Soldering Process Engineer',
       task: 'Review solder joint and thermal considerations',
@@ -342,8 +346,9 @@ export const solderThermalReviewTask = defineTask('solder-thermal-review', (args
 export const testCoverageAnalysisTask = defineTask('test-coverage-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Test Coverage Analysis - ${args.projectName}`,
+  skill: { name: 'dfm-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'pcb-layout-engineer',
     prompt: {
       role: 'Test Engineering Manager',
       task: 'Analyze test coverage and testability',
@@ -379,8 +384,9 @@ export const testCoverageAnalysisTask = defineTask('test-coverage-analysis', (ar
 export const costOptimizationTask = defineTask('cost-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Cost Optimization Analysis - ${args.projectName}`,
+  skill: { name: 'dfm-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'pcb-layout-engineer',
     prompt: {
       role: 'Cost Optimization Engineer',
       task: 'Analyze and optimize manufacturing cost',
@@ -415,8 +421,9 @@ export const costOptimizationTask = defineTask('cost-optimization', (args, taskC
 export const riskAssessmentTask = defineTask('risk-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Manufacturing Risk Assessment - ${args.projectName}`,
+  skill: { name: 'dfm-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'pcb-layout-engineer',
     prompt: {
       role: 'Manufacturing Risk Analyst',
       task: 'Assess manufacturing risks',
@@ -452,8 +459,9 @@ export const riskAssessmentTask = defineTask('risk-assessment', (args, taskCtx) 
 export const dfmReportTask = defineTask('dfm-report', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: DFM Report Generation - ${args.projectName}`,
+  skill: { name: 'dfm-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'pcb-layout-engineer',
     prompt: {
       role: 'DFM Review Lead',
       task: 'Generate comprehensive DFM report',

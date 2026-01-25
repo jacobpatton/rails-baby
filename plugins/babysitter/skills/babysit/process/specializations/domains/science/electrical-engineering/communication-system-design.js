@@ -185,8 +185,9 @@ export async function process(inputs, ctx) {
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Requirements Definition - ${args.systemName}`,
+  skill: { name: 'wireless-link-budget' },
   agent: {
-    name: 'general-purpose',
+    name: 'communications-engineer',
     prompt: {
       role: 'Communications Systems Engineer',
       task: 'Define communication system requirements',
@@ -241,8 +242,9 @@ export const requirementsDefinitionTask = defineTask('requirements-definition', 
 export const modulationSelectionTask = defineTask('modulation-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Modulation Selection - ${args.systemName}`,
+  skill: { name: 'wireless-link-budget' },
   agent: {
-    name: 'general-purpose',
+    name: 'communications-engineer',
     prompt: {
       role: 'Digital Communications Specialist',
       task: 'Select optimal modulation scheme',
@@ -296,8 +298,9 @@ export const modulationSelectionTask = defineTask('modulation-selection', (args,
 export const transmitterDesignTask = defineTask('transmitter-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Transmitter Design - ${args.systemName}`,
+  skill: { name: 'wireless-link-budget' },
   agent: {
-    name: 'general-purpose',
+    name: 'communications-engineer',
     prompt: {
       role: 'RF/Digital Communications Engineer',
       task: 'Design transmitter chain (encoding, modulation, filtering)',
@@ -362,8 +365,9 @@ export const transmitterDesignTask = defineTask('transmitter-design', (args, tas
 export const receiverDesignTask = defineTask('receiver-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Receiver Design - ${args.systemName}`,
+  skill: { name: 'wireless-link-budget' },
   agent: {
-    name: 'general-purpose',
+    name: 'communications-engineer',
     prompt: {
       role: 'Digital Communications Receiver Engineer',
       task: 'Design receiver chain (synchronization, equalization, decoding)',
@@ -432,8 +436,9 @@ export const receiverDesignTask = defineTask('receiver-design', (args, taskCtx) 
 export const systemSimulationTask = defineTask('system-simulation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: System Simulation - ${args.systemName}`,
+  skill: { name: 'wireless-link-budget' },
   agent: {
-    name: 'general-purpose',
+    name: 'communications-engineer',
     prompt: {
       role: 'Communications System Simulation Engineer',
       task: 'Simulate system performance over channel models',
@@ -487,8 +492,9 @@ export const systemSimulationTask = defineTask('system-simulation', (args, taskC
 export const performanceAnalysisTask = defineTask('performance-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Performance Analysis - ${args.systemName}`,
+  skill: { name: 'wireless-link-budget' },
   agent: {
-    name: 'general-purpose',
+    name: 'communications-engineer',
     prompt: {
       role: 'Communications Performance Analyst',
       task: 'Analyze BER vs SNR curves and system performance',
@@ -546,8 +552,9 @@ export const performanceAnalysisTask = defineTask('performance-analysis', (args,
 export const platformImplementationTask = defineTask('platform-implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Platform Implementation - ${args.systemName}`,
+  skill: { name: 'wireless-link-budget' },
   agent: {
-    name: 'general-purpose',
+    name: 'communications-engineer',
     prompt: {
       role: 'SDR/FPGA Communications Developer',
       task: 'Implement communication system on target platform',
@@ -599,8 +606,9 @@ export const platformImplementationTask = defineTask('platform-implementation', 
 export const otaValidationTask = defineTask('ota-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: OTA Validation - ${args.systemName}`,
+  skill: { name: 'wireless-link-budget' },
   agent: {
-    name: 'general-purpose',
+    name: 'communications-engineer',
     prompt: {
       role: 'RF Test Engineer',
       task: 'Validate system with over-the-air testing',

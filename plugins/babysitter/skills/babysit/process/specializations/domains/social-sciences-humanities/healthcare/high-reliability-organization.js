@@ -5,6 +5,8 @@
  * commitment to resilience, and deference to expertise.
  * @inputs { organizationName: string, assessmentScope?: string, currentMaturity?: string, focusAreas?: array }
  * @outputs { success: boolean, assessment: object, implementationPlan: object, metrics: object, artifacts: array }
+ * @recommendedSkills SK-HC-002 (quality-metrics-measurement), SK-HC-005 (patient-safety-event-analysis), SK-HC-010 (accreditation-tracer-simulation)
+ * @recommendedAgents AG-HC-004 (patient-safety-officer), AG-HC-001 (quality-improvement-orchestrator)
  *
  * @example
  * const result = await orchestrate('specializations/domains/social-sciences-humanities/healthcare/high-reliability-organization', {

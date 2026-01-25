@@ -12,7 +12,8 @@ const analyzeTask = defineTask('uncertainty-propagation-quantification-analyze',
   kind: 'agent',
   title: 'Uncertainty Propagation and Quantification Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'uncertainty-propagator',
+    skills: ['emcee-mcmc-sampler', 'pymc-bayesian-modeler'],
     prompt: {
       role: 'Physicist specializing in uncertainty quantification and error analysis',
       task: 'Systematically propagate and quantify uncertainties for the given physics measurement',

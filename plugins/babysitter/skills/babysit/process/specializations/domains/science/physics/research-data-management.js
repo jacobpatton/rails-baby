@@ -12,7 +12,8 @@ const analyzeTask = defineTask('research-data-management-analyze', (args, taskCt
   kind: 'agent',
   title: 'Research Data Management Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'research-data-manager',
+    skills: ['latex-physics-documenter', 'paraview-scientific-visualizer'],
     prompt: {
       role: 'Research data specialist with expertise in physics data management and FAIR principles',
       task: 'Develop and implement a comprehensive research data management plan',

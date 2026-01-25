@@ -12,7 +12,8 @@ const analyzeTask = defineTask('molecular-dynamics-simulation-setup-analyze', (a
   kind: 'agent',
   title: 'Molecular Dynamics Simulation Setup Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'md-simulation-specialist',
+    skills: ['lammps-md-simulator', 'gromacs-biosim-runner'],
     prompt: {
       role: 'Computational physicist specializing in molecular dynamics simulations and materials modeling',
       task: 'Configure and validate a molecular dynamics simulation for the given physical system',

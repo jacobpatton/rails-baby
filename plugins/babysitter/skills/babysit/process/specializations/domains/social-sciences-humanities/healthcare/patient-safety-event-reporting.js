@@ -4,6 +4,8 @@
  * patient safety events including adverse events, near-misses, and unsafe conditions for organizational learning.
  * @inputs { eventDetails: object, reporterRole?: string, immediateActions?: array, eventCategory?: string }
  * @outputs { success: boolean, eventReport: object, classification: object, analysis: object, artifacts: array }
+ * @recommendedSkills SK-HC-005 (patient-safety-event-analysis), SK-HC-002 (quality-metrics-measurement)
+ * @recommendedAgents AG-HC-004 (patient-safety-officer), AG-HC-002 (compliance-readiness-manager)
  *
  * @example
  * const result = await orchestrate('specializations/domains/social-sciences-humanities/healthcare/patient-safety-event-reporting', {

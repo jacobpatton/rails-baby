@@ -12,7 +12,8 @@ const analyzeTask = defineTask('event-reconstruction-analyze', (args, taskCtx) =
   kind: 'agent',
   title: 'Event Reconstruction Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'event-reconstructor',
+    skills: ['root-data-analyzer', 'geant4-detector-simulator', 'delphes-fast-simulator'],
     prompt: {
       role: 'Particle physicist specializing in event reconstruction and detector data analysis',
       task: 'Develop event reconstruction algorithms to convert raw detector data into physics objects',

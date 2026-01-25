@@ -211,8 +211,9 @@ export async function process(inputs, ctx) {
 export const prePowerInspectionTask = defineTask('pre-power-inspection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Pre-Power Inspection - ${args.projectName}`,
+  skill: { name: 'test-automation' },
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-test-engineer',
     prompt: {
       role: 'Hardware Quality Engineer',
       task: 'Perform pre-power inspection',
@@ -248,8 +249,9 @@ export const prePowerInspectionTask = defineTask('pre-power-inspection', (args, 
 export const powerOnValidationTask = defineTask('power-on-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Power-On Validation - ${args.projectName}`,
+  skill: { name: 'test-automation' },
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-test-engineer',
     prompt: {
       role: 'Hardware Bring-Up Engineer',
       task: 'Validate power-on sequence',
@@ -287,8 +289,9 @@ export const powerOnValidationTask = defineTask('power-on-validation', (args, ta
 export const clockResetVerificationTask = defineTask('clock-reset-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Clock and Reset Verification - ${args.projectName}`,
+  skill: { name: 'test-automation' },
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-test-engineer',
     prompt: {
       role: 'Digital Hardware Engineer',
       task: 'Verify clock and reset systems',
@@ -325,8 +328,9 @@ export const clockResetVerificationTask = defineTask('clock-reset-verification',
 export const digitalValidationTask = defineTask('digital-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Digital Subsystem Validation - ${args.projectName}`,
+  skill: { name: 'test-automation' },
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-test-engineer',
     prompt: {
       role: 'Digital Validation Engineer',
       task: 'Validate digital subsystems',
@@ -362,8 +366,9 @@ export const digitalValidationTask = defineTask('digital-validation', (args, tas
 export const analogValidationTask = defineTask('analog-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Analog Subsystem Validation - ${args.projectName}`,
+  skill: { name: 'test-automation' },
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-test-engineer',
     prompt: {
       role: 'Analog Validation Engineer',
       task: 'Validate analog subsystems',
@@ -399,8 +404,9 @@ export const analogValidationTask = defineTask('analog-validation', (args, taskC
 export const performanceCharacterizationTask = defineTask('performance-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Performance Characterization - ${args.projectName}`,
+  skill: { name: 'test-automation' },
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-test-engineer',
     prompt: {
       role: 'Hardware Characterization Engineer',
       task: 'Characterize hardware performance',
@@ -436,8 +442,9 @@ export const performanceCharacterizationTask = defineTask('performance-character
 export const stressTestingTask = defineTask('stress-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Stress Testing - ${args.projectName}`,
+  skill: { name: 'test-automation' },
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-test-engineer',
     prompt: {
       role: 'Hardware Stress Test Engineer',
       task: 'Perform environmental and stress testing',
@@ -473,8 +480,9 @@ export const stressTestingTask = defineTask('stress-testing', (args, taskCtx) =>
 export const validationReportTask = defineTask('validation-report', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Validation Report - ${args.projectName}`,
+  skill: { name: 'test-automation' },
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-test-engineer',
     prompt: {
       role: 'Hardware Validation Lead',
       task: 'Generate comprehensive validation report',

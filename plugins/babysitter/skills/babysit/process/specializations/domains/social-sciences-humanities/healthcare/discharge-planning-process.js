@@ -4,6 +4,8 @@
  * from hospital to home or other care settings with medication reconciliation and post-acute coordination.
  * @inputs { patientProfile: object, admissionType?: string, anticipatedNeeds?: array, caregiverAvailable?: boolean }
  * @outputs { success: boolean, dischargePlan: object, educationPlan: object, followUpSchedule: array, artifacts: array }
+ * @recommendedSkills SK-HC-008 (care-transition-coordination), SK-HC-001 (clinical-workflow-analysis)
+ * @recommendedAgents AG-HC-006 (care-management-coordinator), AG-HC-007 (operations-excellence-director)
  *
  * @example
  * const result = await orchestrate('specializations/domains/social-sciences-humanities/healthcare/discharge-planning-process', {

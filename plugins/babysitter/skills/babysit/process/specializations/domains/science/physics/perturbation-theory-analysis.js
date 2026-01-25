@@ -175,7 +175,8 @@ export const unperturbedAnalysisTask = defineTask('unperturbed-analysis', (args,
   kind: 'agent',
   title: `Phase 1: Unperturbed System Analysis - ${args.problemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'perturbation-theory-analyst',
+    skills: ['scipy-optimization-toolkit', 'pyscf-quantum-chemistry'],
     prompt: {
       role: 'Theoretical Physicist with expertise in exactly solvable systems',
       task: 'Analyze the unperturbed system and document its exact solutions',
@@ -262,7 +263,8 @@ export const perturbationSetupTask = defineTask('perturbation-setup', (args, tas
   kind: 'agent',
   title: `Phase 2: Perturbation Setup - ${args.problemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'perturbation-theory-analyst',
+    skills: ['scipy-optimization-toolkit', 'pyscf-quantum-chemistry'],
     prompt: {
       role: 'Theoretical Physicist with expertise in perturbation theory methodology',
       task: 'Set up the perturbation expansion framework',
@@ -362,7 +364,8 @@ export const firstOrderTask = defineTask('first-order-corrections', (args, taskC
   kind: 'agent',
   title: `Phase 3: First-Order Corrections - ${args.problemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'perturbation-theory-analyst',
+    skills: ['scipy-optimization-toolkit', 'pyscf-quantum-chemistry'],
     prompt: {
       role: 'Theoretical Physicist with expertise in perturbation calculations',
       task: 'Compute first-order perturbative corrections',
@@ -462,7 +465,8 @@ export const higherOrderTask = defineTask('higher-order-corrections', (args, tas
   kind: 'agent',
   title: `Phase 4: Higher-Order Corrections - ${args.problemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'perturbation-theory-analyst',
+    skills: ['scipy-optimization-toolkit', 'pyscf-quantum-chemistry'],
     prompt: {
       role: 'Theoretical Physicist with expertise in high-order perturbation calculations',
       task: 'Compute higher-order perturbative corrections systematically',
@@ -562,7 +566,8 @@ export const convergenceAnalysisTask = defineTask('convergence-analysis', (args,
   kind: 'agent',
   title: `Phase 5: Convergence Analysis - ${args.problemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'perturbation-theory-analyst',
+    skills: ['scipy-optimization-toolkit', 'pyscf-quantum-chemistry'],
     prompt: {
       role: 'Mathematical Physicist with expertise in asymptotic analysis and series convergence',
       task: 'Analyze the convergence properties of the perturbation series',
@@ -665,7 +670,8 @@ export const comparisonTask = defineTask('non-perturbative-comparison', (args, t
   kind: 'agent',
   title: `Phase 6: Non-Perturbative Comparison - ${args.problemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'perturbation-theory-analyst',
+    skills: ['scipy-optimization-toolkit', 'pyscf-quantum-chemistry'],
     prompt: {
       role: 'Computational Physicist with expertise in numerical and variational methods',
       task: 'Compare perturbative results with non-perturbative methods',
@@ -753,7 +759,8 @@ export const synthesisTask = defineTask('results-synthesis', (args, taskCtx) => 
   kind: 'agent',
   title: `Phase 7: Results Synthesis - ${args.problemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'perturbation-theory-analyst',
+    skills: ['scipy-optimization-toolkit', 'pyscf-quantum-chemistry'],
     prompt: {
       role: 'Theoretical Physicist and Technical Writer',
       task: 'Synthesize perturbation analysis results into comprehensive documentation',

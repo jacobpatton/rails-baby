@@ -4,6 +4,8 @@
  * Electronic Health Record systems including workflow analysis, configuration, data migration, and go-live.
  * @inputs { organizationName: string, ehrVendor?: string, implementationScope?: string, timeline?: object }
  * @outputs { success: boolean, implementationPlan: object, workflowDesign: object, goLivePlan: object, artifacts: array }
+ * @recommendedSkills SK-HC-006 (health-data-integration), SK-HC-001 (clinical-workflow-analysis), SK-HC-014 (clinical-decision-support-rules)
+ * @recommendedAgents AG-HC-005 (clinical-informatics-specialist), AG-HC-007 (operations-excellence-director)
  *
  * @example
  * const result = await orchestrate('specializations/domains/social-sciences-humanities/healthcare/ehr-implementation-methodology', {

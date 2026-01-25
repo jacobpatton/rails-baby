@@ -211,8 +211,9 @@ export async function process(inputs, ctx) {
 export const systemDataCollectionTask = defineTask('system-data-collection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: System Data Collection - ${args.systemName}`,
+  skill: { name: 'relay-coordination' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Protection Engineer with expertise in power system data collection',
       task: 'Collect and organize system data for protection coordination study',
@@ -267,8 +268,9 @@ export const systemDataCollectionTask = defineTask('system-data-collection', (ar
 export const shortCircuitAnalysisTask = defineTask('short-circuit-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Short-Circuit Analysis - ${args.systemName}`,
+  skill: { name: 'relay-coordination' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Power Systems Engineer specializing in fault analysis',
       task: 'Calculate short-circuit currents at key locations',
@@ -322,8 +324,9 @@ export const shortCircuitAnalysisTask = defineTask('short-circuit-analysis', (ar
 export const deviceSelectionTask = defineTask('device-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Device Selection - ${args.systemName}`,
+  skill: { name: 'relay-coordination' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Protection Engineer with expertise in relay selection',
       task: 'Select protective device types and ratings',
@@ -382,8 +385,9 @@ export const deviceSelectionTask = defineTask('device-selection', (args, taskCtx
 export const relaySettingsCalculationTask = defineTask('relay-settings-calculation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Relay Settings Calculation - ${args.systemName}`,
+  skill: { name: 'relay-coordination' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Protection Engineer with expertise in relay settings',
       task: 'Determine relay settings and pickup values',
@@ -442,8 +446,9 @@ export const relaySettingsCalculationTask = defineTask('relay-settings-calculati
 export const coordinationCurvesTask = defineTask('coordination-curves', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Coordination Curves - ${args.systemName}`,
+  skill: { name: 'relay-coordination' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Protection Coordination Engineer',
       task: 'Plot time-current coordination curves',
@@ -498,8 +503,9 @@ export const coordinationCurvesTask = defineTask('coordination-curves', (args, t
 export const coordinationVerificationTask = defineTask('coordination-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Coordination Verification - ${args.systemName}`,
+  skill: { name: 'relay-coordination' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Protection Coordination Verification Engineer',
       task: 'Verify coordination between protective devices',
@@ -565,8 +571,9 @@ export const coordinationVerificationTask = defineTask('coordination-verificatio
 export const faultScenarioAnalysisTask = defineTask('fault-scenario-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Fault Scenario Analysis - ${args.systemName}`,
+  skill: { name: 'relay-coordination' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Protection Systems Analyst',
       task: 'Analyze protection for various fault scenarios',
@@ -625,8 +632,9 @@ export const faultScenarioAnalysisTask = defineTask('fault-scenario-analysis', (
 export const studyDocumentationTask = defineTask('study-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Study Documentation - ${args.systemName}`,
+  skill: { name: 'relay-coordination' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Protection Engineering Documentation Specialist',
       task: 'Document settings and coordination study results',

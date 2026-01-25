@@ -3,6 +3,8 @@
  * @description Systematic approach to managing permanent collections including acquisition, documentation, cataloging, storage, loan coordination, and deaccession following AAM and ICOM standards
  * @inputs { collectionScope: string, institutionName: string, managementAction: string, objectIds: array }
  * @outputs { success: boolean, collectionStatus: object, actions: array, documentation: object, artifacts: array }
+ * @recommendedSkills SK-AC-003 (collection-documentation), SK-AC-001 (curatorial-research), SK-AC-006 (conservation-assessment)
+ * @recommendedAgents AG-AC-006 (registrar-agent), AG-AC-001 (curator-agent), AG-AC-004 (conservator-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

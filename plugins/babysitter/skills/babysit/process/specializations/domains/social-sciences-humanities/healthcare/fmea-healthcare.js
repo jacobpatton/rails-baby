@@ -4,6 +4,8 @@
  * potential failures in healthcare processes before they occur and develops preventive actions.
  * @inputs { processName: string, processScope?: string, existingControls?: array, teamMembers?: array }
  * @outputs { success: boolean, failureModes: array, prioritizedRisks: array, actionPlan: object, artifacts: array }
+ * @recommendedSkills SK-HC-005 (patient-safety-event-analysis), SK-HC-001 (clinical-workflow-analysis)
+ * @recommendedAgents AG-HC-004 (patient-safety-officer), AG-HC-001 (quality-improvement-orchestrator)
  *
  * @example
  * const result = await orchestrate('specializations/domains/social-sciences-humanities/healthcare/fmea-healthcare', {

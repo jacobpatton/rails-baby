@@ -191,7 +191,8 @@ export const systemDefinitionTask = defineTask('system-definition', (args, taskC
   kind: 'agent',
   title: `Phase 1: System Definition - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'theoretical-model-developer',
+    skills: ['scipy-optimization-toolkit', 'latex-physics-documenter', 'qiskit-quantum-simulator'],
     prompt: {
       role: 'Theoretical Physicist with expertise in analytical mechanics',
       task: 'Define the physical system with its degrees of freedom and constraints',
@@ -296,7 +297,8 @@ export const formulationTask = defineTask('lagrangian-hamiltonian', (args, taskC
   kind: 'agent',
   title: `Phase 2: Lagrangian/Hamiltonian Formulation - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'theoretical-model-developer',
+    skills: ['scipy-optimization-toolkit', 'latex-physics-documenter'],
     prompt: {
       role: 'Theoretical Physicist with expertise in analytical mechanics and variational principles',
       task: 'Derive the Lagrangian and Hamiltonian formulations for the physical system',
@@ -391,7 +393,8 @@ export const symmetryAnalysisTask = defineTask('symmetry-analysis', (args, taskC
   kind: 'agent',
   title: `Phase 3: Symmetry and Conservation Law Analysis - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'theoretical-model-developer',
+    skills: ['pyscf-quantum-chemistry', 'qiskit-quantum-simulator'],
     prompt: {
       role: 'Theoretical Physicist with expertise in group theory and Noether theorem',
       task: 'Identify symmetries and derive conservation laws using Noether theorem',
@@ -513,7 +516,8 @@ export const equationsOfMotionTask = defineTask('equations-of-motion', (args, ta
   kind: 'agent',
   title: `Phase 4: Equations of Motion Derivation - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'theoretical-model-developer',
+    skills: ['scipy-optimization-toolkit', 'latex-physics-documenter'],
     prompt: {
       role: 'Theoretical Physicist with expertise in differential equations and dynamical systems',
       task: 'Derive and analyze the equations of motion for the physical system',
@@ -630,7 +634,8 @@ export const approximationsTask = defineTask('approximations', (args, taskCtx) =
   kind: 'agent',
   title: `Phase 5: Approximations and Simplifications - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'perturbation-theory-analyst',
+    skills: ['scipy-optimization-toolkit', 'pyscf-quantum-chemistry'],
     prompt: {
       role: 'Theoretical Physicist with expertise in perturbation theory and asymptotic methods',
       task: 'Develop appropriate approximations and simplifications for the model',
@@ -732,7 +737,8 @@ export const limitingCaseValidationTask = defineTask('limiting-case-validation',
   kind: 'agent',
   title: `Phase 6: Limiting Case Validation - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'theoretical-model-developer',
+    skills: ['scipy-optimization-toolkit', 'latex-physics-documenter'],
     prompt: {
       role: 'Theoretical Physicist with expertise in model validation and limiting behavior',
       task: 'Validate the mathematical model against known limiting cases',
@@ -853,7 +859,8 @@ export const documentationTask = defineTask('documentation', (args, taskCtx) => 
   kind: 'agent',
   title: `Phase 7: Documentation Generation - ${args.systemName}`,
   agent: {
-    name: 'general-purpose',
+    name: 'physics-paper-writer',
+    skills: ['latex-physics-documenter', 'paraview-scientific-visualizer'],
     prompt: {
       role: 'Physics Technical Writer with expertise in mathematical physics documentation',
       task: 'Generate comprehensive documentation for the mathematical model',

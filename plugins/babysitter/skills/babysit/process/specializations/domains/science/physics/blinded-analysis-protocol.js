@@ -12,7 +12,8 @@ const analyzeTask = defineTask('blinded-analysis-protocol-analyze', (args, taskC
   kind: 'agent',
   title: 'Blinded Analysis Protocol Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'blinded-analysis-coordinator',
+    skills: ['root-data-analyzer', 'iminuit-statistical-fitter'],
     prompt: {
       role: 'Physicist specializing in blinded analysis methodology and bias prevention',
       task: 'Design and implement a blinded analysis protocol for the given measurement',

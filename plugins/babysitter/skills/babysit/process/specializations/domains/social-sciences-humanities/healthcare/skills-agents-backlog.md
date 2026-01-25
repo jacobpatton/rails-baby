@@ -46,57 +46,57 @@ This document defines the skills and agents required to support the Healthcare a
 
 ### Clinical Operations Processes
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| Patient Flow Optimization | SK-HC-001 (clinical-workflow-analysis), SK-HC-012 (workforce-demand-forecasting) | AG-HC-007 (operations-excellence-director), AG-HC-006 (care-management-coordinator) |
-| Care Coordination Protocol | SK-HC-001 (clinical-workflow-analysis), SK-HC-008 (care-transition-coordination) | AG-HC-006 (care-management-coordinator), AG-HC-005 (clinical-informatics-specialist) |
-| Clinical Pathway Development | SK-HC-001 (clinical-workflow-analysis), SK-HC-009 (population-health-stratification), SK-HC-014 (clinical-decision-support-rules) | AG-HC-001 (quality-improvement-orchestrator), AG-HC-005 (clinical-informatics-specialist) |
-| Discharge Planning Process | SK-HC-008 (care-transition-coordination), SK-HC-001 (clinical-workflow-analysis) | AG-HC-006 (care-management-coordinator), AG-HC-007 (operations-excellence-director) |
+| Process | Recommended Skills | Recommended Agents | Status |
+|---------|-------------------|-------------------|--------|
+| Patient Flow Optimization | SK-HC-001 (clinical-workflow-analysis), SK-HC-012 (workforce-demand-forecasting) | AG-HC-007 (operations-excellence-director), AG-HC-006 (care-management-coordinator) | [x] |
+| Care Coordination Protocol | SK-HC-001 (clinical-workflow-analysis), SK-HC-008 (care-transition-coordination) | AG-HC-006 (care-management-coordinator), AG-HC-005 (clinical-informatics-specialist) | [x] |
+| Clinical Pathway Development | SK-HC-001 (clinical-workflow-analysis), SK-HC-009 (population-health-stratification), SK-HC-014 (clinical-decision-support-rules) | AG-HC-001 (quality-improvement-orchestrator), AG-HC-005 (clinical-informatics-specialist) | [x] |
+| Discharge Planning Process | SK-HC-008 (care-transition-coordination), SK-HC-001 (clinical-workflow-analysis) | AG-HC-006 (care-management-coordinator), AG-HC-007 (operations-excellence-director) | [x] |
 
 ### Quality and Safety Processes
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| PDSA Cycle Implementation | SK-HC-002 (quality-metrics-measurement), SK-HC-001 (clinical-workflow-analysis) | AG-HC-001 (quality-improvement-orchestrator), AG-HC-007 (operations-excellence-director) |
-| Root Cause Analysis (RCA) | SK-HC-005 (patient-safety-event-analysis), SK-HC-002 (quality-metrics-measurement) | AG-HC-004 (patient-safety-officer), AG-HC-001 (quality-improvement-orchestrator) |
-| Failure Mode and Effects Analysis (FMEA) | SK-HC-005 (patient-safety-event-analysis), SK-HC-001 (clinical-workflow-analysis) | AG-HC-004 (patient-safety-officer), AG-HC-001 (quality-improvement-orchestrator) |
-| Patient Safety Event Reporting | SK-HC-005 (patient-safety-event-analysis), SK-HC-002 (quality-metrics-measurement) | AG-HC-004 (patient-safety-officer), AG-HC-002 (compliance-readiness-manager) |
-| High Reliability Organization (HRO) Implementation | SK-HC-002 (quality-metrics-measurement), SK-HC-005 (patient-safety-event-analysis), SK-HC-010 (accreditation-tracer-simulation) | AG-HC-004 (patient-safety-officer), AG-HC-001 (quality-improvement-orchestrator) |
+| Process | Recommended Skills | Recommended Agents | Status |
+|---------|-------------------|-------------------|--------|
+| PDSA Cycle Implementation | SK-HC-002 (quality-metrics-measurement), SK-HC-001 (clinical-workflow-analysis) | AG-HC-001 (quality-improvement-orchestrator), AG-HC-007 (operations-excellence-director) | [x] |
+| Root Cause Analysis (RCA) | SK-HC-005 (patient-safety-event-analysis), SK-HC-002 (quality-metrics-measurement) | AG-HC-004 (patient-safety-officer), AG-HC-001 (quality-improvement-orchestrator) | [x] |
+| Failure Mode and Effects Analysis (FMEA) | SK-HC-005 (patient-safety-event-analysis), SK-HC-001 (clinical-workflow-analysis) | AG-HC-004 (patient-safety-officer), AG-HC-001 (quality-improvement-orchestrator) | [x] |
+| Patient Safety Event Reporting | SK-HC-005 (patient-safety-event-analysis), SK-HC-002 (quality-metrics-measurement) | AG-HC-004 (patient-safety-officer), AG-HC-002 (compliance-readiness-manager) | [x] |
+| High Reliability Organization (HRO) Implementation | SK-HC-002 (quality-metrics-measurement), SK-HC-005 (patient-safety-event-analysis), SK-HC-010 (accreditation-tracer-simulation) | AG-HC-004 (patient-safety-officer), AG-HC-001 (quality-improvement-orchestrator) | [x] |
 
 ### Health Informatics Processes
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| EHR Implementation Methodology | SK-HC-006 (health-data-integration), SK-HC-001 (clinical-workflow-analysis), SK-HC-014 (clinical-decision-support-rules) | AG-HC-005 (clinical-informatics-specialist), AG-HC-007 (operations-excellence-director) |
-| Clinical Documentation Improvement (CDI) | SK-HC-011 (clinical-documentation-query), SK-HC-004 (medical-coding-audit), SK-HC-002 (quality-metrics-measurement) | AG-HC-008 (documentation-integrity-specialist), AG-HC-003 (revenue-integrity-analyst) |
-| Health Information Exchange (HIE) Integration | SK-HC-006 (health-data-integration), SK-HC-003 (regulatory-compliance-assessment) | AG-HC-005 (clinical-informatics-specialist), AG-HC-002 (compliance-readiness-manager) |
-| Clinical Decision Support Implementation | SK-HC-014 (clinical-decision-support-rules), SK-HC-006 (health-data-integration), SK-HC-001 (clinical-workflow-analysis) | AG-HC-005 (clinical-informatics-specialist), AG-HC-001 (quality-improvement-orchestrator) |
+| Process | Recommended Skills | Recommended Agents | Status |
+|---------|-------------------|-------------------|--------|
+| EHR Implementation Methodology | SK-HC-006 (health-data-integration), SK-HC-001 (clinical-workflow-analysis), SK-HC-014 (clinical-decision-support-rules) | AG-HC-005 (clinical-informatics-specialist), AG-HC-007 (operations-excellence-director) | [x] |
+| Clinical Documentation Improvement (CDI) | SK-HC-011 (clinical-documentation-query), SK-HC-004 (medical-coding-audit), SK-HC-002 (quality-metrics-measurement) | AG-HC-008 (documentation-integrity-specialist), AG-HC-003 (revenue-integrity-analyst) | [x] |
+| Health Information Exchange (HIE) Integration | SK-HC-006 (health-data-integration), SK-HC-003 (regulatory-compliance-assessment) | AG-HC-005 (clinical-informatics-specialist), AG-HC-002 (compliance-readiness-manager) | [x] |
+| Clinical Decision Support Implementation | SK-HC-014 (clinical-decision-support-rules), SK-HC-006 (health-data-integration), SK-HC-001 (clinical-workflow-analysis) | AG-HC-005 (clinical-informatics-specialist), AG-HC-001 (quality-improvement-orchestrator) | [x] |
 
 ### Revenue Cycle Processes
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| Medical Coding Compliance | SK-HC-004 (medical-coding-audit), SK-HC-003 (regulatory-compliance-assessment), SK-HC-011 (clinical-documentation-query) | AG-HC-003 (revenue-integrity-analyst), AG-HC-008 (documentation-integrity-specialist) |
-| Claims Management Workflow | SK-HC-007 (revenue-cycle-analytics), SK-HC-004 (medical-coding-audit), SK-HC-013 (payer-contract-analysis) | AG-HC-003 (revenue-integrity-analyst), AG-HC-007 (operations-excellence-director) |
-| Denial Prevention and Management | SK-HC-007 (revenue-cycle-analytics), SK-HC-004 (medical-coding-audit), SK-HC-013 (payer-contract-analysis) | AG-HC-003 (revenue-integrity-analyst), AG-HC-008 (documentation-integrity-specialist) |
-| Prior Authorization Workflow | SK-HC-007 (revenue-cycle-analytics), SK-HC-001 (clinical-workflow-analysis) | AG-HC-003 (revenue-integrity-analyst), AG-HC-006 (care-management-coordinator) |
+| Process | Recommended Skills | Recommended Agents | Status |
+|---------|-------------------|-------------------|--------|
+| Medical Coding Compliance | SK-HC-004 (medical-coding-audit), SK-HC-003 (regulatory-compliance-assessment), SK-HC-011 (clinical-documentation-query) | AG-HC-003 (revenue-integrity-analyst), AG-HC-008 (documentation-integrity-specialist) | [x] |
+| Claims Management Workflow | SK-HC-007 (revenue-cycle-analytics), SK-HC-004 (medical-coding-audit), SK-HC-013 (payer-contract-analysis) | AG-HC-003 (revenue-integrity-analyst), AG-HC-007 (operations-excellence-director) | [x] |
+| Denial Prevention and Management | SK-HC-007 (revenue-cycle-analytics), SK-HC-004 (medical-coding-audit), SK-HC-013 (payer-contract-analysis) | AG-HC-003 (revenue-integrity-analyst), AG-HC-008 (documentation-integrity-specialist) | [x] |
+| Prior Authorization Workflow | SK-HC-007 (revenue-cycle-analytics), SK-HC-001 (clinical-workflow-analysis) | AG-HC-003 (revenue-integrity-analyst), AG-HC-006 (care-management-coordinator) | [x] |
 
 ### Regulatory Compliance Processes
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| HIPAA Compliance Program | SK-HC-003 (regulatory-compliance-assessment), SK-HC-006 (health-data-integration) | AG-HC-002 (compliance-readiness-manager), AG-HC-005 (clinical-informatics-specialist) |
-| Joint Commission Survey Readiness | SK-HC-010 (accreditation-tracer-simulation), SK-HC-003 (regulatory-compliance-assessment), SK-HC-002 (quality-metrics-measurement) | AG-HC-002 (compliance-readiness-manager), AG-HC-004 (patient-safety-officer) |
-| CMS Conditions of Participation Compliance | SK-HC-003 (regulatory-compliance-assessment), SK-HC-002 (quality-metrics-measurement), SK-HC-010 (accreditation-tracer-simulation) | AG-HC-002 (compliance-readiness-manager), AG-HC-001 (quality-improvement-orchestrator) |
-| Quality Reporting Program Compliance | SK-HC-002 (quality-metrics-measurement), SK-HC-003 (regulatory-compliance-assessment), SK-HC-011 (clinical-documentation-query) | AG-HC-002 (compliance-readiness-manager), AG-HC-008 (documentation-integrity-specialist) |
+| Process | Recommended Skills | Recommended Agents | Status |
+|---------|-------------------|-------------------|--------|
+| HIPAA Compliance Program | SK-HC-003 (regulatory-compliance-assessment), SK-HC-006 (health-data-integration) | AG-HC-002 (compliance-readiness-manager), AG-HC-005 (clinical-informatics-specialist) | [x] |
+| Joint Commission Survey Readiness | SK-HC-010 (accreditation-tracer-simulation), SK-HC-003 (regulatory-compliance-assessment), SK-HC-002 (quality-metrics-measurement) | AG-HC-002 (compliance-readiness-manager), AG-HC-004 (patient-safety-officer) | [x] |
+| CMS Conditions of Participation Compliance | SK-HC-003 (regulatory-compliance-assessment), SK-HC-002 (quality-metrics-measurement), SK-HC-010 (accreditation-tracer-simulation) | AG-HC-002 (compliance-readiness-manager), AG-HC-001 (quality-improvement-orchestrator) | [x] |
+| Quality Reporting Program Compliance | SK-HC-002 (quality-metrics-measurement), SK-HC-003 (regulatory-compliance-assessment), SK-HC-011 (clinical-documentation-query) | AG-HC-002 (compliance-readiness-manager), AG-HC-008 (documentation-integrity-specialist) | [x] |
 
 ### Strategic Planning Processes
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| Service Line Strategic Planning | SK-HC-009 (population-health-stratification), SK-HC-012 (workforce-demand-forecasting), SK-HC-013 (payer-contract-analysis) | AG-HC-007 (operations-excellence-director), AG-HC-001 (quality-improvement-orchestrator) |
-| Population Health Management Program | SK-HC-009 (population-health-stratification), SK-HC-008 (care-transition-coordination), SK-HC-002 (quality-metrics-measurement) | AG-HC-006 (care-management-coordinator), AG-HC-001 (quality-improvement-orchestrator) |
-| Healthcare Workforce Planning | SK-HC-012 (workforce-demand-forecasting), SK-HC-001 (clinical-workflow-analysis) | AG-HC-007 (operations-excellence-director), AG-HC-002 (compliance-readiness-manager) |
+| Process | Recommended Skills | Recommended Agents | Status |
+|---------|-------------------|-------------------|--------|
+| Service Line Strategic Planning | SK-HC-009 (population-health-stratification), SK-HC-012 (workforce-demand-forecasting), SK-HC-013 (payer-contract-analysis) | AG-HC-007 (operations-excellence-director), AG-HC-001 (quality-improvement-orchestrator) | [x] |
+| Population Health Management Program | SK-HC-009 (population-health-stratification), SK-HC-008 (care-transition-coordination), SK-HC-002 (quality-metrics-measurement) | AG-HC-006 (care-management-coordinator), AG-HC-001 (quality-improvement-orchestrator) | [x] |
+| Healthcare Workforce Planning | SK-HC-012 (workforce-demand-forecasting), SK-HC-001 (clinical-workflow-analysis) | AG-HC-007 (operations-excellence-director), AG-HC-002 (compliance-readiness-manager) | [x] |
 
 ---
 

@@ -222,8 +222,9 @@ export async function process(inputs, ctx) {
 export const requirementsAnalysisTask = defineTask('requirements-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Requirements Analysis - ${args.designName}`,
+  skill: { name: 'hdl-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'digital-design-engineer',
     prompt: {
       role: 'Digital Design Engineer with expertise in requirements specification',
       task: 'Analyze and define functional and timing requirements for digital logic design',
@@ -278,8 +279,9 @@ export const requirementsAnalysisTask = defineTask('requirements-analysis', (arg
 export const architectureDesignTask = defineTask('architecture-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Architecture Design - ${args.designName}`,
+  skill: { name: 'hdl-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'digital-design-engineer',
     prompt: {
       role: 'Digital System Architect with expertise in RTL design',
       task: 'Create block diagrams and architecture specification for digital design',
@@ -344,8 +346,9 @@ export const architectureDesignTask = defineTask('architecture-design', (args, t
 export const rtlDevelopmentTask = defineTask('rtl-development', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: RTL Development - ${args.designName}`,
+  skill: { name: 'hdl-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'digital-design-engineer',
     prompt: {
       role: 'RTL Design Engineer with expertise in Verilog/VHDL/SystemVerilog',
       task: 'Write RTL code implementing the architecture specification',
@@ -408,8 +411,9 @@ export const rtlDevelopmentTask = defineTask('rtl-development', (args, taskCtx) 
 export const verificationPlanningTask = defineTask('verification-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Verification Planning - ${args.designName}`,
+  skill: { name: 'hdl-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'digital-design-engineer',
     prompt: {
       role: 'Verification Engineer with expertise in UVM and functional verification',
       task: 'Develop testbenches and verification plans for the RTL design',
@@ -472,8 +476,9 @@ export const verificationPlanningTask = defineTask('verification-planning', (arg
 export const functionalSimulationTask = defineTask('functional-simulation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Functional Simulation - ${args.designName}`,
+  skill: { name: 'hdl-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'digital-design-engineer',
     prompt: {
       role: 'Verification Engineer with expertise in simulation and debug',
       task: 'Execute simulations and verify functional correctness',
@@ -547,8 +552,9 @@ export const functionalSimulationTask = defineTask('functional-simulation', (arg
 export const synthesisAnalysisTask = defineTask('synthesis-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Synthesis and Timing Analysis - ${args.designName}`,
+  skill: { name: 'hdl-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'digital-design-engineer',
     prompt: {
       role: 'FPGA/ASIC Implementation Engineer with expertise in synthesis',
       task: 'Synthesize design and analyze timing reports',
@@ -613,8 +619,9 @@ export const synthesisAnalysisTask = defineTask('synthesis-analysis', (args, tas
 export const ppaOptimizationTask = defineTask('ppa-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: PPA Optimization - ${args.designName}`,
+  skill: { name: 'hdl-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'digital-design-engineer',
     prompt: {
       role: 'RTL Optimization Engineer specializing in PPA trade-offs',
       task: 'Optimize design for power, performance, and area',
@@ -678,8 +685,9 @@ export const ppaOptimizationTask = defineTask('ppa-optimization', (args, taskCtx
 export const implementationDocumentationTask = defineTask('implementation-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Implementation Documentation - ${args.designName}`,
+  skill: { name: 'hdl-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'digital-design-engineer',
     prompt: {
       role: 'Technical Documentation Specialist for Digital Design',
       task: 'Generate implementation constraints and comprehensive documentation',

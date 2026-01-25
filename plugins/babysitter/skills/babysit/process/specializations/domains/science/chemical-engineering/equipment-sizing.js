@@ -173,8 +173,9 @@ export async function process(inputs, ctx) {
 export const designConditionsTask = defineTask('design-conditions', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate design conditions',
+  skill: { name: 'equipment-sizing-calculator' },
   agent: {
-    name: 'process-engineer',
+    name: 'equipment-engineer',
     prompt: {
       role: 'process engineer',
       task: 'Calculate design pressure, temperature, and flow rates for equipment',
@@ -223,8 +224,9 @@ export const designConditionsTask = defineTask('design-conditions', (args, taskC
 export const designMarginsTask = defineTask('design-margins', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Apply design margins and safety factors',
+  skill: { name: 'equipment-sizing-calculator' },
   agent: {
-    name: 'design-engineer',
+    name: 'equipment-engineer',
     prompt: {
       role: 'process design engineer',
       task: 'Apply appropriate design margins and safety factors per codes',
@@ -271,6 +273,7 @@ export const designMarginsTask = defineTask('design-margins', (args, taskCtx) =>
 export const equipmentSizingTask = defineTask('equipment-sizing-calc', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform equipment sizing calculations',
+  skill: { name: 'equipment-sizing-calculator' },
   agent: {
     name: 'equipment-engineer',
     prompt: {
@@ -313,8 +316,9 @@ export const equipmentSizingTask = defineTask('equipment-sizing-calc', (args, ta
 export const materialSelectionTask = defineTask('material-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select materials of construction',
+  skill: { name: 'corrosion-materials-selector' },
   agent: {
-    name: 'materials-engineer',
+    name: 'equipment-engineer',
     prompt: {
       role: 'materials and corrosion engineer',
       task: 'Select appropriate materials of construction for equipment',
@@ -362,8 +366,9 @@ export const materialSelectionTask = defineTask('material-selection', (args, tas
 export const specificationSheetTask = defineTask('specification-sheet', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop equipment specification sheet',
+  skill: { name: 'equipment-sizing-calculator' },
   agent: {
-    name: 'specification-engineer',
+    name: 'equipment-engineer',
     prompt: {
       role: 'equipment specification engineer',
       task: 'Develop comprehensive equipment specification/data sheet',
@@ -402,8 +407,9 @@ export const specificationSheetTask = defineTask('specification-sheet', (args, t
 export const mechanicalCoordinationTask = defineTask('mechanical-coordination', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Coordinate with mechanical engineering',
+  skill: { name: 'equipment-sizing-calculator' },
   agent: {
-    name: 'mechanical-coordinator',
+    name: 'equipment-engineer',
     prompt: {
       role: 'mechanical engineering coordinator',
       task: 'Coordinate process requirements with mechanical engineering',
@@ -442,8 +448,9 @@ export const mechanicalCoordinationTask = defineTask('mechanical-coordination', 
 export const vendorDataRequirementsTask = defineTask('vendor-data-requirements', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate vendor data requirements',
+  skill: { name: 'process-economics-estimator' },
   agent: {
-    name: 'procurement-engineer',
+    name: 'equipment-engineer',
     prompt: {
       role: 'procurement engineer',
       task: 'Define vendor data requirements for equipment procurement',
@@ -489,8 +496,9 @@ export const vendorDataRequirementsTask = defineTask('vendor-data-requirements',
 export const pidTagsTask = defineTask('pid-tags', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Create P&ID equipment tags and descriptions',
+  skill: { name: 'pfd-pid-generator' },
   agent: {
-    name: 'pid-engineer',
+    name: 'equipment-engineer',
     prompt: {
       role: 'P&ID engineer',
       task: 'Create equipment tags and descriptions for P&ID',

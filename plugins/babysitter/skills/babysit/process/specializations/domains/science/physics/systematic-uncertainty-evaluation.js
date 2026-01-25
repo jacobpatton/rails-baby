@@ -12,7 +12,8 @@ const analyzeTask = defineTask('systematic-uncertainty-evaluation-analyze', (arg
   kind: 'agent',
   title: 'Systematic Uncertainty Evaluation Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'systematic-uncertainty-analyst',
+    skills: ['root-data-analyzer', 'iminuit-statistical-fitter'],
     prompt: {
       role: 'Experimental physicist specializing in systematic uncertainty analysis and error quantification',
       task: 'Comprehensively assess and quantify all systematic uncertainties for the given measurement',

@@ -180,8 +180,9 @@ export async function process(inputs, ctx) {
 export const chemistryReviewTask = defineTask('chemistry-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review reaction chemistry and thermodynamics',
+  skill: { name: 'kinetic-modeler' },
   agent: {
-    name: 'reaction-chemist',
+    name: 'reaction-engineer',
     prompt: {
       role: 'reaction chemistry specialist',
       task: 'Review and analyze reaction chemistry for reactor design',
@@ -230,8 +231,9 @@ export const chemistryReviewTask = defineTask('chemistry-review', (args, taskCtx
 export const reactorTypeSelectionTask = defineTask('reactor-type-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select appropriate reactor type',
+  skill: { name: 'reactor-designer' },
   agent: {
-    name: 'reactor-engineer',
+    name: 'reaction-engineer',
     prompt: {
       role: 'reactor engineering specialist',
       task: 'Select optimal reactor type based on process requirements',
@@ -281,8 +283,9 @@ export const reactorTypeSelectionTask = defineTask('reactor-type-selection', (ar
 export const reactorSizingTask = defineTask('reactor-sizing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Size reactor for conversion and throughput',
+  skill: { name: 'reactor-designer' },
   agent: {
-    name: 'reactor-engineer',
+    name: 'reaction-engineer',
     prompt: {
       role: 'reactor sizing engineer',
       task: 'Size reactor to achieve required conversion and throughput',
@@ -330,8 +333,9 @@ export const reactorSizingTask = defineTask('reactor-sizing', (args, taskCtx) =>
 export const heatTransferDesignTask = defineTask('heat-transfer-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design heat transfer systems for temperature control',
+  skill: { name: 'reactor-designer' },
   agent: {
-    name: 'heat-transfer-engineer',
+    name: 'reaction-engineer',
     prompt: {
       role: 'reactor heat transfer engineer',
       task: 'Design heat transfer system for reactor temperature control',
@@ -379,8 +383,9 @@ export const heatTransferDesignTask = defineTask('heat-transfer-design', (args, 
 export const mixingMassTransferTask = defineTask('mixing-mass-transfer', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Evaluate mixing and mass transfer requirements',
+  skill: { name: 'scale-up-analyzer' },
   agent: {
-    name: 'mixing-engineer',
+    name: 'reaction-engineer',
     prompt: {
       role: 'mixing and mass transfer engineer',
       task: 'Evaluate and design mixing and mass transfer systems',
@@ -428,8 +433,9 @@ export const mixingMassTransferTask = defineTask('mixing-mass-transfer', (args, 
 export const reactorSafetyTask = defineTask('reactor-safety', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess reactor safety',
+  skill: { name: 'reactive-hazards-analyzer' },
   agent: {
-    name: 'safety-engineer',
+    name: 'reaction-engineer',
     prompt: {
       role: 'reactor safety engineer',
       task: 'Assess reactor safety including thermal runaway potential',
@@ -478,8 +484,9 @@ export const reactorSafetyTask = defineTask('reactor-safety', (args, taskCtx) =>
 export const operatingEnvelopeTask = defineTask('operating-envelope', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define operating envelope',
+  skill: { name: 'reactor-designer' },
   agent: {
-    name: 'operations-engineer',
+    name: 'reaction-engineer',
     prompt: {
       role: 'reactor operations engineer',
       task: 'Define safe and efficient operating envelope for reactor',
@@ -526,8 +533,9 @@ export const operatingEnvelopeTask = defineTask('operating-envelope', (args, tas
 export const reactorDocumentationTask = defineTask('reactor-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate reactor design documentation',
+  skill: { name: 'reactor-designer' },
   agent: {
-    name: 'documentation-engineer',
+    name: 'reaction-engineer',
     prompt: {
       role: 'reactor documentation engineer',
       task: 'Create comprehensive reactor design documentation package',

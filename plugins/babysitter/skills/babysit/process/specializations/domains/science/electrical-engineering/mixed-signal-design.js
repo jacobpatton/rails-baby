@@ -227,8 +227,9 @@ export async function process(inputs, ctx) {
 export const architectureDefinitionTask = defineTask('architecture-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Architecture Definition - ${args.designName}`,
+  skill: { name: 'spice-simulation' },
   agent: {
-    name: 'general-purpose',
+    name: 'mixed-signal-ic-designer',
     prompt: {
       role: 'Mixed-Signal IC Architect with expertise in ADC/DAC/PLL design',
       task: 'Define mixed-signal architecture and analog-digital partitioning',
@@ -289,8 +290,9 @@ export const architectureDefinitionTask = defineTask('architecture-definition', 
 export const blockSpecificationTask = defineTask('block-specification', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Block Specification - ${args.designName}`,
+  skill: { name: 'spice-simulation' },
   agent: {
-    name: 'general-purpose',
+    name: 'mixed-signal-ic-designer',
     prompt: {
       role: 'Mixed-Signal Design Engineer with expertise in block-level specification',
       task: 'Specify requirements for analog and digital blocks',
@@ -357,8 +359,9 @@ export const blockSpecificationTask = defineTask('block-specification', (args, t
 export const analogFrontendDesignTask = defineTask('analog-frontend-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3a: Analog Front-End Design - ${args.designName}`,
+  skill: { name: 'spice-simulation' },
   agent: {
-    name: 'general-purpose',
+    name: 'mixed-signal-ic-designer',
     prompt: {
       role: 'Analog IC Design Engineer with expertise in data converters',
       task: 'Design analog front-end blocks for the mixed-signal system',
@@ -421,8 +424,9 @@ export const analogFrontendDesignTask = defineTask('analog-frontend-design', (ar
 export const digitalBackendDesignTask = defineTask('digital-backend-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3b: Digital Backend Design - ${args.designName}`,
+  skill: { name: 'spice-simulation' },
   agent: {
-    name: 'general-purpose',
+    name: 'mixed-signal-ic-designer',
     prompt: {
       role: 'Digital IC Design Engineer with expertise in mixed-signal systems',
       task: 'Design digital backend blocks for the mixed-signal system',
@@ -485,8 +489,9 @@ export const digitalBackendDesignTask = defineTask('digital-backend-design', (ar
 export const noiseAnalysisTask = defineTask('noise-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Noise Coupling Analysis - ${args.designName}`,
+  skill: { name: 'spice-simulation' },
   agent: {
-    name: 'general-purpose',
+    name: 'mixed-signal-ic-designer',
     prompt: {
       role: 'Mixed-Signal Noise Analysis Expert',
       task: 'Analyze noise coupling between analog and digital domains',
@@ -552,8 +557,9 @@ export const noiseAnalysisTask = defineTask('noise-analysis', (args, taskCtx) =>
 export const mixedSignalSimulationTask = defineTask('mixed-signal-simulation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Mixed-Signal Simulation - ${args.designName}`,
+  skill: { name: 'spice-simulation' },
   agent: {
-    name: 'general-purpose',
+    name: 'mixed-signal-ic-designer',
     prompt: {
       role: 'Mixed-Signal Verification Engineer',
       task: 'Simulate mixed-signal interactions and verify system performance',
@@ -616,8 +622,9 @@ export const mixedSignalSimulationTask = defineTask('mixed-signal-simulation', (
 export const interfaceTimingVerificationTask = defineTask('interface-timing-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Interface Timing Verification - ${args.designName}`,
+  skill: { name: 'spice-simulation' },
   agent: {
-    name: 'general-purpose',
+    name: 'mixed-signal-ic-designer',
     prompt: {
       role: 'Mixed-Signal Timing Verification Engineer',
       task: 'Verify timing at analog-digital interfaces',
@@ -678,8 +685,9 @@ export const interfaceTimingVerificationTask = defineTask('interface-timing-veri
 export const floorplanningTask = defineTask('floorplanning', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Floorplanning - ${args.designName}`,
+  skill: { name: 'spice-simulation' },
   agent: {
-    name: 'general-purpose',
+    name: 'mixed-signal-ic-designer',
     prompt: {
       role: 'Mixed-Signal Layout Engineer with expertise in floorplanning',
       task: 'Plan floor placement for noise isolation and performance',
@@ -732,8 +740,9 @@ export const floorplanningTask = defineTask('floorplanning', (args, taskCtx) => 
 export const integrationDocumentationTask = defineTask('integration-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Integration Documentation - ${args.designName}`,
+  skill: { name: 'spice-simulation' },
   agent: {
-    name: 'general-purpose',
+    name: 'mixed-signal-ic-designer',
     prompt: {
       role: 'Technical Documentation Specialist for Mixed-Signal ICs',
       task: 'Document integration and test requirements for the mixed-signal design',

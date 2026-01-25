@@ -202,8 +202,9 @@ export async function process(inputs, ctx) {
 export const designCriteriaTask = defineTask('design-criteria', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish design criteria and material properties',
+  skill: { name: 'concrete-design-calculator' },
   agent: {
-    name: 'structural-engineer',
+    name: 'reinforced-concrete-designer',
     prompt: {
       role: 'senior structural engineer',
       task: 'Establish design criteria per ACI 318',
@@ -253,8 +254,9 @@ export const designCriteriaTask = defineTask('design-criteria', (args, taskCtx) 
 export const beamDesignTask = defineTask('beam-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design reinforced concrete beams',
+  skill: { name: 'fea-structural-engine' },
   agent: {
-    name: 'structural-engineer',
+    name: 'reinforced-concrete-designer',
     prompt: {
       role: 'structural engineer',
       task: 'Design reinforced concrete beams per ACI 318',
@@ -296,8 +298,9 @@ export const beamDesignTask = defineTask('beam-design', (args, taskCtx) => ({
 export const columnDesignTask = defineTask('column-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design reinforced concrete columns',
+  skill: { name: 'fea-structural-engine' },
   agent: {
-    name: 'structural-engineer',
+    name: 'reinforced-concrete-designer',
     prompt: {
       role: 'structural engineer',
       task: 'Design reinforced concrete columns per ACI 318',
@@ -340,8 +343,9 @@ export const columnDesignTask = defineTask('column-design', (args, taskCtx) => (
 export const slabDesignTask = defineTask('slab-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design reinforced concrete slabs',
+  skill: { name: 'concrete-design-calculator' },
   agent: {
-    name: 'structural-engineer',
+    name: 'reinforced-concrete-designer',
     prompt: {
       role: 'structural engineer',
       task: 'Design reinforced concrete slabs per ACI 318',
@@ -385,8 +389,9 @@ export const slabDesignTask = defineTask('slab-design', (args, taskCtx) => ({
 export const shearWallDesignTask = defineTask('shear-wall-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design reinforced concrete shear walls',
+  skill: { name: 'fea-structural-engine' },
   agent: {
-    name: 'structural-engineer',
+    name: 'seismic-design-specialist',
     prompt: {
       role: 'structural engineer',
       task: 'Design reinforced concrete shear walls per ACI 318',
@@ -429,8 +434,9 @@ export const shearWallDesignTask = defineTask('shear-wall-design', (args, taskCt
 export const foundationDesignTask = defineTask('foundation-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design reinforced concrete foundations',
+  skill: { name: 'bearing-capacity-calculator' },
   agent: {
-    name: 'structural-engineer',
+    name: 'foundation-engineer',
     prompt: {
       role: 'structural engineer',
       task: 'Design reinforced concrete foundations per ACI 318',
@@ -473,8 +479,9 @@ export const foundationDesignTask = defineTask('foundation-design', (args, taskC
 export const detailingTask = defineTask('detailing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop reinforcement details',
+  skill: { name: 'section-property-calculator' },
   agent: {
-    name: 'structural-detailer',
+    name: 'reinforced-concrete-designer',
     prompt: {
       role: 'structural detailing engineer',
       task: 'Develop reinforcement details per ACI 318',
@@ -516,8 +523,9 @@ export const detailingTask = defineTask('detailing', (args, taskCtx) => ({
 export const reinforcementSchedulesTask = defineTask('reinforcement-schedules', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate reinforcement schedules',
+  skill: { name: 'quantity-takeoff-calculator' },
   agent: {
-    name: 'structural-detailer',
+    name: 'reinforced-concrete-designer',
     prompt: {
       role: 'structural detailing engineer',
       task: 'Generate comprehensive reinforcement schedules',
@@ -567,8 +575,9 @@ export const reinforcementSchedulesTask = defineTask('reinforcement-schedules', 
 export const structuralDrawingsTask = defineTask('structural-drawings', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate structural drawings',
+  skill: { name: 'engineering-report-generator' },
   agent: {
-    name: 'structural-drafter',
+    name: 'technical-report-writer',
     prompt: {
       role: 'structural CAD technician',
       task: 'Generate structural drawings for reinforced concrete',

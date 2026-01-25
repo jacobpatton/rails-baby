@@ -158,8 +158,9 @@ export async function process(inputs, ctx) {
 export const experimentDesignTask = defineTask('experiment-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design kinetic experiments using DOE',
+  skill: { name: 'kinetic-modeler' },
   agent: {
-    name: 'doe-specialist',
+    name: 'reaction-engineer',
     prompt: {
       role: 'design of experiments specialist',
       task: 'Design kinetic experiments using statistical DOE methods',
@@ -206,8 +207,9 @@ export const experimentDesignTask = defineTask('experiment-design', (args, taskC
 export const dataCollectionTask = defineTask('data-collection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Collect and validate reaction rate data',
+  skill: { name: 'kinetic-modeler' },
   agent: {
-    name: 'data-analyst',
+    name: 'reaction-engineer',
     prompt: {
       role: 'kinetic data analyst',
       task: 'Collect, organize, and validate experimental kinetic data',
@@ -254,8 +256,9 @@ export const dataCollectionTask = defineTask('data-collection', (args, taskCtx) 
 export const mechanismProposalTask = defineTask('mechanism-proposal', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Propose reaction mechanism and rate expressions',
+  skill: { name: 'kinetic-modeler' },
   agent: {
-    name: 'kinetics-engineer',
+    name: 'reaction-engineer',
     prompt: {
       role: 'reaction kinetics engineer',
       task: 'Propose reaction mechanism and derive rate expressions',
@@ -302,8 +305,9 @@ export const mechanismProposalTask = defineTask('mechanism-proposal', (args, tas
 export const parameterEstimationTask = defineTask('parameter-estimation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Estimate kinetic parameters through regression',
+  skill: { name: 'kinetic-modeler' },
   agent: {
-    name: 'regression-analyst',
+    name: 'reaction-engineer',
     prompt: {
       role: 'kinetic parameter estimation specialist',
       task: 'Estimate kinetic parameters using nonlinear regression',
@@ -358,8 +362,9 @@ export const parameterEstimationTask = defineTask('parameter-estimation', (args,
 export const modelValidationTask = defineTask('model-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Validate kinetic model over operating range',
+  skill: { name: 'aspen-plus-simulator' },
   agent: {
-    name: 'validation-engineer',
+    name: 'reaction-engineer',
     prompt: {
       role: 'kinetic model validation engineer',
       task: 'Validate kinetic model against independent data',
@@ -401,8 +406,9 @@ export const modelValidationTask = defineTask('model-validation', (args, taskCtx
 export const uncertaintyAssessmentTask = defineTask('uncertainty-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess model uncertainty and limitations',
+  skill: { name: 'kinetic-modeler' },
   agent: {
-    name: 'uncertainty-analyst',
+    name: 'reaction-engineer',
     prompt: {
       role: 'model uncertainty analyst',
       task: 'Assess kinetic model uncertainty and define validity range',

@@ -4,6 +4,8 @@
  * HIPAA Privacy, Security, and Breach Notification Rule compliance across the organization.
  * @inputs { organizationName: string, complianceScope?: string, entityType?: string, currentState?: object }
  * @outputs { success: boolean, complianceProgram: object, riskAssessment: object, policies: array, artifacts: array }
+ * @recommendedSkills SK-HC-003 (regulatory-compliance-assessment), SK-HC-006 (health-data-integration)
+ * @recommendedAgents AG-HC-002 (compliance-readiness-manager), AG-HC-005 (clinical-informatics-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

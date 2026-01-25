@@ -4,6 +4,8 @@
  * front-end processes, real-time eligibility, and systematic denial analysis with corrective action.
  * @inputs { organizationName: string, denialScope?: string, topDenialReasons?: array, currentMetrics?: object }
  * @outputs { success: boolean, preventionProgram: object, managementWorkflow: object, metrics: object, artifacts: array }
+ * @recommendedSkills SK-HC-007 (revenue-cycle-analytics), SK-HC-004 (medical-coding-audit), SK-HC-013 (payer-contract-analysis)
+ * @recommendedAgents AG-HC-003 (revenue-integrity-analyst), AG-HC-008 (documentation-integrity-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

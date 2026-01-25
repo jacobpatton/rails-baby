@@ -188,8 +188,9 @@ export async function process(inputs, ctx) {
 export const plantModelingTask = defineTask('plant-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Plant Modeling - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'control-systems-engineer',
     prompt: {
       role: 'Control Systems Engineer with expertise in system identification',
       task: 'Develop mathematical model of plant/process',
@@ -242,8 +243,9 @@ export const plantModelingTask = defineTask('plant-modeling', (args, taskCtx) =>
 export const objectivesDefinitionTask = defineTask('objectives-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Objectives Definition - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'control-systems-engineer',
     prompt: {
       role: 'Control Systems Specification Engineer',
       task: 'Define control objectives and performance specifications',
@@ -309,8 +311,9 @@ export const objectivesDefinitionTask = defineTask('objectives-definition', (arg
 export const openLoopAnalysisTask = defineTask('open-loop-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Open-Loop Analysis - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'control-systems-engineer',
     prompt: {
       role: 'Control Systems Analysis Engineer',
       task: 'Analyze open-loop system characteristics',
@@ -358,8 +361,9 @@ export const openLoopAnalysisTask = defineTask('open-loop-analysis', (args, task
 export const controllerDesignTask = defineTask('controller-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Controller Design - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'control-systems-engineer',
     prompt: {
       role: 'Control Systems Design Engineer',
       task: 'Design controller structure and parameters',
@@ -422,8 +426,9 @@ export const controllerDesignTask = defineTask('controller-design', (args, taskC
 export const closedLoopSimulationTask = defineTask('closed-loop-simulation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Closed-Loop Simulation - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'control-systems-engineer',
     prompt: {
       role: 'Control Systems Simulation Engineer',
       task: 'Simulate closed-loop performance',
@@ -483,8 +488,9 @@ export const closedLoopSimulationTask = defineTask('closed-loop-simulation', (ar
 export const stabilityAnalysisTask = defineTask('stability-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Stability Analysis - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'control-systems-engineer',
     prompt: {
       role: 'Control Systems Stability Analyst',
       task: 'Analyze stability margins (gain, phase)',
@@ -539,8 +545,9 @@ export const stabilityAnalysisTask = defineTask('stability-analysis', (args, tas
 export const controllerTuningTask = defineTask('controller-tuning', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Controller Tuning - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'control-systems-engineer',
     prompt: {
       role: 'Control Systems Tuning Specialist',
       task: 'Tune controller parameters for optimal performance',
@@ -601,8 +608,9 @@ export const controllerTuningTask = defineTask('controller-tuning', (args, taskC
 export const hilValidationTask = defineTask('hil-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: HIL Validation - ${args.systemName}`,
+  skill: { name: 'control-system-sim' },
   agent: {
-    name: 'general-purpose',
+    name: 'control-systems-engineer',
     prompt: {
       role: 'Control Systems Validation Engineer',
       task: 'Validate with hardware-in-the-loop testing',

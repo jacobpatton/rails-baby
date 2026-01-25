@@ -206,8 +206,9 @@ export async function process(inputs, ctx) {
 export const specificationDefinitionTask = defineTask('specification-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Specification Definition - ${args.filterName}`,
+  skill: { name: 'digital-filter-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'dsp-algorithm-engineer',
     prompt: {
       role: 'DSP Filter Design Engineer',
       task: 'Define and validate filter specifications',
@@ -262,8 +263,9 @@ export const specificationDefinitionTask = defineTask('specification-definition'
 export const filterTypeSelectionTask = defineTask('filter-type-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Filter Type Selection - ${args.filterName}`,
+  skill: { name: 'digital-filter-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'dsp-algorithm-engineer',
     prompt: {
       role: 'Filter Design Specialist',
       task: 'Select optimal filter type (FIR vs IIR)',
@@ -323,8 +325,9 @@ export const filterTypeSelectionTask = defineTask('filter-type-selection', (args
 export const designMethodSelectionTask = defineTask('design-method-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Design Method Selection - ${args.filterName}`,
+  skill: { name: 'digital-filter-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'dsp-algorithm-engineer',
     prompt: {
       role: 'Filter Design Engineer',
       task: 'Choose appropriate filter design method',
@@ -375,8 +378,9 @@ export const designMethodSelectionTask = defineTask('design-method-selection', (
 export const coefficientCalculationTask = defineTask('coefficient-calculation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Coefficient Calculation - ${args.filterName}`,
+  skill: { name: 'digital-filter-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'dsp-algorithm-engineer',
     prompt: {
       role: 'Filter Design Engineer',
       task: 'Calculate filter coefficients using selected method',
@@ -435,8 +439,9 @@ export const coefficientCalculationTask = defineTask('coefficient-calculation', 
 export const responseAnalysisTask = defineTask('response-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Response Analysis - ${args.filterName}`,
+  skill: { name: 'digital-filter-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'dsp-algorithm-engineer',
     prompt: {
       role: 'Filter Analysis Engineer',
       task: 'Analyze frequency response and phase characteristics',
@@ -491,8 +496,9 @@ export const responseAnalysisTask = defineTask('response-analysis', (args, taskC
 export const stabilityAnalysisTask = defineTask('stability-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Stability Analysis - ${args.filterName}`,
+  skill: { name: 'digital-filter-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'dsp-algorithm-engineer',
     prompt: {
       role: 'Control Systems/DSP Engineer',
       task: 'Verify filter stability (especially for IIR filters)',
@@ -549,8 +555,9 @@ export const stabilityAnalysisTask = defineTask('stability-analysis', (args, tas
 export const filterImplementationTask = defineTask('filter-implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Filter Implementation - ${args.filterName}`,
+  skill: { name: 'digital-filter-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'dsp-algorithm-engineer',
     prompt: {
       role: 'DSP Implementation Engineer',
       task: 'Implement and test filter structure',
@@ -610,8 +617,9 @@ export const filterImplementationTask = defineTask('filter-implementation', (arg
 export const fixedPointOptimizationTask = defineTask('fixed-point-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Fixed-Point Optimization - ${args.filterName}`,
+  skill: { name: 'digital-filter-design' },
   agent: {
-    name: 'general-purpose',
+    name: 'dsp-algorithm-engineer',
     prompt: {
       role: 'Fixed-Point DSP Engineer',
       task: 'Optimize filter for fixed-point implementation',

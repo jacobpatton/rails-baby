@@ -4,6 +4,8 @@
  * including submission, tracking, appeals, and automation of payer-specific requirements.
  * @inputs { organizationName: string, authScope?: string, serviceTypes?: array, payerMix?: object }
  * @outputs { success: boolean, authWorkflow: object, automationPlan: object, metrics: object, artifacts: array }
+ * @recommendedSkills SK-HC-007 (revenue-cycle-analytics), SK-HC-001 (clinical-workflow-analysis)
+ * @recommendedAgents AG-HC-003 (revenue-integrity-analyst), AG-HC-006 (care-management-coordinator)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

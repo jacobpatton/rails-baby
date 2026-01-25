@@ -12,7 +12,8 @@ const analyzeTask = defineTask('monte-carlo-event-generation-analyze', (args, ta
   kind: 'agent',
   title: 'Monte Carlo Event Generation Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'mc-generator-specialist',
+    skills: ['pythia-event-generator', 'madgraph-amplitude-calculator'],
     prompt: {
       role: 'Particle physicist specializing in Monte Carlo event generation and simulation',
       task: 'Configure and validate Monte Carlo event generation for physics analysis',

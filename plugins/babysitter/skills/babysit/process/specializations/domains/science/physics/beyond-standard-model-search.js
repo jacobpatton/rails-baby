@@ -12,7 +12,8 @@ const analyzeTask = defineTask('beyond-standard-model-search-analyze', (args, ta
   kind: 'agent',
   title: 'Beyond Standard Model Search Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'bsm-search-analyst',
+    skills: ['madgraph-amplitude-calculator', 'root-data-analyzer', 'scikit-hep-analysis'],
     prompt: {
       role: 'Particle physicist specializing in BSM physics searches and new particle discovery',
       task: 'Design and execute a search for physics beyond the Standard Model',

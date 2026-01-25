@@ -5,6 +5,9 @@
  * @inputs { facilityName: string, targetArea?: string, currentMetrics?: object, constraints?: array }
  * @outputs { success: boolean, flowAnalysis: object, improvements: array, implementationPlan: object, artifacts: array }
  *
+ * @recommendedSkills SK-HC-001 (clinical-workflow-analysis), SK-HC-012 (workforce-demand-forecasting)
+ * @recommendedAgents AG-HC-007 (operations-excellence-director), AG-HC-006 (care-management-coordinator)
+ *
  * @example
  * const result = await orchestrate('specializations/domains/social-sciences-humanities/healthcare/patient-flow-optimization', {
  *   facilityName: 'General Hospital Emergency Department',
@@ -196,11 +199,12 @@ export async function process(inputs, ctx) {
 }
 
 // Task 1: Current State Assessment
+// Uses: SK-HC-001 (clinical-workflow-analysis)
 export const currentStateAssessmentTask = defineTask('pfo-current-state', (args, taskCtx) => ({
   kind: 'agent',
   title: `Patient Flow Current State - ${args.facilityName}`,
   agent: {
-    name: 'lean-healthcare-specialist',
+    name: 'operations-excellence-director', // AG-HC-007
     prompt: {
       role: 'Lean Healthcare Specialist',
       task: 'Assess current state of patient flow',
@@ -242,11 +246,12 @@ export const currentStateAssessmentTask = defineTask('pfo-current-state', (args,
 }));
 
 // Task 2: Demand and Capacity Analysis
+// Uses: SK-HC-012 (workforce-demand-forecasting)
 export const demandCapacityAnalysisTask = defineTask('pfo-demand-capacity', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Patient Flow Demand-Capacity Analysis',
   agent: {
-    name: 'operations-analyst',
+    name: 'operations-excellence-director', // AG-HC-007
     prompt: {
       role: 'Healthcare Operations Analyst',
       task: 'Analyze demand patterns and capacity',
@@ -287,11 +292,12 @@ export const demandCapacityAnalysisTask = defineTask('pfo-demand-capacity', (arg
 }));
 
 // Task 3: Value Stream Mapping
+// Uses: SK-HC-001 (clinical-workflow-analysis)
 export const valueStreamMappingTask = defineTask('pfo-value-stream', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Patient Flow Value Stream Mapping',
   agent: {
-    name: 'lean-facilitator',
+    name: 'operations-excellence-director', // AG-HC-007
     prompt: {
       role: 'Lean Value Stream Facilitator',
       task: 'Create value stream map for patient flow',
@@ -333,11 +339,12 @@ export const valueStreamMappingTask = defineTask('pfo-value-stream', (args, task
 }));
 
 // Task 4: Bottleneck Analysis
+// Uses: SK-HC-001 (clinical-workflow-analysis)
 export const bottleneckAnalysisTask = defineTask('pfo-bottleneck', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Patient Flow Bottleneck Analysis',
   agent: {
-    name: 'constraint-analyst',
+    name: 'operations-excellence-director', // AG-HC-007
     prompt: {
       role: 'Theory of Constraints Analyst',
       task: 'Identify and analyze flow bottlenecks',
@@ -377,11 +384,12 @@ export const bottleneckAnalysisTask = defineTask('pfo-bottleneck', (args, taskCt
 }));
 
 // Task 5: Future State Design
+// Uses: SK-HC-001 (clinical-workflow-analysis)
 export const futureStateDesignTask = defineTask('pfo-future-state', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Patient Flow Future State Design',
   agent: {
-    name: 'process-designer',
+    name: 'operations-excellence-director', // AG-HC-007
     prompt: {
       role: 'Healthcare Process Designer',
       task: 'Design optimized future state patient flow',
@@ -423,11 +431,12 @@ export const futureStateDesignTask = defineTask('pfo-future-state', (args, taskC
 }));
 
 // Task 6: Implementation Planning
+// Uses: SK-HC-001 (clinical-workflow-analysis)
 export const implementationPlanningTask = defineTask('pfo-implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Patient Flow Implementation Planning',
   agent: {
-    name: 'implementation-planner',
+    name: 'care-management-coordinator', // AG-HC-006
     prompt: {
       role: 'Healthcare Implementation Planner',
       task: 'Develop implementation plan for flow improvements',
@@ -470,11 +479,12 @@ export const implementationPlanningTask = defineTask('pfo-implementation', (args
 }));
 
 // Task 7: Monitoring Design
+// Uses: SK-HC-002 (quality-metrics-measurement)
 export const monitoringDesignTask = defineTask('pfo-monitoring', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Patient Flow Monitoring Design',
   agent: {
-    name: 'performance-analyst',
+    name: 'operations-excellence-director', // AG-HC-007
     prompt: {
       role: 'Healthcare Performance Analyst',
       task: 'Design monitoring system for patient flow',
@@ -516,11 +526,12 @@ export const monitoringDesignTask = defineTask('pfo-monitoring', (args, taskCtx)
 }));
 
 // Task 8: Report Generation
+// Uses: SK-HC-001 (clinical-workflow-analysis)
 export const patientFlowReportTask = defineTask('pfo-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Patient Flow Optimization Report',
   agent: {
-    name: 'report-writer',
+    name: 'operations-excellence-director', // AG-HC-007
     prompt: {
       role: 'Healthcare Report Writer',
       task: 'Generate comprehensive patient flow optimization report',

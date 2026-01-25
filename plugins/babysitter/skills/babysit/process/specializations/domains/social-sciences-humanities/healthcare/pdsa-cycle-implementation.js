@@ -4,6 +4,8 @@
  * changes in healthcare settings through rapid-cycle improvement and iterative testing.
  * @inputs { improvementAim: string, changeIdea: string, currentBaseline?: object, testScope?: string }
  * @outputs { success: boolean, cycleResults: object, learnings: array, nextSteps: object, artifacts: array }
+ * @recommendedSkills SK-HC-002 (quality-metrics-measurement), SK-HC-001 (clinical-workflow-analysis)
+ * @recommendedAgents AG-HC-001 (quality-improvement-orchestrator), AG-HC-007 (operations-excellence-director)
  *
  * @example
  * const result = await orchestrate('specializations/domains/social-sciences-humanities/healthcare/pdsa-cycle-implementation', {

@@ -12,7 +12,8 @@ const analyzeTask = defineTask('phase-transition-investigation-analyze', (args, 
   kind: 'agent',
   title: 'Phase Transition Investigation Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'phase-transition-investigator',
+    skills: ['quimb-tensor-network', 'monte-carlo-physics-simulator'],
     prompt: {
       role: 'Condensed matter physicist specializing in phase transitions and critical phenomena',
       task: 'Investigate phase transitions and critical behavior in the given physical system',

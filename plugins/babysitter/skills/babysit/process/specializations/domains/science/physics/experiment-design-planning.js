@@ -12,7 +12,8 @@ const analyzeTask = defineTask('experiment-design-planning-analyze', (args, task
   kind: 'agent',
   title: 'Experiment Design and Planning Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'experiment-designer',
+    skills: ['geant4-detector-simulator', 'comsol-multiphysics-modeler'],
     prompt: {
       role: 'Experimental physicist specializing in experiment design and measurement methodology',
       task: 'Design a comprehensive physics experiment to address the given measurement objectives',

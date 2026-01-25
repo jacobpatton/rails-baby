@@ -181,8 +181,9 @@ export async function process(inputs, ctx) {
 export const standardsIdentificationTask = defineTask('standards-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Standards Identification - ${args.productName}`,
+  skill: { name: 'emc-pre-compliance' },
   agent: {
-    name: 'general-purpose',
+    name: 'emc-engineer',
     prompt: {
       role: 'EMC Regulatory Compliance Specialist',
       task: 'Identify EMC requirements and applicable standards',
@@ -227,8 +228,9 @@ export const standardsIdentificationTask = defineTask('standards-identification'
 export const emcDesignRulesTask = defineTask('emc-design-rules', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: EMC Design Rules - ${args.productName}`,
+  skill: { name: 'emc-pre-compliance' },
   agent: {
-    name: 'general-purpose',
+    name: 'emc-engineer',
     prompt: {
       role: 'EMC Design Engineer',
       task: 'Apply EMC design rules to schematic and layout',
@@ -282,8 +284,9 @@ export const emcDesignRulesTask = defineTask('emc-design-rules', (args, taskCtx)
 export const filteringDesignTask = defineTask('filtering-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Filtering Design - ${args.productName}`,
+  skill: { name: 'emc-pre-compliance' },
   agent: {
-    name: 'general-purpose',
+    name: 'emc-engineer',
     prompt: {
       role: 'EMI Filter Design Engineer',
       task: 'Design filtering and suppression circuits',
@@ -336,8 +339,9 @@ export const filteringDesignTask = defineTask('filtering-design', (args, taskCtx
 export const groundingShieldingTask = defineTask('grounding-shielding', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Grounding and Shielding - ${args.productName}`,
+  skill: { name: 'emc-pre-compliance' },
   agent: {
-    name: 'general-purpose',
+    name: 'emc-engineer',
     prompt: {
       role: 'EMC Grounding and Shielding Specialist',
       task: 'Implement proper grounding and shielding',
@@ -388,8 +392,9 @@ export const groundingShieldingTask = defineTask('grounding-shielding', (args, t
 export const emissionsTestingTask = defineTask('emissions-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Emissions Testing - ${args.productName}`,
+  skill: { name: 'emc-pre-compliance' },
   agent: {
-    name: 'general-purpose',
+    name: 'emc-engineer',
     prompt: {
       role: 'EMC Test Engineer',
       task: 'Conduct pre-compliance emissions testing',
@@ -439,8 +444,9 @@ export const emissionsTestingTask = defineTask('emissions-testing', (args, taskC
 export const immunityTestingTask = defineTask('immunity-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Immunity Testing - ${args.productName}`,
+  skill: { name: 'emc-pre-compliance' },
   agent: {
-    name: 'general-purpose',
+    name: 'emc-engineer',
     prompt: {
       role: 'EMC Immunity Test Engineer',
       task: 'Perform immunity testing (ESD, surge, RF)',
@@ -495,8 +501,9 @@ export const immunityTestingTask = defineTask('immunity-testing', (args, taskCtx
 export const emcDebuggingTask = defineTask('emc-debugging', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: EMC Debugging - ${args.productName}`,
+  skill: { name: 'emc-pre-compliance' },
   agent: {
-    name: 'general-purpose',
+    name: 'emc-engineer',
     prompt: {
       role: 'EMC Debug Specialist',
       task: 'Debug and mitigate EMC issues',
@@ -550,8 +557,9 @@ export const emcDebuggingTask = defineTask('emc-debugging', (args, taskCtx) => (
 export const complianceDocumentationTask = defineTask('compliance-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Compliance Documentation - ${args.productName}`,
+  skill: { name: 'emc-pre-compliance' },
   agent: {
-    name: 'general-purpose',
+    name: 'emc-engineer',
     prompt: {
       role: 'EMC Compliance Documentation Specialist',
       task: 'Document compliance test results',

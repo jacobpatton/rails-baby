@@ -12,7 +12,8 @@ const analyzeTask = defineTask('material-synthesis-characterization-analyze', (a
   kind: 'agent',
   title: 'Material Synthesis and Characterization Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'materials-synthesizer',
+    skills: ['vasp-dft-calculator', 'aflow-materials-discovery', 'spinw-magnetic-simulator'],
     prompt: {
       role: 'Condensed matter physicist specializing in materials synthesis and characterization',
       task: 'Plan and execute material synthesis and comprehensive characterization',

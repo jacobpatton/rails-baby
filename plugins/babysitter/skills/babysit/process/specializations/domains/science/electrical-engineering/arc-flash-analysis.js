@@ -190,8 +190,9 @@ export async function process(inputs, ctx) {
 export const dataCollectionTask = defineTask('data-collection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Data Collection - ${args.facilityName}`,
+  skill: { name: 'arc-flash-calc' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Electrical Safety Engineer specializing in arc flash studies',
       task: 'Collect system data and protective device information for arc flash analysis',
@@ -246,8 +247,9 @@ export const dataCollectionTask = defineTask('data-collection', (args, taskCtx) 
 export const systemModelingTask = defineTask('system-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: System Modeling - ${args.facilityName}`,
+  skill: { name: 'arc-flash-calc' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Power Systems Modeling Engineer',
       task: 'Build power system model with device characteristics',
@@ -310,8 +312,9 @@ export const systemModelingTask = defineTask('system-modeling', (args, taskCtx) 
 export const faultCurrentCalculationTask = defineTask('fault-current-calculation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Fault Current Calculation - ${args.facilityName}`,
+  skill: { name: 'arc-flash-calc' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Power Systems Engineer specializing in short circuit analysis',
       task: 'Calculate bolted fault currents at equipment locations',
@@ -366,8 +369,9 @@ export const faultCurrentCalculationTask = defineTask('fault-current-calculation
 export const clearingTimeAnalysisTask = defineTask('clearing-time-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Clearing Time Analysis - ${args.facilityName}`,
+  skill: { name: 'arc-flash-calc' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Protection Engineer specializing in device coordination',
       task: 'Determine protective device clearing times for arc flash',
@@ -422,8 +426,9 @@ export const clearingTimeAnalysisTask = defineTask('clearing-time-analysis', (ar
 export const incidentEnergyCalculationTask = defineTask('incident-energy-calculation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Incident Energy Calculation - ${args.facilityName}`,
+  skill: { name: 'arc-flash-calc' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Arc Flash Analysis Engineer',
       task: 'Calculate incident energy levels per IEEE 1584',
@@ -490,8 +495,9 @@ export const incidentEnergyCalculationTask = defineTask('incident-energy-calcula
 export const arcFlashBoundaryTask = defineTask('arc-flash-boundary', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Arc Flash Boundaries - ${args.facilityName}`,
+  skill: { name: 'arc-flash-calc' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Electrical Safety Specialist',
       task: 'Determine arc flash boundaries for all equipment',
@@ -545,8 +551,9 @@ export const arcFlashBoundaryTask = defineTask('arc-flash-boundary', (args, task
 export const ppeAndLabelingTask = defineTask('ppe-labeling', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: PPE and Labeling - ${args.facilityName}`,
+  skill: { name: 'arc-flash-calc' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Electrical Safety Compliance Specialist',
       task: 'Specify PPE requirements and generate equipment labels',
@@ -628,8 +635,9 @@ export const ppeAndLabelingTask = defineTask('ppe-labeling', (args, taskCtx) => 
 export const documentationTask = defineTask('documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Documentation - ${args.facilityName}`,
+  skill: { name: 'arc-flash-calc' },
   agent: {
-    name: 'general-purpose',
+    name: 'protection-engineer',
     prompt: {
       role: 'Electrical Safety Documentation Specialist',
       task: 'Document hazard analysis and safety recommendations',

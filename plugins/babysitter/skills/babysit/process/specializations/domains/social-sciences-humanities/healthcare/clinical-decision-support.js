@@ -4,6 +4,8 @@
  * optimizing CDS systems that provide clinicians with knowledge at the point of care.
  * @inputs { organizationName: string, cdsScope?: string, targetAreas?: array, ehrPlatform?: string }
  * @outputs { success: boolean, cdsDesign: object, implementationPlan: object, evaluationPlan: object, artifacts: array }
+ * @recommendedSkills SK-HC-014 (clinical-decision-support-rules), SK-HC-006 (health-data-integration), SK-HC-001 (clinical-workflow-analysis)
+ * @recommendedAgents AG-HC-005 (clinical-informatics-specialist), AG-HC-001 (quality-improvement-orchestrator)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

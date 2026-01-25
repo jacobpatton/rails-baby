@@ -187,8 +187,9 @@ export async function process(inputs, ctx) {
 export const thermodynamicSelectionTask = defineTask('thermodynamic-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select appropriate thermodynamic models',
+  skill: { name: 'thermodynamic-model-selector' },
   agent: {
-    name: 'thermo-specialist',
+    name: 'process-development-engineer',
     prompt: {
       role: 'thermodynamics specialist',
       task: 'Select appropriate thermodynamic property methods for process simulation',
@@ -237,8 +238,9 @@ export const thermodynamicSelectionTask = defineTask('thermodynamic-selection', 
 export const componentConfigurationTask = defineTask('component-configuration', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Configure component database',
+  skill: { name: 'aspen-plus-simulator' },
   agent: {
-    name: 'component-engineer',
+    name: 'process-development-engineer',
     prompt: {
       role: 'process simulation engineer',
       task: 'Configure component database and properties for simulation',
@@ -279,8 +281,9 @@ export const componentConfigurationTask = defineTask('component-configuration', 
 export const unitOperationsConfigTask = defineTask('unit-operations-config', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Configure unit operations',
+  skill: { name: 'aspen-plus-simulator' },
   agent: {
-    name: 'simulation-engineer',
+    name: 'process-development-engineer',
     prompt: {
       role: 'process simulation engineer',
       task: 'Configure all unit operations in the simulation model',
@@ -330,8 +333,9 @@ export const unitOperationsConfigTask = defineTask('unit-operations-config', (ar
 export const streamConnectivityTask = defineTask('stream-connectivity', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Set up stream connectivity',
+  skill: { name: 'aspen-plus-simulator' },
   agent: {
-    name: 'simulation-engineer',
+    name: 'process-development-engineer',
     prompt: {
       role: 'process simulation engineer',
       task: 'Configure stream connectivity between unit operations',
@@ -378,8 +382,9 @@ export const streamConnectivityTask = defineTask('stream-connectivity', (args, t
 export const feedConditionsTask = defineTask('feed-conditions', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Input feed and operating conditions',
+  skill: { name: 'aspen-plus-simulator' },
   agent: {
-    name: 'simulation-engineer',
+    name: 'process-development-engineer',
     prompt: {
       role: 'process simulation engineer',
       task: 'Input all feed stream conditions and operating parameters',
@@ -419,8 +424,9 @@ export const feedConditionsTask = defineTask('feed-conditions', (args, taskCtx) 
 export const modelConvergenceTask = defineTask('model-convergence', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Run simulation and achieve convergence',
+  skill: { name: 'hysys-dynamic-simulator' },
   agent: {
-    name: 'simulation-engineer',
+    name: 'process-development-engineer',
     prompt: {
       role: 'process simulation engineer',
       task: 'Run simulation and troubleshoot convergence issues',
@@ -463,8 +469,9 @@ export const modelConvergenceTask = defineTask('model-convergence', (args, taskC
 export const modelValidationTask = defineTask('model-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Validate model against experimental/plant data',
+  skill: { name: 'aspen-plus-simulator' },
   agent: {
-    name: 'validation-engineer',
+    name: 'process-development-engineer',
     prompt: {
       role: 'process validation engineer',
       task: 'Validate simulation model against available data',
@@ -511,8 +518,9 @@ export const modelValidationTask = defineTask('model-validation', (args, taskCtx
 export const sensitivityAnalysisTask = defineTask('sensitivity-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform sensitivity analysis on key parameters',
+  skill: { name: 'aspen-plus-simulator' },
   agent: {
-    name: 'analysis-engineer',
+    name: 'process-development-engineer',
     prompt: {
       role: 'process analysis engineer',
       task: 'Perform sensitivity analysis on key process parameters',
@@ -558,8 +566,9 @@ export const sensitivityAnalysisTask = defineTask('sensitivity-analysis', (args,
 export const modelDocumentationTask = defineTask('model-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate model documentation',
+  skill: { name: 'aspen-plus-simulator' },
   agent: {
-    name: 'documentation-engineer',
+    name: 'process-development-engineer',
     prompt: {
       role: 'process documentation engineer',
       task: 'Create comprehensive simulation model documentation',

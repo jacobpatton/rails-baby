@@ -205,8 +205,9 @@ export async function process(inputs, ctx) {
 export const geometryPreparationTask = defineTask('geometry-preparation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Geometry Preparation - ${args.projectName}`,
+  skill: { name: 'cfd-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'aero-specialist',
     prompt: {
       role: 'CAD/CFD Engineer specializing in geometry preparation for computational fluid dynamics',
       task: 'Prepare and validate geometry for CFD analysis',
@@ -269,8 +270,9 @@ export const geometryPreparationTask = defineTask('geometry-preparation', (args,
 export const meshStrategyTask = defineTask('mesh-strategy', (args, taskCtx) => ({
   kind: 'agent',
   title: `Mesh Strategy Development - ${args.projectName}`,
+  skill: { name: 'cfd-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'aero-specialist',
     prompt: {
       role: 'CFD Mesh Specialist with expertise in aerospace applications',
       task: 'Develop comprehensive meshing strategy for CFD analysis',
@@ -353,8 +355,9 @@ export const meshStrategyTask = defineTask('mesh-strategy', (args, taskCtx) => (
 export const meshGenerationTask = defineTask('mesh-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Mesh Generation - ${args.projectName}`,
+  skill: { name: 'cfd-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'aero-specialist',
     prompt: {
       role: 'CFD Mesh Engineer with expertise in high-quality mesh generation',
       task: 'Generate computational mesh following the defined strategy',
@@ -425,8 +428,9 @@ export const meshGenerationTask = defineTask('mesh-generation', (args, taskCtx) 
 export const solverSetupTask = defineTask('solver-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: `Solver Configuration - ${args.projectName}`,
+  skill: { name: 'cfd-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'aero-specialist',
     prompt: {
       role: 'CFD Solver Specialist with expertise in aerospace flow simulation',
       task: 'Configure CFD solver for the specified flow conditions',
@@ -508,8 +512,9 @@ export const solverSetupTask = defineTask('solver-setup', (args, taskCtx) => ({
 export const solutionExecutionTask = defineTask('solution-execution', (args, taskCtx) => ({
   kind: 'agent',
   title: `Solution Execution - ${args.projectName}`,
+  skill: { name: 'cfd-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'aero-specialist',
     prompt: {
       role: 'CFD Analysis Engineer monitoring solution convergence and stability',
       task: 'Execute CFD solution and monitor convergence',
@@ -579,8 +584,9 @@ export const solutionExecutionTask = defineTask('solution-execution', (args, tas
 export const postProcessingTask = defineTask('post-processing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Post-Processing - ${args.projectName}`,
+  skill: { name: 'cfd-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'aero-specialist',
     prompt: {
       role: 'CFD Post-Processing Specialist with aerospace analysis expertise',
       task: 'Extract and analyze CFD results',
@@ -678,8 +684,9 @@ export const postProcessingTask = defineTask('post-processing', (args, taskCtx) 
 export const validationTask = defineTask('validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Results Validation - ${args.projectName}`,
+  skill: { name: 'cfd-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'aero-specialist',
     prompt: {
       role: 'CFD Validation Engineer with expertise in verification and validation',
       task: 'Validate CFD results against reference data and best practices',
@@ -740,8 +747,9 @@ export const validationTask = defineTask('validation', (args, taskCtx) => ({
 export const reportGenerationTask = defineTask('report-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Report Generation - ${args.projectName}`,
+  skill: { name: 'cfd-analysis' },
   agent: {
-    name: 'general-purpose',
+    name: 'aero-specialist',
     prompt: {
       role: 'Aerospace CFD Technical Writer with expertise in analysis documentation',
       task: 'Generate comprehensive CFD analysis report',

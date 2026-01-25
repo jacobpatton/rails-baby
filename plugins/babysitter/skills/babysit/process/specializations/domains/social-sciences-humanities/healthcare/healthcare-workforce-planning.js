@@ -4,6 +4,8 @@
  * and managing healthcare workforce capacity aligned with patient care demands and strategic objectives.
  * @inputs { organizationName: string, planningScope?: string, departments?: array, planningHorizon?: number }
  * @outputs { success: boolean, workforcePlan: object, staffingModels: array, developmentPlan: object, artifacts: array }
+ * @recommendedSkills SK-HC-012 (workforce-demand-forecasting), SK-HC-001 (clinical-workflow-analysis)
+ * @recommendedAgents AG-HC-007 (operations-excellence-director), AG-HC-002 (compliance-readiness-manager)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

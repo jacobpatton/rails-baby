@@ -12,7 +12,8 @@ const analyzeTask = defineTask('scientific-paper-preparation-analyze', (args, ta
   kind: 'agent',
   title: 'Scientific Paper Preparation Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'physics-paper-writer',
+    skills: ['latex-physics-documenter', 'paraview-scientific-visualizer'],
     prompt: {
       role: 'Physicist with expertise in scientific writing and publication',
       task: 'Guide the preparation of a physics research paper for publication',

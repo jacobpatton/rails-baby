@@ -4,6 +4,8 @@
  * programs including MIPS, Hospital IQR, VBP, and other value-based payment programs.
  * @inputs { organizationName: string, reportingPrograms?: array, providerType?: string, currentPerformance?: object }
  * @outputs { success: boolean, programCompliance: object, improvementPlan: object, metrics: array, artifacts: array }
+ * @recommendedSkills SK-HC-002 (quality-metrics-measurement), SK-HC-003 (regulatory-compliance-assessment), SK-HC-011 (clinical-documentation-query)
+ * @recommendedAgents AG-HC-002 (compliance-readiness-manager), AG-HC-008 (documentation-integrity-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
