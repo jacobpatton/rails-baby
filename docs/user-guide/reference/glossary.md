@@ -1,0 +1,1083 @@
+# Babysitter Glossary
+
+**Version:** 1.0
+**Last Updated:** 2026-01-25
+**Audience:** All users
+
+This glossary provides definitions for technical terms and concepts used in Babysitter documentation. Terms are organized alphabetically with cross-references to related concepts and links to detailed documentation.
+
+---
+
+## Table of Contents
+
+- [A](#a) | [B](#b) | [C](#c) | [D](#d) | [E](#e) | [F](#f) | [G](#g) | [H](#h) | [I](#i) | [J](#j) | [K](#k) | [L](#l) | [M](#m) | [N](#n) | [O](#o) | [P](#p) | [Q](#q) | [R](#r) | [S](#s) | [T](#t) | [U](#u) | [V](#v) | [W](#w)
+
+---
+
+## A
+
+### Agent
+
+A **task type** representing LLM-powered operations within a process. Agents perform intelligent tasks like planning, scoring, code review, and analysis.
+
+**Example:**
+```javascript
+{
+  kind: 'agent',
+  agent: {
+    name: 'quality-scorer',
+    prompt: { role: 'QA engineer', task: 'Score results 0-100' }
+  }
+}
+```
+
+**Related:** [Task](#task), [Skill](#skill), [Effect](#effect)
+
+**See Also:** [Process Definitions](../features/process-definitions.md)
+
+---
+
+### Agent Task
+
+A task definition that invokes an LLM agent to perform intelligent operations. Agent tasks specify the agent name, prompt configuration, and expected output schema.
+
+**Example:**
+```javascript
+const agentTask = defineTask('scorer', (args, ctx) => ({
+  kind: 'agent',
+  title: 'Score quality',
+  agent: {
+    name: 'quality-scorer',
+    prompt: {
+      role: 'QA engineer',
+      task: 'Score the implementation',
+      outputFormat: 'JSON'
+    },
+    outputSchema: { type: 'object', required: ['score'] }
+  }
+}));
+```
+
+**Related:** [Agent](#agent), [Task Definition](#task-definition)
+
+---
+
+### Approval Gate
+
+See [Breakpoint](#breakpoint).
+
+---
+
+### Artifact
+
+Any file produced during a run, stored in the `artifacts/` directory. Common artifacts include plans, specifications, reports, and generated documentation.
+
+**Location:** `.a5c/runs/<runId>/artifacts/`
+
+**Examples:**
+- `process.md` - Process description
+- `plan.md` - Implementation plan
+- `specs.md` - Specifications document
+
+**Related:** [Run Directory](#run-directory)
+
+---
+
+## B
+
+### Babysitter
+
+The orchestration framework for Claude Code that enables deterministic, event-sourced workflow management. Babysitter provides structured multi-step workflows with quality gates, human approval checkpoints, and session persistence.
+
+**Components:**
+- SDK (`@a5c-ai/babysitter-sdk`) - Core runtime and CLI
+- Plugin (`babysitter@a5c.ai`) - Claude Code integration
+- Breakpoints (`@a5c-ai/babysitter-breakpoints`) - Human approval system
+
+**Related:** [SDK](#sdk), [Plugin](#plugin), [Breakpoints Service](#breakpoints-service)
+
+---
+
+### Babysitter Skill
+
+The primary Claude Code skill for orchestrating runs. The skill manages the orchestration loop, executing iterations until completion.
+
+**Location:** `plugins/babysitter/skills/babysit/SKILL.md`
+
+**Invocation:**
+```bash
+/babysitter:babysit Build a REST API with TDD
+```
+
+**Related:** [Skill](#skill), [In-Session Loop](#in-session-loop)
+
+---
+
+### Breakpoint
+
+A pause point in a process that requires human approval before continuing. Breakpoints enable human-in-the-loop workflows for critical decisions like deployment approval, plan review, or security-sensitive changes.
+
+**Example:**
+```javascript
+await ctx.breakpoint({
+  question: 'Approve the deployment?',
+  title: 'Production Deployment',
+  context: {
+    files: [{ path: 'artifacts/plan.md', format: 'markdown' }]
+  }
+});
+```
+
+**Related:** [Breakpoints Service](#breakpoints-service), [Human-in-the-Loop](#human-in-the-loop)
+
+**See Also:** [Breakpoints Feature](../features/breakpoints.md)
+
+---
+
+### Breakpoints Service
+
+The external service providing human approval UI and API. Consists of a web UI (port 3184), REST API (port 3185), and worker for job processing.
+
+**Package:** `@a5c-ai/babysitter-breakpoints`
+
+**Start Command:**
+```bash
+npx -y @a5c-ai/babysitter-breakpoints@latest start
+```
+
+**Ports:**
+- `3184` - Web UI
+- `3185` - REST API
+
+**Related:** [Breakpoint](#breakpoint)
+
+---
+
+## C
+
+### CLI (Command-Line Interface)
+
+The command-line tool for managing Babysitter runs. Provides commands for run lifecycle management, task operations, and state inspection.
+
+**Binary Names:** `babysitter`, `babysitter-sdk`
+
+**Installation:**
+```bash
+npm install -g @a5c-ai/babysitter-sdk
+```
+
+**Related:** [SDK](#sdk)
+
+**See Also:** [CLI Reference](./cli-reference.md)
+
+---
+
+### Completion Promise
+
+A special XML tag that signals the end of an in-session loop. When Claude outputs `<promise>TEXT</promise>` where TEXT matches the completion secret, the loop exits.
+
+**Format:** `<promise>COMPLETION_SECRET</promise>`
+
+**Usage:** Only output when the run status is `completed`.
+
+**Related:** [In-Session Loop](#in-session-loop), [Completion Secret](#completion-secret)
+
+---
+
+### Completion Secret
+
+A unique string emitted by `run:iterate` and `run:status` when a run completes successfully. Used with the completion promise to exit the in-session loop.
+
+**Example Output:**
+```json
+{
+  "status": "completed",
+  "completionSecret": "run-abc123-completed-xyz789"
+}
+```
+
+**Related:** [Completion Promise](#completion-promise)
+
+---
+
+### Context API
+
+The interface available to process functions for interacting with the orchestration system. Provides methods for executing tasks, creating breakpoints, parallel execution, and state management.
+
+**Methods:**
+- `ctx.task(taskDef, inputs)` - Execute a task
+- `ctx.breakpoint(payload)` - Request human approval
+- `ctx.sleepUntil(timestamp)` - Time gate
+- `ctx.parallel.all(tasks)` - Parallel execution
+- `ctx.hook(name, payload)` - Call custom hooks
+- `ctx.log(message)` - Log to journal
+- `ctx.now()` - Get deterministic timestamp
+
+**Related:** [Process](#process), [Intrinsic](#intrinsic)
+
+---
+
+### Convergence
+
+See [Quality Convergence](#quality-convergence).
+
+---
+
+## D
+
+### Deterministic Replay
+
+The ability to reproduce the exact same execution path given the same inputs and journal. Achieved through event sourcing where all state changes are recorded as immutable events.
+
+**Benefits:**
+- Time-travel debugging
+- Reliable session resumption
+- Audit trail verification
+
+**Related:** [Event Sourcing](#event-sourcing), [Journal](#journal)
+
+---
+
+## E
+
+### Effect
+
+A side-effect request generated by process execution. Effects include tasks, breakpoints, and sleep gates. Each effect has a unique `effectId` and tracks status through the journal.
+
+**Effect Kinds:**
+- `node` - Node.js script execution
+- `agent` - LLM agent invocation
+- `skill` - Claude Code skill invocation
+- `breakpoint` - Human approval gate
+- `sleep` - Time-based wait
+
+**Related:** [Effect ID](#effect-id), [Task](#task)
+
+---
+
+### Effect ID
+
+A unique identifier assigned to each effect within a run. Used for tracking, posting results, and state management.
+
+**Format:** `effect-<ulid>`
+
+**Example:** `effect-01HJKMNPQR3STUVWXYZ012345`
+
+**Related:** [Effect](#effect)
+
+---
+
+### Entry Point
+
+The JavaScript/TypeScript file and export that defines a process. Specified when creating a run using the `--entry` flag.
+
+**Format:** `<path>#<export>`
+
+**Example:** `.a5c/processes/build/process.js#buildProcess`
+
+**Related:** [Process](#process), [run:create](#runcreate)
+
+---
+
+### Event
+
+A single immutable record in the journal representing a state change. Events have a sequence number, timestamp, type, and payload.
+
+**Event Types:**
+- `RUN_CREATED` - Run initialization
+- `TASK_REQUESTED` - Effect requested
+- `EFFECT_RESOLVED` - Task completed
+- `BREAKPOINT_REQUESTED` - Human approval needed
+- `RUN_COMPLETED` - Successful completion
+- `RUN_FAILED` - Run failure
+
+**Related:** [Journal](#journal), [Event Sourcing](#event-sourcing)
+
+---
+
+### Event Sourcing
+
+An architectural pattern where all state changes are recorded as immutable events. State is derived by replaying the event history. This enables deterministic replay, audit trails, and time-travel debugging.
+
+**Benefits:**
+- Complete audit trail
+- Deterministic behavior
+- Resumable sessions
+- Debug-friendly
+
+**Related:** [Journal](#journal), [Deterministic Replay](#deterministic-replay)
+
+---
+
+## G
+
+### GSD (Get Stuff Done)
+
+A methodology focused on rapid task completion. GSD emphasizes pragmatic execution over extensive planning.
+
+**Location:** `plugins/babysitter/skills/babysit/process/gsd/`
+
+**Related:** [Methodology](#methodology), [TDD](#tdd-test-driven-development)
+
+---
+
+## H
+
+### Hook
+
+A shell script executed at specific lifecycle points during orchestration. Hooks enable custom behavior for task execution, notifications, logging, and integrations.
+
+**Discovery Priority:**
+1. Per-repo: `.a5c/hooks/<hook-name>/`
+2. Per-user: `~/.config/babysitter/hooks/<hook-name>/`
+3. Plugin: `plugins/babysitter/hooks/<hook-name>/`
+
+**Hook Types:**
+- `on-run-start` - When run is created
+- `on-run-complete` - When run completes
+- `on-iteration-start` - Before iteration (core orchestration)
+- `on-iteration-end` - After iteration
+- `on-task-start` - Before task execution
+- `on-task-complete` - After task execution
+- `on-breakpoint` - Breakpoint notification
+
+**Related:** [Hook Dispatcher](#hook-dispatcher)
+
+**See Also:** [Configuration Reference](./configuration.md)
+
+---
+
+### Hook Dispatcher
+
+The component that discovers and executes hooks. Located at `plugins/babysitter/hooks/hook-dispatcher.sh`. Responsible for finding hooks, executing them with payloads, and collecting results.
+
+**Related:** [Hook](#hook)
+
+---
+
+### Human-in-the-Loop
+
+A workflow pattern that includes human approval checkpoints. Implemented through breakpoints that pause execution until a human reviews and approves.
+
+**Use Cases:**
+- Production deployments
+- Security-sensitive changes
+- Major architectural decisions
+- Plan and specification review
+
+**Related:** [Breakpoint](#breakpoint)
+
+---
+
+## I
+
+### In-Session Loop
+
+A mechanism for continuous iteration within a single Claude Code session. The stop hook intercepts exit attempts and continues the loop until completion or max iterations reached.
+
+**Components:**
+- Setup script: `setup-babysitter-run.sh`
+- Stop hook: `babysitter-stop-hook.sh`
+- State file: `$CLAUDE_PLUGIN_ROOT/state/${SESSION_ID}.md`
+
+**Invocation:**
+```bash
+/babysitter:babysit Build feature --max-iterations 20
+```
+
+**Related:** [Stop Hook](#stop-hook), [Completion Promise](#completion-promise)
+
+---
+
+### Inputs
+
+The initial data provided to a process when creating a run. Stored in `inputs.json` at the run root.
+
+**Location:** `.a5c/runs/<runId>/inputs.json`
+
+**Example:**
+```json
+{
+  "feature": "user-authentication",
+  "targetQuality": 85,
+  "maxIterations": 5
+}
+```
+
+**Related:** [Run](#run), [Process](#process)
+
+---
+
+### Intrinsic
+
+A built-in SDK function callable from within a process. Intrinsics provide the core capabilities for task execution, breakpoints, parallel operations, and state management.
+
+**Core Intrinsics:**
+- `ctx.task()` - Execute a task
+- `ctx.breakpoint()` - Request approval
+- `ctx.sleepUntil()` - Time gate
+- `ctx.parallel.all()` - Batch execution
+- `ctx.hook()` - Custom hooks
+- `ctx.log()` - Logging
+- `ctx.now()` - Timestamp
+
+**Related:** [Context API](#context-api)
+
+---
+
+### Invocation Key
+
+A unique identifier for a specific call to a task within a process. Used to track and deduplicate task executions.
+
+**Format:** `<taskId>:<sequence>`
+
+**Example:** `task/build:1`
+
+**Related:** [Task](#task), [Effect](#effect)
+
+---
+
+### Iteration
+
+A single pass through the orchestration loop. Each iteration processes pending effects, executes tasks, and updates state.
+
+**Iteration Status Values:**
+- `executed` - Tasks executed, continue looping
+- `waiting` - Breakpoint or sleep active
+- `completed` - Run finished successfully
+- `failed` - Run failed with error
+- `none` - No pending effects
+
+**Related:** [Orchestration Loop](#orchestration-loop)
+
+---
+
+## J
+
+### Journal
+
+The append-only event log recording all state changes. Located at `.a5c/runs/<runId>/journal/`. Each event is stored as a separate JSON file.
+
+**File Naming:** `<sequence>.<ulid>.json`
+
+**Example:** `000042.01HJKMNPQR3STUVWXYZ012345.json`
+
+**Benefits:**
+- Complete audit trail
+- Deterministic replay
+- State reconstruction
+- Time-travel debugging
+
+**Related:** [Event](#event), [Event Sourcing](#event-sourcing)
+
+**See Also:** [Journal System](../features/journal-system.md)
+
+---
+
+### JSON Lines (JSONL)
+
+A format where each line is a complete JSON object. Used for streaming event data.
+
+**Related:** [Journal](#journal)
+
+---
+
+## K
+
+### Kind
+
+The type classification of an effect or task. Determines how the effect is executed.
+
+**Effect Kinds:**
+- `node` - Node.js script
+- `shell` - Shell command
+- `agent` - LLM agent
+- `skill` - Claude Code skill
+- `breakpoint` - Human approval
+- `sleep` - Time gate
+
+**Related:** [Effect](#effect), [Task](#task)
+
+---
+
+## L
+
+### Label
+
+An optional descriptive string attached to tasks for identification in logs and UI.
+
+**Example:**
+```javascript
+{
+  kind: 'node',
+  label: 'Build workspace',
+  node: { entry: './scripts/build.js' }
+}
+```
+
+**Related:** [Task](#task)
+
+---
+
+## M
+
+### Methodology
+
+A structured approach to software development packaged as a process definition. Babysitter includes several methodologies.
+
+**Built-in Methodologies:**
+- TDD Quality Convergence
+- GSD (Get Stuff Done)
+- Spec-Kit
+- ATDD/BDD
+- Domain-Driven Design
+
+**Location:** `plugins/babysitter/skills/babysit/process/methodologies/`
+
+**Related:** [Process](#process), [TDD](#tdd-test-driven-development)
+
+---
+
+## N
+
+### Node Task
+
+A task type that executes a Node.js script. The most common task type for running build scripts, tests, and automation.
+
+**Example:**
+```javascript
+{
+  kind: 'node',
+  node: {
+    entry: './scripts/build.js',
+    timeout: 300000
+  }
+}
+```
+
+**Related:** [Task](#task), [Effect](#effect)
+
+---
+
+## O
+
+### Orchestration
+
+The process of managing run execution and state. Orchestration coordinates task execution, handles effects, and maintains the event journal.
+
+**Related:** [Orchestration Loop](#orchestration-loop), [Run](#run)
+
+---
+
+### Orchestration Loop
+
+The iterative cycle that drives run execution. Each loop iteration: runs `run:iterate`, checks pending effects, executes tasks, posts results.
+
+**Flow:**
+```
+iterate -> get effects -> perform effects -> post results -> repeat
+```
+
+**Related:** [Iteration](#iteration), [run:iterate](#runiterate)
+
+---
+
+## P
+
+### Parallel Execution
+
+The ability to execute multiple tasks concurrently. Implemented via `ctx.parallel.all()`.
+
+**Example:**
+```javascript
+const [build, lint, test] = await ctx.parallel.all([
+  () => ctx.task(buildTask, {}),
+  () => ctx.task(lintTask, {}),
+  () => ctx.task(testTask, {})
+]);
+```
+
+**Related:** [Context API](#context-api)
+
+**See Also:** [Parallel Execution](../features/parallel-execution.md)
+
+---
+
+### Pending Effect
+
+An effect that has been requested but not yet resolved. Listed via `task:list --pending`.
+
+**Related:** [Effect](#effect)
+
+---
+
+### Plugin
+
+A Claude Code extension package. The Babysitter plugin (`babysitter@a5c.ai`) provides skills, hooks, and commands for orchestration.
+
+**Installation:**
+```bash
+claude plugin marketplace add a5c-ai/babysitter
+claude plugin install --scope user babysitter@a5c.ai
+```
+
+**Related:** [Babysitter Skill](#babysitter-skill)
+
+---
+
+### Process
+
+A JavaScript/TypeScript function that defines workflow logic. Processes use the Context API to execute tasks, create breakpoints, and manage state.
+
+**Structure:**
+```javascript
+export async function process(inputs, ctx) {
+  const plan = await ctx.task(planTask, inputs);
+  await ctx.breakpoint({ question: 'Approve plan?' });
+  const result = await ctx.task(buildTask, { plan });
+  return result;
+}
+```
+
+**Location:** `.a5c/runs/<runId>/code/main.js`
+
+**Related:** [Context API](#context-api), [Entry Point](#entry-point)
+
+**See Also:** [Process Definitions](../features/process-definitions.md)
+
+---
+
+### Process Definition
+
+See [Process](#process).
+
+---
+
+### Process ID
+
+A unique identifier for a process type. Used when creating runs to specify which process to execute.
+
+**Format:** `<namespace>/<name>`
+
+**Example:** `dev/build`, `ci/test`, `tdd/feature`
+
+**Related:** [Process](#process), [run:create](#runcreate)
+
+---
+
+## Q
+
+### Quality Convergence
+
+An iterative methodology that repeats execution until quality metrics meet targets. Each iteration measures quality and refines implementation.
+
+**Example Flow:**
+```
+implement -> measure quality -> below target? -> refine -> repeat
+```
+
+**Related:** [Quality Score](#quality-score), [TDD](#tdd-test-driven-development)
+
+**See Also:** [Quality Convergence](../features/quality-convergence.md)
+
+---
+
+### Quality Score
+
+A numeric assessment of implementation quality. Typically scored by an agent task based on test coverage, linting, security, and other metrics.
+
+**Example:**
+```json
+{
+  "score": 85,
+  "coverage": 88,
+  "lint": 0,
+  "security": "pass"
+}
+```
+
+**Related:** [Quality Convergence](#quality-convergence), [Agent](#agent)
+
+---
+
+## R
+
+### Result
+
+The output from a completed task. Stored at `tasks/<effectId>/result.json`.
+
+**Schema:**
+```json
+{
+  "status": "ok",
+  "value": { /* task output */ },
+  "metadata": { /* execution metadata */ }
+}
+```
+
+**Related:** [Task](#task), [task:post](#taskpost)
+
+---
+
+### Resume
+
+Continuing a previously interrupted run. The journal enables exact state reconstruction for seamless resumption.
+
+**Command:**
+```bash
+/babysitter:babysit resume --run-id <runId>
+```
+
+**Related:** [Run](#run), [Deterministic Replay](#deterministic-replay)
+
+**See Also:** [Run Resumption](../features/run-resumption.md)
+
+---
+
+### Run
+
+A single execution of a process. Each run has a unique ID, directory, journal, and state. Runs are resumable across sessions.
+
+**Directory:** `.a5c/runs/<runId>/`
+
+**Lifecycle:**
+`created` -> `running` -> `completed` | `failed`
+
+**Related:** [Run ID](#run-id), [Run Directory](#run-directory)
+
+---
+
+### Run Directory
+
+The directory containing all data for a run.
+
+**Structure:**
+```
+.a5c/runs/<runId>/
+├── run.json           # Run metadata
+├── inputs.json        # Initial inputs
+├── code/
+│   └── main.js        # Process implementation
+├── artifacts/         # Generated files
+├── journal/           # Event log
+├── state/
+│   └── state.json     # State cache
+└── tasks/             # Task artifacts
+```
+
+**Related:** [Run](#run)
+
+---
+
+### Run ID
+
+A unique identifier for a run. Typically includes timestamp and description.
+
+**Format:** `run-<YYYYMMDD>-<HHMMSS>[-<description>]`
+
+**Example:** `run-20260125-143012-auth-feature`
+
+**Related:** [Run](#run)
+
+---
+
+## S
+
+### SDK (Software Development Kit)
+
+The core Babysitter package providing the orchestration runtime, CLI, and APIs.
+
+**Package:** `@a5c-ai/babysitter-sdk`
+
+**Installation:**
+```bash
+npm install -g @a5c-ai/babysitter-sdk
+```
+
+**Components:**
+- Runtime - Process execution engine
+- CLI - Command-line interface
+- Storage - Journal and state management
+- Tasks - Task definition and execution
+
+**Related:** [CLI](#cli-command-line-interface)
+
+---
+
+### Session ID
+
+A unique identifier for a Claude Code session. Used for state isolation in in-session loops.
+
+**Environment Variable:** `CLAUDE_SESSION_ID`
+
+**Related:** [In-Session Loop](#in-session-loop)
+
+---
+
+### Shell Task
+
+A task type that executes shell commands.
+
+**Example:**
+```javascript
+{
+  kind: 'shell',
+  shell: {
+    command: 'npm run build',
+    cwd: './packages/app'
+  }
+}
+```
+
+**Related:** [Task](#task)
+
+---
+
+### Skill
+
+A Claude Code capability that provides specialized functionality. The Babysitter skill (`babysit`) orchestrates runs.
+
+**Invocation:**
+```bash
+/babysitter:babysit <prompt>
+```
+
+**Related:** [Babysitter Skill](#babysitter-skill)
+
+---
+
+### Skill Task
+
+A task type that invokes a Claude Code skill.
+
+**Example:**
+```javascript
+{
+  kind: 'skill',
+  skill: {
+    name: 'codebase-analyzer',
+    context: { scope: 'src/', depth: 3 }
+  }
+}
+```
+
+**Related:** [Skill](#skill), [Task](#task)
+
+---
+
+### Sleep
+
+A time gate that pauses execution until a specified timestamp.
+
+**Example:**
+```javascript
+await ctx.sleepUntil(new Date('2026-01-26T10:00:00Z'));
+```
+
+**Related:** [Effect](#effect)
+
+---
+
+### State
+
+The current status of a run derived from replaying the journal. Cached at `state/state.json` for performance.
+
+**Schema:**
+```json
+{
+  "runId": "run-...",
+  "status": "running",
+  "version": 42,
+  "invocations": {},
+  "pendingEffects": []
+}
+```
+
+**Note:** State cache is gitignored (derived from journal).
+
+**Related:** [State Cache](#state-cache), [Journal](#journal)
+
+---
+
+### State Cache
+
+A derived snapshot of current state stored for fast access. Rebuilt from journal if missing or stale.
+
+**Location:** `.a5c/runs/<runId>/state/state.json`
+
+**Related:** [State](#state)
+
+---
+
+### State Version
+
+A monotonically increasing number tracking state changes. Increments with each journal event.
+
+**Related:** [State](#state)
+
+---
+
+### Stop Hook
+
+A Claude Code hook that intercepts exit attempts during in-session loops. Decides whether to allow exit or continue the loop.
+
+**Location:** `plugins/babysitter/hooks/babysitter-stop-hook.sh`
+
+**Output (block):**
+```json
+{
+  "decision": "block",
+  "reason": "<prompt>",
+  "systemMessage": "Babysitter iteration N"
+}
+```
+
+**Related:** [In-Session Loop](#in-session-loop), [Hook](#hook)
+
+---
+
+## T
+
+### Task
+
+The core primitive for external work in processes. Tasks define what to execute and how to handle results.
+
+**Task Kinds:**
+- `node` - Node.js script
+- `shell` - Shell command
+- `agent` - LLM agent
+- `skill` - Claude Code skill
+
+**Example:**
+```javascript
+const result = await ctx.task(buildTask, { target: 'app' });
+```
+
+**Related:** [Effect](#effect), [Task Definition](#task-definition)
+
+---
+
+### Task Definition
+
+A JavaScript object or function that specifies how to create a task. Defines kind, configuration, and I/O paths.
+
+**Example:**
+```javascript
+const buildTask = defineTask('build', (args, ctx) => ({
+  kind: 'node',
+  title: 'Build project',
+  node: { entry: './scripts/build.js' },
+  io: {
+    inputJsonPath: `tasks/${ctx.effectId}/input.json`,
+    outputJsonPath: `tasks/${ctx.effectId}/result.json`
+  }
+}));
+```
+
+**Related:** [Task](#task)
+
+---
+
+### TDD (Test-Driven Development)
+
+A development methodology where tests are written before implementation. Babysitter's TDD quality convergence combines TDD with iterative refinement.
+
+**Process:**
+1. Write tests
+2. Implement code
+3. Measure quality
+4. Iterate until target met
+
+**Related:** [Quality Convergence](#quality-convergence), [Methodology](#methodology)
+
+---
+
+### Telegram Integration
+
+An optional extension for receiving breakpoint notifications via Telegram.
+
+**Setup:**
+```bash
+breakpoints extension enable telegram --token <bot-token> --username <your-username>
+```
+
+**Related:** [Breakpoints Service](#breakpoints-service)
+
+---
+
+## U
+
+### ULID (Universally Unique Lexicographically Sortable Identifier)
+
+A time-sortable unique identifier used for event and effect IDs.
+
+**Example:** `01HJKMNPQR3STUVWXYZ012345`
+
+**Related:** [Event](#event), [Effect ID](#effect-id)
+
+---
+
+## V
+
+### Value
+
+The main output data from a task result. Passed via `--value` flag when posting results.
+
+**Example:**
+```bash
+$CLI task:post <runId> <effectId> --status ok --value output.json
+```
+
+**Related:** [Result](#result), [task:post](#taskpost)
+
+---
+
+## W
+
+### Waiting
+
+A run status indicating a blocking effect (breakpoint or sleep) is active. Orchestration pauses until the effect is resolved.
+
+**Related:** [Breakpoint](#breakpoint), [Sleep](#sleep), [Iteration](#iteration)
+
+---
+
+### Worker
+
+A background process that handles asynchronous jobs like TTL expiration and notifications in the breakpoints service.
+
+**Configuration:**
+- `WORKER_POLL_MS` - Poll interval (default: 2000)
+- `WORKER_BATCH_SIZE` - Batch size (default: 10)
+
+**Related:** [Breakpoints Service](#breakpoints-service)
+
+---
+
+## Quick Reference Index
+
+### By Category
+
+**Core Concepts:**
+[Run](#run), [Process](#process), [Journal](#journal), [Event](#event), [Effect](#effect), [Task](#task), [State](#state)
+
+**Task Types:**
+[Node Task](#node-task), [Agent Task](#agent-task), [Skill Task](#skill-task), [Shell Task](#shell-task)
+
+**Workflow:**
+[Orchestration Loop](#orchestration-loop), [Iteration](#iteration), [Quality Convergence](#quality-convergence), [Breakpoint](#breakpoint)
+
+**Architecture:**
+[SDK](#sdk-software-development-kit), [CLI](#cli-command-line-interface), [Plugin](#plugin), [Hook](#hook)
+
+**Session Management:**
+[In-Session Loop](#in-session-loop), [Completion Promise](#completion-promise), [Stop Hook](#stop-hook)
+
+---
+
+## Related Documentation
+
+- [CLI Reference](./cli-reference.md) - Complete CLI command documentation
+- [Configuration Reference](./configuration.md) - Environment variables and settings
+- [FAQ](./faq.md) - Frequently asked questions
+- [Troubleshooting](./troubleshooting.md) - Common issues and solutions
