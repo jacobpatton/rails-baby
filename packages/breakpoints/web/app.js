@@ -314,7 +314,7 @@ async function loadExtensions() {
             <input data-field="token" type="password" value="${tokenValue}" placeholder="Telegram bot token" />
           </div>
           <div>
-            <label>User Handle</label>
+            <label>Owner User Handle (not the bot's username)</label>
             <input data-field="username" type="text" value="${item.config?.username || ""}" placeholder="@yourhandle" />
           </div>
         </div>
@@ -332,6 +332,12 @@ async function loadExtensions() {
         const userInput = card.querySelector("input[data-field='username']");
         const token = tokenInput.value.trim();
         const username = userInput.value.trim();
+        // make sure the username is not the bot's username (doesn't end with bot)
+        if (username.endsWith("bot")) {
+          extensionsMessage.textContent = "Owner username should not end with 'bot'.";
+          return;
+        }
+        
         if (action === "save") {
           if (!token) {
             extensionsMessage.textContent = "Token required.";
