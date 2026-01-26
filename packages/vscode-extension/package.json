@@ -2,7 +2,7 @@
   "name": "babysitter-vscode",
   "displayName": "Babysitter",
   "description": "VS Code extension for orchestrating and monitoring Babysitter runs.",
-  "version": "0.0.129",
+  "version": "0.0.130",
   "publisher": "a5c-ai",
   "repository": {
     "type": "git",
