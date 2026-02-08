@@ -142,8 +142,8 @@ fi
 # Deduplicate by name
 ALL_SKILLS=$(echo "$ALL_SKILLS" | jq '[group_by(.name)[] | .[0]]')
 
-# Limit to top 5 for context window efficiency
-ALL_SKILLS=$(echo "$ALL_SKILLS" | jq '.[0:5]')
+# Limit to top 10 for context window efficiency
+ALL_SKILLS=$(echo "$ALL_SKILLS" | jq '.[0:10]')
 
 # ─────────────────────────────────────────────────
 # 5. Output
