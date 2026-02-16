@@ -63,7 +63,7 @@ If you want more control, you have options:
 
 1. **Name a process style in your prompt** - Something like "use a top-down approach" or "follow a TDD workflow"
 
-2. **Browse the process library** - See what's available at the [Process Library](https://github.com/a5c-ai/babysitter/tree/main/packages/sdk/src/processes) and reference one by name
+2. **Browse the process library** - See what's available at the [Process Library](https://github.com/a5c-ai/babysitter/blob/staging/docs/user-guide/features/process-library.md) and reference one by name
 
 3. **Create your own** - Use the meta process to define a custom workflow, or simply complete a run and then tell Babysitter: *"turn what we just did into a reusable process"*
 
