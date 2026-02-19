@@ -151,7 +151,7 @@ Do not fight the tests. Reshape the code until the test is easy to write.
 - [glossary.md](references/glossary.md) — canonical terms
 - [folder-structure.md](references/folder-structure.md) — folder structure, private/public hexagon, cross-hexagon rules, adapter patterns, test seams
 - [testing-strategy.md](references/testing-strategy.md) — full testing matrix, acceptance/component test rules, contract test pattern
-- [methodology.md](references/methodology.md) — walking skeleton, emergent design deep-dive, listen to the tests, anti-patterns
+- [methodology.md](references/methodology.md) — why outside-in over regular TDD, walking skeleton, emergent design deep-dive, listen to the tests, anti-patterns
 
 ## Sources
 
